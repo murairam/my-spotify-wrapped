@@ -70,3 +70,12 @@
 // Create a unique personality profile based on this data that feels personal and entertaining!
 // `.trim();
 // }
+
+// Placeholder export for deployment
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(request: NextRequest) {
+  return NextResponse.json({
+    message: "Mistral AI integration coming soon!"
+  });
+}
