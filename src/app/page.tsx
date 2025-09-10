@@ -39,6 +39,9 @@ function SpotifyDataTest() {
   const [spotifyData, setSpotifyData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedTimeRange, setSelectedTimeRange] = useState("short_term"); // Default to most recent data
+  const [selectedTracksTimeRange, setSelectedTracksTimeRange] = useState("short_term"); // For Top Tracks section
+  const [selectedArtistsTimeRange, setSelectedArtistsTimeRange] = useState("short_term"); // For Top Artists section
 
   const fetchSpotifyData = async () => {
     setLoading(true);
@@ -61,19 +64,28 @@ function SpotifyDataTest() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
+    <div className="min-h-screen bg-black">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header with Spotify Branding */}
         <div className="text-center mb-12 pt-8">
-          <h1 className="text-6xl font-bold text-white mb-4 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+          <h1 className="text-6xl font-bold text-white mb-4">
             My Spotify Wrapped
           </h1>
-          <p className="text-xl text-gray-300 mb-8">Powered by Mistral AI</p>
+          <p className="text-xl text-gray-300 mb-6">
+            Discover your unique music personality and listening patterns
+          </p>
+          {/* Spotify Attribution */}
+          <div className="flex items-center justify-center space-x-2 mb-8">
+            <span className="text-gray-400 text-sm">Powered by</span>
+            <div className="bg-[#1DB954] text-white px-3 py-1 rounded-full text-sm font-bold">
+              Spotify
+            </div>
+          </div>
           <div className="space-x-4">
             <button
               onClick={fetchSpotifyData}
               disabled={loading}
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-500 disabled:to-gray-600 text-white px-8 py-3 rounded-full font-semibold text-lg shadow-lg transform transition hover:scale-105"
+              className="bg-[#1DB954] hover:bg-[#1ed760] disabled:bg-gray-600 text-white px-8 py-3 rounded-full font-semibold text-lg shadow-lg transform transition hover:scale-105"
             >
               {loading ? "🎵 Loading..." : "🎶 Get My Spotify Data"}
             </button>
@@ -103,15 +115,26 @@ function SpotifyDataTest() {
             {/* Top Tracks and Artists Row */}
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Top Tracks */}
-              <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl border border-white/20 shadow-xl">
-                <div className="flex items-center mb-6">
-                  <span className="text-3xl mr-3">🎵</span>
-                  <h2 className="text-2xl font-bold text-white">Top Tracks</h2>
+              <div className="bg-[#191414] p-8 rounded-xl border border-gray-800 shadow-xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <span className="text-3xl mr-3">🎵</span>
+                    <h2 className="text-2xl font-bold text-white">Top Tracks</h2>
+                  </div>
+                  <select 
+                    className="bg-black/40 text-white text-sm px-3 py-2 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none"
+                    value={selectedTracksTimeRange}
+                    onChange={(e) => setSelectedTracksTimeRange(e.target.value)}
+                  >
+                    <option value="short_term">📅 Last 4 Weeks</option>
+                    <option value="medium_term">📊 Last 6 Months</option>
+                    <option value="long_term">🏆 ~1 Year of Data</option>
+                  </select>
                 </div>
                 <div className="space-y-4">
-                  {spotifyData.topTracks?.slice(0, 5).map((track: any, index: number) => (
-                    <div key={track.id} className="flex items-center space-x-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
-                      <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                  {(spotifyData.topTracksByTimeRange?.[selectedTracksTimeRange] || spotifyData.topTracks || [])?.slice(0, 5).map((track: any, index: number) => (
+                    <div key={track.id} className="flex items-center space-x-4 p-3 rounded-lg bg-black/20 hover:bg-black/40 transition-all">
+                      <div className="w-8 h-8 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-sm">
                         {index + 1}
                       </div>
                       <div className="flex-1">
@@ -120,7 +143,7 @@ function SpotifyDataTest() {
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-gray-400">Popularity</div>
-                        <div className="text-green-400 font-bold" title="Spotify's algorithm score based on recent plays and trends">{track.popularity}/100</div>
+                        <div className="text-[#1DB954] font-bold" title="Spotify's algorithm score based on recent plays and trends">{track.popularity}/100</div>
                         <div className="text-xs text-gray-500">
                           {track.popularity >= 80 ? "🔥 Trending" :
                            track.popularity >= 60 ? "📈 Popular" :
@@ -133,22 +156,33 @@ function SpotifyDataTest() {
               </div>
 
               {/* Top Artists */}
-              <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl border border-white/20 shadow-xl">
-                <div className="flex items-center mb-6">
-                  <span className="text-3xl mr-3">🎤</span>
-                  <h2 className="text-2xl font-bold text-white">Top Artists</h2>
+              <div className="bg-[#191414] p-8 rounded-xl border border-gray-800 shadow-xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <span className="text-3xl mr-3">🎤</span>
+                    <h2 className="text-2xl font-bold text-white">Top Artists</h2>
+                  </div>
+                  <select 
+                    className="bg-black/40 text-white text-sm px-3 py-2 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none"
+                    value={selectedArtistsTimeRange}
+                    onChange={(e) => setSelectedArtistsTimeRange(e.target.value)}
+                  >
+                    <option value="short_term">📅 Last 4 Weeks</option>
+                    <option value="medium_term">📊 Last 6 Months</option>
+                    <option value="long_term">🏆 ~1 Year of Data</option>
+                  </select>
                 </div>
                 <div className="space-y-4">
-                  {spotifyData.topArtists?.slice(0, 5).map((artist: any, index: number) => (
-                    <div key={artist.id} className="flex items-center space-x-4 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
-                      <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                  {(spotifyData.topArtistsByTimeRange?.[selectedArtistsTimeRange] || spotifyData.topArtists || [])?.slice(0, 5).map((artist: any, index: number) => (
+                    <div key={artist.id} className="flex items-center space-x-4 p-3 rounded-lg bg-black/20 hover:bg-black/40 transition-all">
+                      <div className="w-8 h-8 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-sm">
                         {index + 1}
                       </div>
                       {artist.images?.[2] && (
                         <img
                           src={artist.images[2].url}
                           alt={artist.name}
-                          className="w-12 h-12 rounded-full"
+                          className="w-12 h-12 rounded-full object-cover"
                         />
                       )}
                       <div className="flex-1">
@@ -227,6 +261,85 @@ function SpotifyDataTest() {
                 </div>
               </div>
             </div>
+
+            {/* NEW: Most Played Songs */}
+            {spotifyData.mostPlayedSongs && (
+              <div className="bg-[#191414] p-8 rounded-xl border border-gray-800 shadow-xl mt-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <span className="text-3xl mr-3">🔥</span>
+                    <h2 className="text-2xl font-bold text-white">Most Played Songs</h2>
+                    <span className="ml-4 px-3 py-1 bg-[#1DB954] text-white rounded-full text-sm">
+                      Top 10
+                    </span>
+                  </div>
+
+                  {/* Time Range Selector */}
+                  <div className="flex items-center space-x-3">
+                    <span className="text-gray-300 text-sm">Period:</span>
+                    <select
+                      value={selectedTimeRange}
+                      onChange={(e) => setSelectedTimeRange(e.target.value)}
+                      className="bg-[#2a2a2a] text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none text-sm"
+                    >
+                      <option value="short_term">📅 Last 4 Weeks</option>
+                      <option value="medium_term">📊 Last 6 Months</option>
+                      <option value="long_term">🏆 ~1 Year of Data</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Time Range Info */}
+                {(spotifyData.mostPlayedSongs[selectedTimeRange] || []).length > 0 && (
+                  <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                    <p className="text-blue-400 text-sm flex items-center">
+                      <span className="mr-2">📊</span>
+                      <strong>
+                        Period: {(spotifyData.mostPlayedSongs[selectedTimeRange] || [])[0]?.periodDescription || 'Unknown'}
+                      </strong>
+                      Your actual Spotify top tracks rankings for this period
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  {(spotifyData.mostPlayedSongs[selectedTimeRange] || []).map((track: any) => (
+                    <div key={track.id} className="flex items-center space-x-4 p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all">
+                      <div className="w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        {track.rank}
+                      </div>
+                      {track.images?.[2] && (
+                        <img
+                          src={track.images[2].url}
+                          alt={track.name}
+                          className="w-16 h-16 spotify-rounded-small object-cover"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-white text-lg truncate">{track.name}</div>
+                        <div className="text-[#b3b3b3] truncate">{track.artist}</div>
+                        <div className="text-sm text-gray-400">{track.album.name}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[#1DB954] font-bold text-2xl">#{track.rank}</div>
+                        <div className="text-gray-400 text-sm">ranking</div>
+                        <div className="text-xs text-gray-500">Popularity: {track.popularity}/100</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                  <p className="text-yellow-400 text-sm flex items-center">
+                    <span className="mr-2">💡</span>
+                    Shows your actual Spotify top tracks rankings for ${
+                      selectedTimeRange === 'short_term' ? 'the last 4 weeks' :
+                      selectedTimeRange === 'medium_term' ? 'the last 6 months' :
+                      '~1 year of data'
+                    }. Rankings are 100% real from Spotify&apos;s API. Spotify doesn&apos;t provide exact play counts or specific dates.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* NEW: Social & Discovery Insights */}
             <div className="grid lg:grid-cols-2 gap-8 mt-8">
@@ -339,6 +452,7 @@ function SpotifyDataTest() {
                 </div>
               </div>
             )}
+
 
             {/* RAW DATA: Time Range Evolution */}
             <div className="bg-white/10 backdrop-blur-lg p-8 rounded-2xl border border-white/20 shadow-xl mt-8">

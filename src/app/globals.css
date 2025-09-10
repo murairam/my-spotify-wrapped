@@ -3,21 +3,46 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #ffffff;
+  --spotify-green: #1DB954;
+  --spotify-black: #191414;
+  --spotify-dark-gray: #121212;
+  --spotify-light-gray: #b3b3b3;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #000000;
+    --foreground: #ffffff;
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* Spotify Design Guidelines */
+.spotify-rounded-small {
+  border-radius: 2px;
+}
+
+.spotify-rounded-large {
+  border-radius: 4px;
+}
+
+.spotify-bg-primary {
+  background-color: var(--spotify-green);
+}
+
+.spotify-bg-dark {
+  background-color: var(--spotify-black);
+}
+
+.spotify-text-light {
+  color: var(--spotify-light-gray);
 }
 
 @layer utilities {

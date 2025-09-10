@@ -398,7 +398,83 @@ export async function GET() {
 
     // 11. Format final comprehensive data
     const spotifyData = {
-      // Basic top items (formatted for display)
+      // Top items by time range (for selectable time period displays)
+      topTracksByTimeRange: {
+        short_term: topTracksShort.body.items.slice(0, 10).map((track: any, index: number) => ({
+          id: track.id,
+          name: track.name,
+          artist: track.artists[0].name,
+          artists: track.artists.map((a: any) => a.name),
+          album: track.album.name,
+          popularity: track.popularity,
+          preview_url: track.preview_url,
+          external_urls: track.external_urls,
+          images: track.album.images,
+          release_date: track.album.release_date,
+          rank: index + 1
+        })),
+        medium_term: topTracksMedium.body.items.slice(0, 10).map((track: any, index: number) => ({
+          id: track.id,
+          name: track.name,
+          artist: track.artists[0].name,
+          artists: track.artists.map((a: any) => a.name),
+          album: track.album.name,
+          popularity: track.popularity,
+          preview_url: track.preview_url,
+          external_urls: track.external_urls,
+          images: track.album.images,
+          release_date: track.album.release_date,
+          rank: index + 1
+        })),
+        long_term: topTracksLong.body.items.slice(0, 10).map((track: any, index: number) => ({
+          id: track.id,
+          name: track.name,
+          artist: track.artists[0].name,
+          artists: track.artists.map((a: any) => a.name),
+          album: track.album.name,
+          popularity: track.popularity,
+          preview_url: track.preview_url,
+          external_urls: track.external_urls,
+          images: track.album.images,
+          release_date: track.album.release_date,
+          rank: index + 1
+        }))
+      },
+
+      topArtistsByTimeRange: {
+        short_term: topArtistsShort.body.items.slice(0, 10).map((artist: any, index: number) => ({
+          id: artist.id,
+          name: artist.name,
+          genres: artist.genres,
+          popularity: artist.popularity,
+          images: artist.images,
+          external_urls: artist.external_urls,
+          followers: artist.followers.total,
+          rank: index + 1
+        })),
+        medium_term: topArtistsMedium.body.items.slice(0, 10).map((artist: any, index: number) => ({
+          id: artist.id,
+          name: artist.name,
+          genres: artist.genres,
+          popularity: artist.popularity,
+          images: artist.images,
+          external_urls: artist.external_urls,
+          followers: artist.followers.total,
+          rank: index + 1
+        })),
+        long_term: topArtistsLong.body.items.slice(0, 10).map((artist: any, index: number) => ({
+          id: artist.id,
+          name: artist.name,
+          genres: artist.genres,
+          popularity: artist.popularity,
+          images: artist.images,
+          external_urls: artist.external_urls,
+          followers: artist.followers.total,
+          rank: index + 1
+        }))
+      },
+
+      // Legacy format (keeping for backwards compatibility)
       topTracks: topTracksShort.body.items.slice(0, 10).map((track: any, index: number) => ({
         id: track.id,
         name: track.name,
@@ -481,6 +557,50 @@ export async function GET() {
         Object.entries(genreCounts).map(([genre, count]) => [genre, { count, genre }])
       ),
 
+      // Most played songs by time range (actual Spotify API periods)
+      mostPlayedSongs: (() => {
+        // Helper function to create song data from tracks - RANKINGS ONLY (no fake play counts)
+        const createSongData = (tracks: any[], label: string, timeRangeKey: string) => {
+          // Get approximate date range for current time period
+          const now = new Date();
+          let periodDescription = "";
+          
+          if (timeRangeKey === 'short_term') {
+            const startDate = new Date(now.getTime() - (4 * 7 * 24 * 60 * 60 * 1000)); // 4 weeks ago
+            const start = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const end = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            periodDescription = `${start} - ${end}`;
+          } else if (timeRangeKey === 'medium_term') {
+            const startDate = new Date(now.getTime() - (6 * 30 * 24 * 60 * 60 * 1000)); // ~6 months ago
+            const start = startDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            const end = now.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            periodDescription = `${start} - ${end}`;
+          } else {
+            // Long term - ~1 year of data according to Spotify docs
+            periodDescription = "~1 year of data (rolling, includes all new data)";
+          }
+
+          return tracks.slice(0, 10).map((track, index) => ({
+            rank: index + 1,
+            id: track.id,
+            name: track.name,
+            artist: track.artists[0].name,
+            artists: track.artists,
+            album: track.album,
+            popularity: track.popularity,
+            images: track.album.images,
+            timeRange: label,
+            periodDescription: periodDescription
+          }));
+        };
+
+        return {
+          short_term: createSongData(topTracksShort.body.items, "Last 4 Weeks", "short_term"),
+          medium_term: createSongData(topTracksMedium.body.items, "Last 6 Months", "medium_term"),
+          long_term: createSongData(topTracksLong.body.items, "~1 Year of Data", "long_term")
+        };
+      })(),
+
       // Comprehensive analytics
       audioProfile,
       musicPersonality,
@@ -511,6 +631,9 @@ export async function GET() {
         uniqueTracksCount: allTracks.length,
         uniqueArtistsCount: Array.from(new Set(allTracks.map(t => t.artists[0].id))).length,
         uniqueAlbumsCount: Array.from(new Set(allTracks.map(t => t.album.id))).length,
+
+        // Popularity metrics
+        averagePopularity: Math.round(allTracks.reduce((sum, track) => sum + (track.popularity || 0), 0) / allTracks.length),
 
         // Audio analysis
         audioFeaturesAnalyzed: allAudioFeatures.length,
