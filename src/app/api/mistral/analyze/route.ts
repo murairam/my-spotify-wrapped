@@ -72,9 +72,9 @@
 // }
 
 // Placeholder export for deployment
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   return NextResponse.json({
     message: "Mistral AI integration coming soon!"
   });

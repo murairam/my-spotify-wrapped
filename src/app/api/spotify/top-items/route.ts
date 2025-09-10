@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import SpotifyWebApi from "spotify-web-api-node";
 
 // Helper function to chunk arrays for API rate limiting
@@ -33,7 +34,7 @@ function getDayOfWeek(date: Date): string {
   return days[date.getDay()];
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -76,12 +77,16 @@ export async function GET(request: NextRequest) {
     console.log("✅ Basic data fetched, now fetching additional endpoints...");
 
     // 2. Fetch additional comprehensive data with error handling
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let followedArtists: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let userPlaylists: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let recentlyPlayed: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let savedAlbums: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let savedTracks: any = null;
-    let topPodcasts: any = null;
 
     // Enhanced data fetching with more endpoints
     const additionalDataPromises = [
@@ -175,13 +180,16 @@ export async function GET(request: NextRequest) {
       ...topArtistsLong.body.items
     ];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const allGenres = allArtists.flatMap((artist: any) => artist.genres || []);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const genreCounts = allGenres.reduce((acc: any, genre: string) => {
       acc[genre] = (acc[genre] || 0) + 1;
       return acc;
     }, {});
 
     const topGenres = Object.entries(genreCounts)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .sort(([,a]: any, [,b]: any) => b - a)
       .slice(0, 20)
       .map(([genre, count]) => ({ genre, count }));
@@ -213,6 +221,7 @@ export async function GET(request: NextRequest) {
 
     // 7. Analyze listening habits from recently played
     const listeningHabits = recentlyPlayed?.body?.items && recentlyPlayed.body.items.length > 0 ? (() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const playTimes = recentlyPlayed.body.items.map((item: any) => new Date(item.played_at));
       const hourCounts = Array(24).fill(0);
       const dayCounts: { [key: string]: number } = {};
@@ -259,12 +268,6 @@ export async function GET(request: NextRequest) {
 
       const uniqueArtists = new Set(allTracks.map(track => track.artists[0].id)).size;
       const uniqueAlbums = new Set(allTracks.map(track => track.album.id)).size;
-
-      const artistCounts = allTracks.reduce((acc: any, track) => {
-        const artistId = track.artists[0].id;
-        acc[artistId] = (acc[artistId] || 0) + 1;
-        return acc;
-      }, {});
 
       const averageTracksPerArtist = allTracks.length / uniqueArtists;
       const popularityScores = allTracks.map(track => track.popularity).filter(p => p > 0);
