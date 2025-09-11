@@ -8,6 +8,11 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
+// Performance monitoring
+const logQueryPerformance = (queryKey: string, duration: number) => {
+  console.log(`🚀 Query Performance - ${queryKey}: ${duration.toFixed(2)}ms`);
+};
+
 // Create a client with optimized settings for the Spotify API
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,16 +31,23 @@ const queryClient = new QueryClient({
       // Global retry delay with exponential backoff
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 
-      // Cache configuration
+      // Cache configuration - optimized for performance
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 30 * 60 * 1000,   // 30 minutes (formerly cacheTime)
 
-      // Refetch configuration
+      // Refetch configuration - minimize unnecessary requests
       refetchOnWindowFocus: false,
       refetchOnReconnect: 'always',
+      refetchOnMount: false,      // Use cache if available on mount
 
       // Network mode - handle offline scenarios
       networkMode: 'online',
+
+      // Performance optimizations
+      notifyOnChangeProps: ['data', 'error', 'isLoading'], // Only re-render on specific prop changes
+      
+      // Structural sharing for better performance
+      structuralSharing: true,
     },
     mutations: {
       // Global retry for mutations (if any)
@@ -43,6 +55,19 @@ const queryClient = new QueryClient({
       networkMode: 'online',
     },
   },
+});
+
+// Add global query performance monitoring
+queryClient.getQueryCache().subscribe((event) => {
+  if (event?.type === 'observerResultsUpdated' && event.query.state.dataUpdatedAt > 0) {
+    const queryKey = event.query.queryKey.join('-');
+    const duration = Date.now() - event.query.state.dataUpdatedAt;
+    
+    // Only log if duration is meaningful
+    if (duration > 0 && duration < 60000) { // Less than 60 seconds
+      logQueryPerformance(queryKey, duration);
+    }
+  }
 });
 
 interface ReactQueryProviderProps {

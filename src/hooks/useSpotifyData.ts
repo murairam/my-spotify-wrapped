@@ -1,9 +1,10 @@
 /**
  * Custom hooks for Spotify data fetching with React Query
- * Provides caching, automatic retries, and error handling
+ * Provides caching, automatic retries, error handling, and performance optimizations
  */
 
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, UseQueryOptions, useQueries } from '@tanstack/react-query';
+import { useCallback, useMemo, useRef } from 'react';
 import { parseSpotifyError, SpotifyError } from '@/components/ErrorHandling';
 
 export interface SpotifyUserProfile {
@@ -118,61 +119,194 @@ export interface SpotifyData {
 }
 
 /**
- * Fetches Spotify data from the API with comprehensive error handling
+ * Performance logging utility
  */
-async function fetchSpotifyData(): Promise<SpotifyData> {
-  const response = await fetch('/api/spotify/top-items', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    // Create error object with response details
-    const errorData: {
-      status: number;
-      statusText: string;
-      message?: string;
-      error?: string;
-      suggestions?: string[];
-    } = {
-      status: response.status,
-      statusText: response.statusText,
-    };
-
-    // Try to get error details from response body
-    try {
-      const errorBody = await response.json() as { message?: string; error?: string; suggestions?: string[] };
-      errorData.message = errorBody.message || errorBody.error || response.statusText;
-      errorData.error = errorBody.error;
-      errorData.suggestions = errorBody.suggestions;
-    } catch {
-      errorData.message = response.statusText;
-    }
-
-    throw errorData;
+const logPerformanceMetrics = (operation: string, startTime: number, endTime: number, dataSize?: number) => {
+  const duration = endTime - startTime;
+  console.group(`🎵 Spotify API Performance - ${operation}`);
+  console.log(`⏱️ Duration: ${duration.toFixed(2)}ms`);
+  if (dataSize !== undefined) {
+    console.log(`📦 Data size: ${dataSize} items`);
+    console.log(`⚡ Throughput: ${(dataSize / duration * 1000).toFixed(2)} items/sec`);
   }
+  console.log(`🕒 Timestamp: ${new Date(endTime).toISOString()}`);
+  console.groupEnd();
+};
 
-  const data = await response.json() as SpotifyData & { error?: string };
-
-  // Handle insufficient data case (not an error, but special case)
-  if (data.error === 'insufficient_data') {
-    throw data;
-  }
-
-  return data;
+/**
+ * Debounce utility for function calls
+ */
+export function debounce<T extends (...args: unknown[]) => unknown>(func: T, delay: number): T {
+  let timeoutId: NodeJS.Timeout;
+  return ((...args: unknown[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  }) as T;
 }
 
 /**
- * Custom hook for Spotify data with React Query
+ * Fetches Spotify data from the API with comprehensive error handling and performance logging
+ */
+async function fetchSpotifyData(): Promise<SpotifyData> {
+  const startTime = performance.now();
+  
+  try {
+    const response = await fetch('/api/spotify/top-items', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const endTime = performance.now();
+      logPerformanceMetrics('API Error', startTime, endTime);
+      
+      // Create error object with response details
+      const errorData: {
+        status: number;
+        statusText: string;
+        message?: string;
+        error?: string;
+        suggestions?: string[];
+      } = {
+        status: response.status,
+        statusText: response.statusText,
+      };
+
+      // Try to get error details from response body
+      try {
+        const errorBody = await response.json() as { message?: string; error?: string; suggestions?: string[] };
+        errorData.message = errorBody.message || errorBody.error || response.statusText;
+        errorData.error = errorBody.error;
+        errorData.suggestions = errorBody.suggestions;
+      } catch {
+        errorData.message = response.statusText;
+      }
+
+      throw errorData;
+    }
+
+    const data = await response.json() as SpotifyData & { error?: string };
+    const endTime = performance.now();
+
+    // Calculate data size for performance metrics
+    const dataSize = (data.topTracks?.length || 0) + (data.topArtists?.length || 0);
+    logPerformanceMetrics('Data Fetch Success', startTime, endTime, dataSize);
+
+    // Handle insufficient data case (not an error, but special case)
+    if (data.error === 'insufficient_data') {
+      throw data;
+    }
+
+    return data;
+  } catch (error) {
+    const endTime = performance.now();
+    logPerformanceMetrics('Fetch Error', startTime, endTime);
+    throw error;
+  }
+}
+
+/**
+ * Fetches top tracks with performance optimization
+ */
+async function fetchTopTracks(timeRange: string = 'short_term'): Promise<SpotifyTrack[]> {
+  const startTime = performance.now();
+  
+  try {
+    const response = await fetch(`/api/spotify/top-items?type=tracks&time_range=${timeRange}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch top tracks: ${response.statusText}`);
+    }
+
+    const data = await response.json() as { topTracks: SpotifyTrack[] };
+    const endTime = performance.now();
+    
+    logPerformanceMetrics('Top Tracks Fetch', startTime, endTime, data.topTracks?.length);
+    return data.topTracks || [];
+  } catch (error) {
+    const endTime = performance.now();
+    logPerformanceMetrics('Top Tracks Error', startTime, endTime);
+    throw error;
+  }
+}
+
+/**
+ * Fetches top artists with performance optimization
+ */
+async function fetchTopArtists(timeRange: string = 'short_term'): Promise<SpotifyArtist[]> {
+  const startTime = performance.now();
+  
+  try {
+    const response = await fetch(`/api/spotify/top-items?type=artists&time_range=${timeRange}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch top artists: ${response.statusText}`);
+    }
+
+    const data = await response.json() as { topArtists: SpotifyArtist[] };
+    const endTime = performance.now();
+    
+    logPerformanceMetrics('Top Artists Fetch', startTime, endTime, data.topArtists?.length);
+    return data.topArtists || [];
+  } catch (error) {
+    const endTime = performance.now();
+    logPerformanceMetrics('Top Artists Error', startTime, endTime);
+    throw error;
+  }
+}
+
+/**
+ * Fetches tracks and artists in parallel for better performance
+ */
+async function fetchParallelSpotifyData(timeRange: string = 'short_term'): Promise<{
+  topTracks: SpotifyTrack[];
+  topArtists: SpotifyArtist[];
+}> {
+  const startTime = performance.now();
+  
+  try {
+    // Fetch tracks and artists in parallel using Promise.all
+    const [topTracks, topArtists] = await Promise.all([
+      fetchTopTracks(timeRange),
+      fetchTopArtists(timeRange)
+    ]);
+
+    const endTime = performance.now();
+    logPerformanceMetrics('Parallel Fetch Complete', startTime, endTime, 
+      (topTracks?.length || 0) + (topArtists?.length || 0));
+
+    return {
+      topTracks,
+      topArtists
+    };
+  } catch (error) {
+    const endTime = performance.now();
+    logPerformanceMetrics('Parallel Fetch Error', startTime, endTime);
+    throw error;
+  }
+}
+
+/**
+ * Custom hook for Spotify data with React Query and performance optimizations
  */
 export function useSpotifyData(options?: Partial<UseQueryOptions<SpotifyData, SpotifyError>>) {
   return useQuery<SpotifyData, SpotifyError>({
     queryKey: ['spotify-data'],
     queryFn: fetchSpotifyData,
 
-    // Caching configuration
+    // Caching configuration - optimized for performance
     staleTime: 5 * 60 * 1000, // 5 minutes - data is considered fresh for 5 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes - data stays in cache for 30 minutes
 
@@ -191,13 +325,10 @@ export function useSpotifyData(options?: Partial<UseQueryOptions<SpotifyData, Sp
       return Math.pow(2, attemptIndex) * 1000;
     },
 
-
-
-    // Don't refetch on window focus by default (can be overridden)
-    refetchOnWindowFocus: false,
-
-    // Don't refetch on reconnect by default (can be overridden)
-    refetchOnReconnect: true,
+    // Performance optimizations
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
+    refetchOnReconnect: true,    // Refetch when connection is restored
+    refetchOnMount: false,       // Use cached data on mount if available
 
     // Transform errors to our SpotifyError format
     select: (data) => data,
@@ -205,6 +336,105 @@ export function useSpotifyData(options?: Partial<UseQueryOptions<SpotifyData, Sp
     // Custom options can override defaults
     ...options,
   });
+}
+
+/**
+ * Optimized hook for parallel fetching of tracks and artists
+ */
+export function useParallelSpotifyData(timeRange: string = 'short_term') {
+  return useQueries({
+    queries: [
+      {
+        queryKey: ['spotify-tracks', timeRange],
+        queryFn: () => fetchTopTracks(timeRange),
+        staleTime: 5 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
+        refetchOnWindowFocus: false,
+      },
+      {
+        queryKey: ['spotify-artists', timeRange],
+        queryFn: () => fetchTopArtists(timeRange),
+        staleTime: 5 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
+        refetchOnWindowFocus: false,
+      }
+    ],
+  });
+}
+
+/**
+ * Hook with debounced refetching to prevent excessive API calls
+ */
+export function useDebouncedSpotifyData(
+  options?: Partial<UseQueryOptions<SpotifyData, SpotifyError>>,
+  debounceDelay: number = 1000
+) {
+  const debouncedRefetchRef = useRef<() => void>();
+  
+  const query = useSpotifyData(options);
+  
+  // Create debounced refetch function
+  const debouncedRefetch = useMemo(
+    () => debounce(() => {
+      console.log('🔄 Debounced refetch triggered');
+      query.refetch();
+    }, debounceDelay),
+    [query, debounceDelay]
+  );
+  
+  // Store debounced function in ref for external access
+  debouncedRefetchRef.current = debouncedRefetch;
+  
+  return {
+    ...query,
+    debouncedRefetch: useCallback(() => {
+      debouncedRefetchRef.current?.();
+    }, [])
+  };
+}
+
+/**
+ * Hook for optimized time range data fetching with caching
+ */
+export function useTimeRangeData(timeRanges: string[] = ['short_term', 'medium_term', 'long_term']) {
+  const startTime = useRef(performance.now());
+  
+  const queries = useQueries({
+    queries: timeRanges.map(timeRange => ({
+      queryKey: ['spotify-parallel-data', timeRange],
+      queryFn: () => fetchParallelSpotifyData(timeRange),
+      staleTime: 10 * 60 * 1000, // 10 minutes for time range data
+      gcTime: 60 * 60 * 1000,    // 1 hour cache
+      refetchOnWindowFocus: false,
+      enabled: true, // Always enabled for background prefetching
+    }))
+  });
+
+  // Log performance when all queries complete
+  const allLoaded = queries.every(q => !q.isLoading);
+  const hasData = queries.some(q => q.data);
+  
+  if (allLoaded && hasData) {
+    const endTime = performance.now();
+    const totalItems = queries.reduce((sum, q) => {
+      const data = q.data;
+      return sum + (data?.topTracks?.length || 0) + (data?.topArtists?.length || 0);
+    }, 0);
+    
+    logPerformanceMetrics('All Time Ranges Loaded', startTime.current, endTime, totalItems);
+  }
+
+  return {
+    queries,
+    isLoading: queries.some(q => q.isLoading),
+    isError: queries.some(q => q.isError),
+    data: queries.reduce((acc, query, index) => {
+      if (query.data) {
+        acc[timeRanges[index]] = query.data;
+      }
+      return acc;
+    }, {} as Record<string, { topTracks: SpotifyTrack[]; topArtists: SpotifyArtist[] }>)
+  };
 }
 
 /**

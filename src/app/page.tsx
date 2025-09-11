@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useState } from "react";
+import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { SessionProvider, useSession, signIn, signOut } from "next-auth/react";
 import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
-import { useSpotifyData, useSpotifyError, SpotifyTrack, SpotifyArtist } from "@/hooks/useSpotifyData";
+import { useSpotifyError, useDebouncedSpotifyData, useTimeRangeData, SpotifyTrack, SpotifyArtist } from "@/hooks/useSpotifyData";
 import { ErrorDisplay } from "@/components/ErrorHandling";
 import { DashboardLoadingSkeleton, ButtonLoadingSpinner } from "@/components/LoadingSkeleton";
 import PopularityBar from "@/components/PopularityBar";
@@ -74,15 +74,19 @@ function SpotifyDataTest() {
   const [selectedTimeRange, setSelectedTimeRange] = useState("short_term"); // Default to most recent data
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
 
-  // Use React Query hook for data fetching
+  // Performance tracking refs
+  const fetchStartTime = useRef<number>(0);
+  const renderStartTime = useRef<number>(0);
+
+  // Use optimized React Query hook with debouncing for data fetching
   const {
     data: spotifyData,
     isLoading,
     error: queryError,
-    refetch,
     isFetching,
-    isRefetching
-  } = useSpotifyData({
+    isRefetching,
+    debouncedRefetch
+  } = useDebouncedSpotifyData({
     enabled: hasAttemptedLoad, // Only fetch when user clicks the button
     retry: (failureCount, error) => {
       // Custom retry logic
@@ -91,22 +95,141 @@ function SpotifyDataTest() {
       }
       return failureCount < 3;
     }
-  });
+  }, 1000); // 1 second debounce delay
+
+  // Parallel data fetching for time ranges (background prefetching)
+  const timeRangeData = useTimeRangeData(['short_term', 'medium_term', 'long_term']);
 
   // Parse error for display
   const displayError = useSpotifyError(queryError);
 
-  // Handle manual fetch trigger
-  const handleFetchData = () => {
+  // Debounced time range change handler
+  const debouncedTimeRangeChange = useMemo(
+    () => {
+      const handleTimeRangeChange = (newTimeRange: string) => {
+        console.log(`🎯 Time range changed to: ${newTimeRange}`);
+        setSelectedTimeRange(newTimeRange);
+        // Use background prefetched data if available
+        if (timeRangeData.data[newTimeRange]) {
+          console.log('✅ Using cached time range data');
+        }
+      };
+      
+      let timeoutId: NodeJS.Timeout;
+      return (newTimeRange: string) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => handleTimeRangeChange(newTimeRange), 300);
+      };
+    }, // 300ms debounce for time range changes
+    [timeRangeData.data]
+  );
+
+  // Handle manual fetch trigger with performance logging
+  const handleFetchData = useCallback(() => {
+    fetchStartTime.current = performance.now();
+    console.log('🚀 Starting data fetch...');
+    
     if (!hasAttemptedLoad) {
       setHasAttemptedLoad(true);
     } else {
-      refetch();
+      // Use debounced refetch to prevent rapid successive calls
+      debouncedRefetch();
     }
-  };
+  }, [hasAttemptedLoad, debouncedRefetch]);
+
+  // Throttled refresh function to prevent excessive API calls
+  const throttledRefresh = useMemo(
+    () => {
+      let lastRefresh = 0;
+      return () => {
+        const now = Date.now();
+        if (now - lastRefresh > 2000) { // 2 second throttle
+          lastRefresh = now;
+          handleFetchData();
+        } else {
+          console.log('🚫 Refresh throttled - please wait');
+        }
+      };
+    },
+    [handleFetchData]
+  );
+
+  // Performance monitoring for data loading
+  useEffect(() => {
+    if (isLoading && fetchStartTime.current > 0) {
+      console.log('⏳ Data loading started...');
+    }
+    
+    if (!isLoading && !isFetching && spotifyData && fetchStartTime.current > 0) {
+      const fetchEndTime = performance.now();
+      const fetchDuration = fetchEndTime - fetchStartTime.current;
+      console.group('🎵 Data Fetch Performance Summary');
+      console.log(`⏱️ Total fetch time: ${fetchDuration.toFixed(2)}ms`);
+      console.log(`📊 Tracks loaded: ${spotifyData.topTracks?.length || 0}`);
+      console.log(`🎤 Artists loaded: ${spotifyData.topArtists?.length || 0}`);
+      console.log(`🎨 Genres loaded: ${spotifyData.topGenres?.length || 0}`);
+      console.groupEnd();
+      fetchStartTime.current = 0;
+    }
+  }, [isLoading, isFetching, spotifyData]);
+
+  // Performance monitoring for rendering
+  useEffect(() => {
+    renderStartTime.current = performance.now();
+  }, [spotifyData]);
+
+  useEffect(() => {
+    if (spotifyData && renderStartTime.current > 0) {
+      const renderEndTime = performance.now();
+      const renderDuration = renderEndTime - renderStartTime.current;
+      console.log(`🎨 UI render time: ${renderDuration.toFixed(2)}ms`);
+      renderStartTime.current = 0;
+    }
+  });
 
   // Loading state includes initial loading and refetching
   const loading = isLoading || isFetching || isRefetching;
+
+  // Memoized components to prevent unnecessary re-renders
+  const topTracksComponent = useMemo(() => (
+    <TopTracks
+      topTracksByTimeRange={spotifyData?.topTracksByTimeRange}
+      topTracks={spotifyData?.topTracks as SpotifyTrack[] | undefined}
+      isLoading={loading && !spotifyData}
+    />
+  ), [loading, spotifyData]);
+
+  const topArtistsComponent = useMemo(() => (
+    <TopArtists
+      topArtistsByTimeRange={spotifyData?.topArtistsByTimeRange}
+      topArtists={spotifyData?.topArtists as SpotifyArtist[] | undefined}
+      isLoading={loading && !spotifyData}
+    />
+  ), [loading, spotifyData]);
+
+  const genresComponent = useMemo(() => 
+    spotifyData?.topGenres?.slice(0, 10).map((genreObj: any, index: number) => (
+      <span
+        key={genreObj.genre || genreObj}
+        className="px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full text-xs sm:text-sm font-medium shadow-lg hover:scale-105 transition-transform touch-manipulation"
+        style={{
+          background: `linear-gradient(45deg, hsl(${index * 36}, 70%, 50%), hsl(${(index * 36) + 60}, 70%, 60%))`
+        }}
+        title={genreObj.count ? `${genreObj.count} artists` : undefined}
+      >
+        {genreObj.genre || genreObj}
+        {genreObj.count && (
+          <span className="ml-2 text-xs opacity-80">
+            {genreObj.count}
+          </span>
+        )}
+      </span>
+    )) || [], [spotifyData?.topGenres]);
+
+  const musicTimelineComponent = useMemo(() => 
+    spotifyData?.allTracksData && spotifyData.allTracksData.length > 0 ? (
+      <MusicTimeline tracks={spotifyData.allTracksData as any} />
+    ) : null, [spotifyData?.allTracksData]);
 
   return (
     <div className="min-h-screen bg-black">
@@ -137,7 +260,7 @@ function SpotifyDataTest() {
           </div>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
             <button
-              onClick={handleFetchData}
+              onClick={hasAttemptedLoad ? throttledRefresh : handleFetchData}
               disabled={loading}
               className="bg-[#1DB954] hover:bg-[#1ed760] disabled:bg-gray-600 text-white px-6 py-3 sm:px-8 rounded-full font-semibold text-base sm:text-lg shadow-lg transform transition hover:scale-105 w-full sm:w-auto min-h-[44px]"
             >
@@ -205,18 +328,10 @@ function SpotifyDataTest() {
               </div>
             )}
 
-            {/* Top Tracks and Artists Row */}
+            {/* Top Tracks and Artists Row - Optimized for Performance */}
             <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
-              <TopTracks
-                topTracksByTimeRange={spotifyData.topTracksByTimeRange}
-                topTracks={spotifyData.topTracks as SpotifyTrack[] | undefined}
-                isLoading={loading && !spotifyData}
-              />
-              <TopArtists
-                topArtistsByTimeRange={spotifyData.topArtistsByTimeRange}
-                topArtists={spotifyData.topArtists as SpotifyArtist[] | undefined}
-                isLoading={loading && !spotifyData}
-              />
+              {topTracksComponent}
+              {topArtistsComponent}
             </div>
 
             {/* Genres and Stats Row */}
@@ -228,23 +343,7 @@ function SpotifyDataTest() {
                   <h2 className="text-xl sm:text-2xl font-bold text-white">Music DNA</h2>
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
-                  {spotifyData.topGenres?.slice(0, 10).map((genreObj: any, index: number) => (
-                    <span
-                      key={genreObj.genre || genreObj}
-                      className="px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full text-xs sm:text-sm font-medium shadow-lg hover:scale-105 transition-transform touch-manipulation"
-                      style={{
-                        background: `linear-gradient(45deg, hsl(${index * 36}, 70%, 50%), hsl(${(index * 36) + 60}, 70%, 60%))`
-                      }}
-                      title={genreObj.count ? `${genreObj.count} artists` : undefined}
-                    >
-                      {genreObj.genre || genreObj}
-                      {genreObj.count && (
-                        <span className="ml-2 text-xs opacity-80">
-                          {genreObj.count}
-                        </span>
-                      )}
-                    </span>
-                  ))}
+                  {genresComponent}
                 </div>
               </div>
 
@@ -301,7 +400,7 @@ function SpotifyDataTest() {
                     <span className="text-gray-300 text-sm">Period:</span>
                     <select
                       value={selectedTimeRange}
-                      onChange={(e) => setSelectedTimeRange(e.target.value)}
+                      onChange={(e) => debouncedTimeRangeChange(e.target.value)}
                       className="bg-[#2a2a2a] text-white px-3 sm:px-4 py-2 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none text-sm flex-1 sm:flex-none min-h-[44px] touch-manipulation"
                     >
                       <option value="short_term">📅 Last 4 Weeks</option>
@@ -476,10 +575,8 @@ function SpotifyDataTest() {
               </div>
             </div>
 
-            {/* Music Timeline */}
-            {spotifyData.allTracksData && spotifyData.allTracksData.length > 0 && (
-              <MusicTimeline tracks={spotifyData.allTracksData as any} />
-            )}
+            {/* Music Timeline - Performance Optimized */}
+            {musicTimelineComponent}
 
             {/* RAW DATA: Listening Time Patterns */}
             {spotifyData.listeningHabits && (
