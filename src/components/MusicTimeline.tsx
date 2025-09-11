@@ -1,3 +1,5 @@
+import { FaCrown } from 'react-icons/fa';
+
 interface MusicTimelineProps {
   tracks: Array<{
     id: string;
@@ -22,18 +24,19 @@ export default function MusicTimeline({ tracks }: MusicTimelineProps) {
   const newestYear = Math.max(...years);
   const yearSpread = newestYear - oldestYear;
 
+  // Replaced emojis with clean text for Spotify design compliance
   const getDecadeDescription = (decade: string) => {
     const descriptions: Record<string, string> = {
-      "2020s": "🔥 Current hits",
-      "2010s": "📱 Streaming era",
-      "2000s": "💿 Digital revolution",
-      "1990s": "📻 Golden age",
-      "1980s": "🎹 Synth wave",
-      "1970s": "🎸 Rock legends",
-      "1960s": "🌼 Classic era",
-      "1950s": "🎺 Vintage gold"
+      "2020s": "Current hits",
+      "2010s": "Streaming era",
+      "2000s": "Digital revolution",
+      "1990s": "Golden age",
+      "1980s": "Synth wave",
+      "1970s": "Rock legends",
+      "1960s": "Classic era",
+      "1950s": "Vintage gold"
     };
-    return descriptions[decade] || "🎵 Retro vibes";
+    return descriptions[decade] || "Retro vibes";
   };
 
   return (
@@ -70,7 +73,7 @@ export default function MusicTimeline({ tracks }: MusicTimelineProps) {
                   <div className="flex items-center space-x-2">
                     <span className="text-white font-bold">{count}</span>
                     <span className="text-purple-300 text-sm">tracks</span>
-                    {isTopDecade && <span className="text-yellow-400">👑</span>}
+                    {isTopDecade && <FaCrown className="text-yellow-400" />}
                   </div>
                 </div>
 

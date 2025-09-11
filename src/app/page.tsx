@@ -3,6 +3,26 @@
 "use client";
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { SessionProvider, useSession, signIn, signOut } from "next-auth/react";
+// Replaced emojis with FontAwesome icons for Spotify design compliance
+import { 
+  FaSpotify, 
+  FaMusic, 
+  FaChartBar, 
+  FaPalette, 
+  FaFire, 
+  FaCrown, 
+  FaTrophy, 
+  FaMicrophone,
+  FaUser,
+  FaPlay,
+  FaClock,
+  FaGuitar,
+  FaTheaterMasks,
+  FaHeart,
+  FaArrowUp,
+  FaUsers,
+  FaEdit
+} from "react-icons/fa";
 import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
 import { useSpotifyError, useDebouncedSpotifyData, useTimeRangeData, SpotifyTrack, SpotifyArtist } from "@/hooks/useSpotifyData";
 import { ErrorDisplay } from "@/components/ErrorHandling";
@@ -31,7 +51,10 @@ function Content() {
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <div className="bg-white/10 backdrop-blur-lg p-6 sm:p-8 lg:p-12 rounded-2xl border border-white/20 shadow-2xl text-center max-w-md w-full">
           <div className="mb-8">
-            <div className="text-4xl sm:text-5xl mb-4">🎵</div>
+            {/* Replaced emoji with FaSpotify for Spotify design compliance */}
+            <div className="text-4xl sm:text-5xl mb-4 text-[#1DB954]">
+              <FaSpotify />
+            </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">My Spotify Wrapped</h1>
             {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
             <p className="text-gray-200 text-sm sm:text-base">Discover your musical journey</p>
@@ -39,9 +62,11 @@ function Content() {
 
           <button
             onClick={() => signIn("spotify")}
-            className="bg-[#1DB954] hover:bg-[#1ed760] text-white px-6 py-3 sm:px-8 rounded-full font-semibold text-base sm:text-lg shadow-lg transform transition hover:scale-105 w-full min-h-[44px] mb-6"
+            className="bg-[#1DB954] hover:bg-[#1ed760] text-white px-6 py-3 sm:px-8 rounded-full font-semibold text-base sm:text-lg shadow-lg transform transition hover:scale-105 w-full min-h-[44px] mb-6 flex items-center justify-center gap-2"
           >
-            🎵 Sign in with Spotify
+            {/* Replaced emoji with FaSpotify for Spotify design compliance */}
+            <FaSpotify />
+            Sign in with Spotify
           </button>
 
           {/* Spotify Logo for Brand Compliance */}
@@ -209,24 +234,41 @@ function SpotifyDataTest() {
     />
   ), [loading, spotifyData]);
 
-  const genresComponent = useMemo(() =>
-    spotifyData?.topGenres?.slice(0, 10).map((genreObj: any, index: number) => (
-      <span
-        key={genreObj.genre || genreObj}
-        className="px-3 sm:px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-full text-xs sm:text-sm font-medium shadow-lg hover:scale-105 transition-transform touch-manipulation"
-        style={{
-          background: `linear-gradient(45deg, hsl(${index * 36}, 70%, 50%), hsl(${(index * 36) + 60}, 70%, 60%))`
-        }}
-        title={genreObj.count ? `${genreObj.count} artists` : undefined}
-      >
-        {genreObj.genre || genreObj}
-        {genreObj.count && (
-          <span className="ml-2 text-xs opacity-80">
-            {genreObj.count}
-          </span>
-        )}
-      </span>
-    )) || [], [spotifyData?.topGenres]);
+  const genresComponent = useMemo(() => {
+    const genres = spotifyData?.topGenres?.slice(0, 10) || [];
+    const maxGenreCount = Math.max(...genres.map((g: any) => g.count || 1));
+
+    return genres.map((genreObj: any) => {
+      const count = genreObj.count || 1;
+      
+      // Apply proportional sizing formulas as specified
+      const opacity = 0.7 + (0.3 * (count / maxGenreCount)); // Opacity formula: 0.7 + (0.3 * ratio)
+      const fontSize = 12 + (count / 2); // Font size formula: 12 + (count / 2)
+
+      return (
+        <span
+          key={genreObj.genre || genreObj}
+          className="inline-block text-white rounded-full font-medium shadow-lg hover:scale-105 transition-all duration-200 touch-manipulation"
+          style={{
+            // Uniform Spotify green gradient for all genre tags
+            background: `linear-gradient(135deg, #1DB954 0%, #1ed760 100%)`,
+            opacity: opacity,
+            fontSize: `${fontSize}px`,
+            padding: `${Math.max(8, fontSize * 0.4)}px ${Math.max(12, fontSize * 0.6)}px`,
+            boxShadow: `0 4px 12px rgba(29, 185, 84, ${opacity * 0.4})`
+          }}
+          title={genreObj.count ? `${genreObj.count} artists` : undefined}
+        >
+          {genreObj.genre || genreObj}
+          {genreObj.count && (
+            <span className="ml-2 opacity-80" style={{ fontSize: `${fontSize * 0.8}px` }}>
+              {genreObj.count}
+            </span>
+          )}
+        </span>
+      );
+    });
+  }, [spotifyData?.topGenres]);
 
   const musicTimelineComponent = useMemo(() =>
     spotifyData?.allTracksData && spotifyData.allTracksData.length > 0 ? (
@@ -266,14 +308,22 @@ function SpotifyDataTest() {
             <button
               onClick={hasAttemptedLoad ? throttledRefresh : handleFetchData}
               disabled={loading}
-              className="bg-[#1DB954] hover:bg-[#1ed760] disabled:bg-gray-600 text-white px-6 py-3 sm:px-8 rounded-full font-semibold text-base sm:text-lg shadow-lg transform transition hover:scale-105 w-full sm:w-auto min-h-[44px]"
+              className="bg-[#1DB954] hover:bg-[#1ed760] disabled:bg-gray-600 text-white px-6 py-3 sm:px-8 rounded-full font-semibold text-base sm:text-lg shadow-lg transform transition hover:scale-105 w-full sm:w-auto min-h-[44px] flex items-center justify-center gap-2"
             >
               {loading ? (
                 <ButtonLoadingSpinner />
               ) : hasAttemptedLoad ? (
-                "🔄 Refresh Data"
+                <>
+                  {/* Replaced emoji with icon for Spotify design compliance */}
+                  <FaPlay className="rotate-180" />
+                  Refresh Data
+                </>
               ) : (
-                "🎶 Get My Spotify Data"
+                <>
+                  {/* Replaced emoji with FaMusic for Spotify design compliance */}
+                  <FaMusic />
+                  Get My Spotify Data
+                </>
               )}
             </button>
             <button
@@ -308,21 +358,32 @@ function SpotifyDataTest() {
                   <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#1DB954] rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-lg sm:text-xl font-bold">
-                        {spotifyData.userProfile?.display_name?.charAt(0) || '🎵'}
+                        {/* Replaced emoji with FaUser for Spotify design compliance */}
+                        {spotifyData.userProfile?.display_name?.charAt(0) || <FaUser />}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-white text-base sm:text-lg font-semibold truncate">
                         {spotifyData.userProfile?.display_name || 'Spotify User'}
                       </h3>
-                      <p className="text-green-300 text-xs sm:text-sm leading-tight">
-                        📊 Your personal Spotify data • {spotifyData.userProfile?.country || 'Unknown'} • {spotifyData.userProfile?.followers || 0} followers
+                      <p className="text-green-300 text-xs sm:text-sm leading-tight flex items-center gap-1">
+                        {/* Replaced emoji with FaChartBar for Spotify design compliance */}
+                        <FaChartBar /> Your personal Spotify data • {spotifyData.userProfile?.country || 'Unknown'} • {spotifyData.userProfile?.followers || 0} followers
                       </p>
                     </div>
                   </div>
                   <div className="text-left sm:text-right w-full sm:w-auto">
-                    <div className="text-green-400 text-xs sm:text-sm font-medium">
-                      {spotifyData.userProfile?.product === 'premium' ? '👑 Premium' : '🎵 Free'}
+                    <div className="text-green-400 text-xs sm:text-sm font-medium flex items-center gap-1 justify-start sm:justify-end">
+                      {/* Replaced emojis with FontAwesome icons for Spotify design compliance */}
+                      {spotifyData.userProfile?.product === 'premium' ? (
+                        <>
+                          <FaCrown /> Premium
+                        </>
+                      ) : (
+                        <>
+                          <FaMusic /> Free
+                        </>
+                      )}
                     </div>
                     {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
                     <div className="text-gray-200 text-xs">
@@ -344,8 +405,17 @@ function SpotifyDataTest() {
               {/* Top Genres */}
               <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl">
                 <div className="flex items-center mb-4 sm:mb-6">
-                  <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🎨</span>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white">Music DNA</h2>
+                  {/* Replaced emoji with FaPalette for Spotify design compliance */}
+                  <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+                    <FaPalette />
+                  </div>
+                  <div className="flex items-center">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white">Music DNA</h2>
+                    {/* Subtitle displaying total number of genres as specified */}
+                    <span className="ml-3 text-sm text-gray-400">
+                      {spotifyData?.topGenres?.length || 0} genres
+                    </span>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   {genresComponent}
@@ -355,7 +425,10 @@ function SpotifyDataTest() {
               {/* Stats */}
               <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl">
                 <div className="flex items-center mb-4 sm:mb-6">
-                  <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">📊</span>
+                  {/* Replaced emoji with FaChartBar for Spotify design compliance */}
+                  <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+                    <FaChartBar />
+                  </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-white">Your Stats</h2>
                 </div>
                 <div className="space-y-4 sm:space-y-6">
@@ -370,7 +443,10 @@ function SpotifyDataTest() {
                          (spotifyData.stats?.averagePopularity || 0) >= 50 ? "Balanced taste" : "Underground vibes"}
                       </div>
                     </div>
-                    <div className="text-3xl sm:text-4xl">🔥</div>
+                    {/* Replaced emoji with FaFire for Spotify design compliance */}
+                    <div className="text-3xl sm:text-4xl text-orange-500">
+                      <FaFire />
+                    </div>
                   </div>
                   <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                     <div className="flex-1">
@@ -378,7 +454,10 @@ function SpotifyDataTest() {
                       <div className="text-gray-200 text-sm sm:text-base">Tracks Analyzed</div>
                       <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.stats?.totalTracksAnalyzed || 0}</div>
                     </div>
-                    <div className="text-3xl sm:text-4xl">🎵</div>
+                    {/* Replaced emoji with FaMusic for Spotify design compliance */}
+                    <div className="text-3xl sm:text-4xl text-blue-500">
+                      <FaMusic />
+                    </div>
                   </div>
                   <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                     <div className="flex-1">
@@ -386,7 +465,10 @@ function SpotifyDataTest() {
                       <div className="text-gray-200 text-sm sm:text-base">Artists Analyzed</div>
                       <div className="text-xl sm:text-2xl font-bold text-purple-400">{spotifyData.stats?.totalArtistsAnalyzed || 0}</div>
                     </div>
-                    <div className="text-3xl sm:text-4xl">👨‍🎤</div>
+                    {/* Replaced emoji with FaMicrophone for Spotify design compliance */}
+                    <div className="text-3xl sm:text-4xl text-purple-500">
+                      <FaMicrophone />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -395,13 +477,23 @@ function SpotifyDataTest() {
             {/* NEW: Most Played Songs */}
             {spotifyData.mostPlayedSongs && (
               <div className="bg-[#191414] p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-800 shadow-xl mt-6 sm:mt-8">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-3 sm:space-y-0">
                   <div className="flex items-center">
-                    <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🔥</span>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white">Most Played Songs</h2>
-                    <span className="ml-2 sm:ml-4 px-2 sm:px-3 py-1 bg-[#1DB954] text-white rounded-full text-xs sm:text-sm">
-                      Top 10
-                    </span>
+                    {/* Replaced emoji with FaTrophy for Spotify design compliance */}
+                    <div className="text-2xl sm:text-3xl mr-3 text-yellow-500">
+                      <FaTrophy />
+                    </div>
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center">
+                        Top 10 Tracks
+                        <span className="ml-3 px-3 py-1 bg-[#1DB954] text-white rounded-full text-xs font-medium">
+                          {selectedTimeRange === 'short_term' ? 'Last 4 Weeks' :
+                           selectedTimeRange === 'medium_term' ? 'Last 6 Months' :
+                           '~1 Year'}
+                        </span>
+                      </h2>
+                      <p className="text-gray-300 text-sm mt-1">Your most played tracks from Spotify</p>
+                    </div>
                   </div>
 
                   {/* Time Range Selector */}
@@ -413,9 +505,10 @@ function SpotifyDataTest() {
                       onChange={(e) => debouncedTimeRangeChange(e.target.value)}
                       className="bg-[#2a2a2a] text-white px-3 sm:px-4 py-2 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none text-sm flex-1 sm:flex-none min-h-[44px] touch-manipulation"
                     >
-                      <option value="short_term">📅 Last 4 Weeks</option>
-                      <option value="medium_term">📊 Last 6 Months</option>
-                      <option value="long_term">🏆 ~1 Year of Data</option>
+                      {/* Replaced emojis with text for cleaner design */}
+                      <option value="short_term">Last 4 Weeks</option>
+                      <option value="medium_term">Last 6 Months</option>
+                      <option value="long_term">~1 Year of Data</option>
                     </select>
                   </div>
                 </div>
@@ -424,7 +517,8 @@ function SpotifyDataTest() {
                 {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).length > 0 && (
                   <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                     <p className="text-blue-400 text-xs sm:text-sm flex items-start sm:items-center">
-                      <span className="mr-2 mt-0.5 sm:mt-0">📊</span>
+                      {/* Replaced emoji with FaChartBar for Spotify design compliance */}
+                      <FaChartBar className="mr-2 mt-0.5 sm:mt-0" />
                       <span>
                         <strong>
                           Period: {(spotifyData.mostPlayedSongs?.[selectedTimeRange] as any)?.[0]?.periodDescription || 'Unknown'}
@@ -436,53 +530,121 @@ function SpotifyDataTest() {
                   </div>
                 )}
 
-                <div className="space-y-3">
-                  {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).map((track: any) => (
-                    <div key={track.id} className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all">
-                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg flex-shrink-0">
-                        {track.rank}
-                      </div>
-                      {track.images?.[2] && (
-                        <img
-                          src={track.images[2].url}
-                          alt={track.name}
-                          className="w-12 h-12 sm:w-16 sm:h-16 spotify-rounded-small object-cover flex-shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-white text-sm sm:text-lg">
-                          <div className="truncate">{track.name}</div>
+                <div className="space-y-6">
+                  {/* Top 3: Grid layout */}
+                  {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                      {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).slice(0, 3).map((track: any) => (
+                        <div key={track.id} className="bg-white/10 backdrop-blur-lg rounded-xl p-4 flex flex-col hover:bg-white/15 transition-all duration-300 border border-white/20 shadow-lg">
+                          {/* Album Art */}
+                          {track.images?.[0] && (
+                            <img
+                              src={track.images[0].url}
+                              alt={`Album cover for ${track.name}`}
+                              className="w-full aspect-square object-cover rounded-lg mb-4 shadow-md"
+                            />
+                          )}
+
+                          {/* Track Info */}
+                          <div className="flex-1 space-y-2">
+                            <h3 className="font-bold text-white text-lg leading-tight">{track.name}</h3>
+                            <p className="text-gray-200 text-sm font-medium">{track.artist}</p>
+                            <p className="text-gray-300 text-xs">{track.album?.name}</p>
+                          </div>
+
+                          {/* Ranking and Popularity */}
+                          <div className="mt-4 flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-[#1DB954] font-bold text-xl">#{track.rank}</span>
+                              <span className="text-gray-300 text-xs">ranking</span>
+                            </div>
+                            <div className="w-20">
+                              <PopularityBar
+                                popularity={track.popularity}
+                                label=""
+                                className="text-xs"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Spotify Button */}
                           {track.external_urls?.spotify && (
                             <a
                               href={track.external_urls.spotify}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center px-2 sm:px-3 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs font-medium rounded-full transition-colors mt-1 sm:mt-0 sm:ml-2 min-h-[32px] touch-manipulation"
+                              className="mt-4 bg-[#1DB954] hover:bg-[#1ed760] text-white px-4 py-2.5 rounded-full text-sm font-semibold text-center transition-all duration-200 hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
                             >
-                              <span className="mr-1">🎵</span>
-                              <span className="hidden sm:inline">Open in Spotify</span>
-                              <span className="sm:hidden">Spotify</span>
+                              {/* Replaced emoji with FaMusic for Spotify design compliance */}
+                              <FaMusic />
+                              <span>Open in Spotify</span>
                             </a>
                           )}
                         </div>
-                        <div className="text-[#b3b3b3] truncate text-sm">{track.artist}</div>
-                        {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
-                        <div className="text-xs sm:text-sm text-gray-200 truncate">{track.album.name}</div>
-                      </div>
-                      <div className="text-right space-y-2">
-                        <div className="text-[#1DB954] font-bold text-lg sm:text-2xl">#{track.rank}</div>
-                        {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
-                        <div className="text-gray-200 text-xs sm:text-sm">ranking</div>
-                        <div className="w-20 sm:w-24">
-                          <PopularityBar
-                            popularity={track.popularity}
-                            label=""
-                            className="p-1"
-                          />
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+
+                  {/* Tracks 4-10: Compact horizontal list */}
+                  {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).length > 3 && (
+                    <>
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold text-white flex items-center">
+                          {/* Replaced emoji with FaChartBar for Spotify design compliance */}
+                          <FaChartBar className="mr-2" />
+                          Tracks 4-10
+                        </h3>
+                        <p className="text-gray-300 text-sm mt-1">Your remaining top tracks</p>
+                      </div>
+
+                      <div className="space-y-3">
+                        {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).slice(3, 10).map((track: any) => (
+                          <div key={track.id} className="bg-white/5 hover:bg-white/10 rounded-lg p-3 flex items-center transition-all duration-200 border border-white/10 hover:border-white/20">
+                            {/* Ranking */}
+                            <span className="text-[#1DB954] font-bold mr-4 text-lg w-8 text-center">#{track.rank}</span>
+
+                            {/* Album Art (smaller) */}
+                            {track.images?.[2] && (
+                              <img
+                                src={track.images[2].url}
+                                alt={`Album cover for ${track.name}`}
+                                className="w-12 h-12 rounded-lg mr-4 object-cover shadow-sm"
+                              />
+                            )}
+
+                            {/* Track Info */}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white text-sm font-semibold truncate">{track.name}</p>
+                              <p className="text-gray-300 text-xs truncate">{track.artist}</p>
+                            </div>
+
+                            {/* Popularity Bar */}
+                            <div className="ml-4 w-16">
+                              <PopularityBar
+                                popularity={track.popularity}
+                                label=""
+                                className="text-xs"
+                              />
+                            </div>
+
+                            {/* Compact Spotify Link */}
+                            {track.external_urls?.spotify && (
+                              <a
+                                href={track.external_urls.spotify}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-3 bg-[#1DB954] hover:bg-[#1ed760] text-white px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 flex items-center space-x-1"
+                              >
+                                {/* Replaced emoji with FaMusic for Spotify design compliance */}
+                                <FaMusic />
+                                <span className="hidden sm:inline">Spotify</span>
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                   <p className="text-yellow-400 text-xs sm:text-sm flex items-start">
@@ -521,7 +683,10 @@ function SpotifyDataTest() {
                              (spotifyData.discoveryMetrics.mainstreamTaste || 0) > 50 ? "Balanced taste" : "Underground explorer"}
                           </div>
                         </div>
-                        <div className="text-3xl sm:text-4xl">📈</div>
+                        {/* Replaced emoji with FaArrowUp for Spotify design compliance */}
+                        <div className="text-3xl sm:text-4xl text-green-500">
+                          <FaArrowUp />
+                        </div>
                       </div>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
@@ -534,7 +699,10 @@ function SpotifyDataTest() {
                              (spotifyData.discoveryMetrics.artistDiversity || 0) > 50 ? "Balanced" : "Loyal fan"}
                           </div>
                         </div>
-                        <div className="text-3xl sm:text-4xl">🎭</div>
+                        {/* Replaced emoji with FaTheaterMasks for Spotify design compliance */}
+                        <div className="text-3xl sm:text-4xl text-purple-500">
+                          <FaTheaterMasks />
+                        </div>
                       </div>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
@@ -557,7 +725,10 @@ function SpotifyDataTest() {
               {/* Social Metrics */}
               <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl">
                 <div className="flex items-center mb-4 sm:mb-6">
-                  <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">👥</span>
+                  {/* Replaced emoji with FaUsers for Spotify design compliance */}
+                  <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+                    <FaUsers />
+                  </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-white">Social Profile</h2>
                 </div>
                 <div className="space-y-4 sm:space-y-6">
@@ -571,7 +742,10 @@ function SpotifyDataTest() {
                           {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
                           <div className="text-xs sm:text-sm text-gray-200">Artists you follow</div>
                         </div>
-                        <div className="text-3xl sm:text-4xl">❤️</div>
+                        {/* Replaced emoji with FaHeart for Spotify design compliance */}
+                        <div className="text-3xl sm:text-4xl text-red-500">
+                          <FaHeart />
+                        </div>
                       </div>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
@@ -581,7 +755,10 @@ function SpotifyDataTest() {
                           {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
                           <div className="text-xs sm:text-sm text-gray-200">Playlists you created</div>
                         </div>
-                        <div className="text-3xl sm:text-4xl">📝</div>
+                        {/* Replaced emoji with FaEdit for Spotify design compliance */}
+                        <div className="text-3xl sm:text-4xl text-blue-500">
+                          <FaEdit />
+                        </div>
                       </div>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
@@ -591,7 +768,10 @@ function SpotifyDataTest() {
                           {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
                           <div className="text-xs sm:text-sm text-gray-200">Spotify subscription</div>
                         </div>
-                        <div className="text-3xl sm:text-4xl">👑</div>
+                        {/* Replaced emoji with FaCrown for Spotify design compliance */}
+                        <div className="text-3xl sm:text-4xl text-yellow-500">
+                          <FaCrown />
+                        </div>
                       </div>
                     </>
                   )}
@@ -667,7 +847,10 @@ function SpotifyDataTest() {
             <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 mt-6 sm:mt-8">
               <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl">
                 <div className="flex items-center mb-4 sm:mb-6">
-                  <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">📊</span>
+                  {/* Replaced emoji with FaChartBar for Spotify design compliance */}
+                  <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+                    <FaChartBar />
+                  </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-white">Raw Metrics</h2>
                 </div>
                 <div className="space-y-3 sm:space-y-4">
@@ -738,7 +921,10 @@ function SpotifyDataTest() {
               <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl mt-6 sm:mt-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-6 space-y-2 sm:space-y-0">
                   <div className="flex items-center">
-                    <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🕐</span>
+                    {/* Replaced emoji with FaClock for Spotify design compliance */}
+                    <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+                      <FaClock />
+                    </div>
                     <h2 className="text-xl sm:text-2xl font-bold text-white">Recent Listening Data</h2>
                   </div>
                   <span className="sm:ml-4 px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300">
@@ -765,7 +951,8 @@ function SpotifyDataTest() {
                               rel="noopener noreferrer"
                               className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors mt-1 sm:mt-0 sm:ml-2 min-h-[28px] touch-manipulation"
                             >
-                              <span className="mr-1">🎵</span>
+                              {/* Replaced emoji with FaMusic for Spotify design compliance */}
+                              <FaMusic className="mr-1" />
                               <span className="hidden sm:inline">Open</span>
                               <span className="sm:hidden">♪</span>
                             </a>
@@ -856,7 +1043,8 @@ function SpotifyDataTest() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors mt-1 min-h-[28px] touch-manipulation"
                           >
-                            <span className="mr-1">🎤</span>
+                            {/* Replaced emoji with FaMicrophone for Spotify design compliance */}
+                            <FaMicrophone className="mr-1" />
                             <span className="hidden sm:inline">Spotify</span>
                             <span className="sm:hidden">♪</span>
                           </a>
@@ -874,7 +1062,10 @@ function SpotifyDataTest() {
               <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl mt-6 sm:mt-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-6 space-y-2 sm:space-y-0">
                   <div className="flex items-center">
-                    <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🎸</span>
+                    {/* Replaced emoji with FaGuitar for Spotify design compliance */}
+                    <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+                      <FaGuitar />
+                    </div>
                     <h2 className="text-xl sm:text-2xl font-bold text-white">Genre Statistics</h2>
                   </div>
                   <span className="sm:ml-4 px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300">
@@ -899,7 +1090,10 @@ function SpotifyDataTest() {
             {spotifyData.artistAnalysis && (
               <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl mt-6 sm:mt-8">
                 <div className="flex items-center mb-4 sm:mb-6">
-                  <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🎤</span>
+                  {/* Replaced emoji with FaMicrophone for Spotify design compliance */}
+                  <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+                    <FaMicrophone />
+                  </div>
                   <h2 className="text-xl sm:text-2xl font-bold text-white">Artist Deep Dive</h2>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -934,7 +1128,8 @@ function SpotifyDataTest() {
                               rel="noopener noreferrer"
                               className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors mt-1 min-h-[28px] touch-manipulation"
                             >
-                              <span className="mr-1">🎤</span>
+                              {/* Replaced emoji with FaMicrophone for Spotify design compliance */}
+                              <FaMicrophone className="mr-1" />
                               <span className="hidden sm:inline">Spotify</span>
                               <span className="sm:hidden">♪</span>
                             </a>
@@ -957,7 +1152,8 @@ function SpotifyDataTest() {
                               rel="noopener noreferrer"
                               className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors mt-1 min-h-[28px] touch-manipulation"
                             >
-                              <span className="mr-1">🎤</span>
+                              {/* Replaced emoji with FaMicrophone for Spotify design compliance */}
+                              <FaMicrophone className="mr-1" />
                               <span className="hidden sm:inline">Spotify</span>
                               <span className="sm:hidden">♪</span>
                             </a>

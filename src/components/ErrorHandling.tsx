@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import { FaChartBar, FaLock, FaClock, FaExclamationTriangle, FaTimes } from 'react-icons/fa';
 
 export interface SpotifyError {
   type: 'network' | 'auth' | 'rate_limit' | 'api' | 'insufficient_data' | 'unknown';
@@ -26,17 +27,17 @@ export function ErrorDisplay({ error, onRetry, onDismiss, className = "" }: Erro
   const getErrorIcon = (type: SpotifyError['type']) => {
     switch (type) {
       case 'network':
-        return '🌐';
+        return <FaExclamationTriangle />;
       case 'auth':
-        return '🔒';
+        return <FaLock />;
       case 'rate_limit':
-        return '⏱️';
+        return <FaClock />;
       case 'api':
-        return '⚠️';
+        return <FaExclamationTriangle />;
       case 'insufficient_data':
-        return '📊';
+        return <FaChartBar />;
       default:
-        return '❌';
+        return <FaTimes />;
     }
   };
 
@@ -267,7 +268,7 @@ export function InlineError({ message, onRetry }: { message: string; onRetry?: (
   return (
     <div className="flex items-center justify-between p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-200">
       <div className="flex items-center space-x-2">
-        <span className="text-red-400">⚠️</span>
+        <FaExclamationTriangle className="text-red-400" />
         <span className="text-sm">{message}</span>
       </div>
       {onRetry && (

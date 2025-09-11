@@ -1,4 +1,6 @@
 import { useState } from 'react';
+// Replaced emojis with FontAwesome icons for Spotify design compliance
+import { FaMicrophone, FaMusic } from 'react-icons/fa';
 import { ItemSkeleton } from './LoadingSkeleton';
 import { SpotifyArtist } from '@/hooks/useSpotifyData';
 
@@ -53,7 +55,10 @@ export default function TopArtists({
       {/* Header with time range selector */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
         <div className="flex items-center">
-          <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🎤</span>
+          {/* Replaced emoji with FaMicrophone for Spotify design compliance */}
+          <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+            <FaMicrophone />
+          </div>
           <h2 className="text-xl sm:text-2xl font-bold text-white">Top Artists</h2>
         </div>
         <select
@@ -61,9 +66,10 @@ export default function TopArtists({
           value={selectedTimeRange}
           onChange={(e) => setSelectedTimeRange(e.target.value)}
         >
-          <option value="short_term">📅 Last 4 Weeks</option>
-          <option value="medium_term">📊 Last 6 Months</option>
-          <option value="long_term">🏆 ~1 Year of Data</option>
+          {/* Replaced emojis with clean text for Spotify design compliance */}
+          <option value="short_term">Last 4 Weeks</option>
+          <option value="medium_term">Last 6 Months</option>
+          <option value="long_term">~1 Year of Data</option>
         </select>
       </div>
 
@@ -106,9 +112,12 @@ export default function TopArtists({
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors mt-1 sm:mt-0 sm:ml-2 min-h-[32px] touch-manipulation"
                     >
-                      <span className="mr-1">🎤</span>
+                      {/* Replaced emojis with FontAwesome icons for Spotify design compliance */}
+                      <FaMicrophone className="mr-1" />
                       <span className="hidden sm:inline">Spotify</span>
-                      <span className="sm:hidden">🎵</span>
+                      <span className="sm:hidden">
+                        <FaMusic />
+                      </span>
                     </a>
                   )}
                 </div>

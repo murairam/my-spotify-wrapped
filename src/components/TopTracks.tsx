@@ -1,4 +1,6 @@
 import { useState } from 'react';
+// Replaced emojis with FontAwesome icons for Spotify design compliance
+import { FaMusic } from 'react-icons/fa';
 import PopularityBar from './PopularityBar';
 import { ItemSkeleton } from './LoadingSkeleton';
 
@@ -55,7 +57,10 @@ export default function TopTracks({
       {/* Header with time range selector */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
         <div className="flex items-center">
-          <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🎵</span>
+          {/* Replaced emoji with FaMusic for Spotify design compliance */}
+          <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+            <FaMusic />
+          </div>
           <h2 className="text-xl sm:text-2xl font-bold text-white">Top Tracks</h2>
         </div>
         <select
@@ -63,9 +68,10 @@ export default function TopTracks({
           value={selectedTimeRange}
           onChange={(e) => setSelectedTimeRange(e.target.value)}
         >
-          <option value="short_term">📅 Last 4 Weeks</option>
-          <option value="medium_term">📊 Last 6 Months</option>
-          <option value="long_term">🏆 ~1 Year of Data</option>
+          {/* Replaced emojis with clean text for Spotify design compliance */}
+          <option value="short_term">Last 4 Weeks</option>
+          <option value="medium_term">Last 6 Months</option>
+          <option value="long_term">~1 Year of Data</option>
         </select>
       </div>
 
@@ -108,7 +114,8 @@ export default function TopTracks({
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-2 sm:px-3 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs font-medium rounded-full transition-colors mt-1 sm:mt-0 sm:ml-2 min-h-[32px] sm:min-h-[28px] touch-manipulation"
                     >
-                      <span className="mr-1">🎵</span>
+                      {/* Replaced emoji with FaMusic for Spotify design compliance */}
+                      <FaMusic className="mr-1" />
                       <span className="hidden sm:inline">Open in Spotify</span>
                       <span className="sm:hidden">Spotify</span>
                     </a>
