@@ -1,10 +1,23 @@
-// next.config.js
-
 const nextConfig = {
-  reactStrictMode: false, // Disable strict mode temporarily
+  reactStrictMode: false, // Temporarily disabled for debugging - consider re-enabling later
   images: {
-    domains: ['i.scdn.co'],
+    domains: [
+      'i.scdn.co',           // Spotify album/artist images
+      'mosaic.scdn.co',      // Spotify playlist images
+      'blend-playlist-covers.spotifycdn.com', // Spotify blend covers
+      'seed-mix-image.spotifycdn.com',        // Spotify mix covers
+      'charts-images.scdn.co',               // Spotify charts images
+      'daily-mix.scdn.co',                   // Spotify daily mix images
+      'mixed-media-images.spotifycdn.com'    // Additional Spotify media
+    ],
   },
+  // Fix the cross-origin warnings
+  allowedDevOrigins: [
+    'localhost:3000',
+    '127.0.0.1:3000',
+    'localhost:3001',
+    '127.0.0.1:3001'
+  ],
   async headers() {
     return [
       {
@@ -17,6 +30,13 @@ const nextConfig = {
         ],
       },
     ];
+  },
+  // Optimize for better performance
+  compress: true,
+  poweredByHeader: false,
+  // Add environment variable validation
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
 };
 

@@ -217,7 +217,7 @@ function SpotifyDataTest() {
                         <div className="font-semibold text-white text-lg">
                           {track.name}
                           {track.external_urls?.spotify && (
-                            <a 
+                            <a
                               href={track.external_urls.spotify}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -278,7 +278,7 @@ function SpotifyDataTest() {
                         <div className="font-semibold text-white text-lg">
                           {artist.name}
                           {artist.external_urls?.spotify && (
-                            <a 
+                            <a
                               href={artist.external_urls.spotify}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -421,7 +421,7 @@ function SpotifyDataTest() {
                         <div className="font-semibold text-white text-lg truncate">
                           {track.name}
                           {track.external_urls?.spotify && (
-                            <a 
+                            <a
                               href={track.external_urls.spotify}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -692,7 +692,7 @@ function SpotifyDataTest() {
                         <div className="text-white text-sm truncate">
                           {track.track.name}
                           {track.track.external_urls?.spotify && (
-                            <a 
+                            <a
                               href={track.track.external_urls.spotify}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -730,7 +730,7 @@ function SpotifyDataTest() {
                       <div className="text-white font-medium text-sm mb-2 truncate">
                         {playlist.name}
                         {playlist.external_urls?.spotify && (
-                          <a 
+                          <a
                             href={playlist.external_urls.spotify}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -777,7 +777,7 @@ function SpotifyDataTest() {
                       <div className="text-white text-sm truncate">
                         {artist.name}
                         {artist.external_urls?.spotify && (
-                          <a 
+                          <a
                             href={artist.external_urls.spotify}
                             target="_blank"
                             rel="noopener noreferrer"
@@ -852,7 +852,7 @@ function SpotifyDataTest() {
                         <div className="font-bold text-white">
                           {spotifyData.artistAnalysis.mostPopularArtist.name}
                           {spotifyData.artistAnalysis.mostPopularArtist.external_urls?.spotify && (
-                            <a 
+                            <a
                               href={spotifyData.artistAnalysis.mostPopularArtist.external_urls.spotify}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -874,7 +874,7 @@ function SpotifyDataTest() {
                         <div className="font-bold text-white">
                           {spotifyData.artistAnalysis.biggestArtist.name}
                           {spotifyData.artistAnalysis.biggestArtist.external_urls?.spotify && (
-                            <a 
+                            <a
                               href={spotifyData.artistAnalysis.biggestArtist.external_urls.spotify}
                               target="_blank"
                               rel="noopener noreferrer"

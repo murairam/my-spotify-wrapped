@@ -4,6 +4,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import SpotifyWebApi from "spotify-web-api-node";
 
+// Force dynamic rendering for this API route (uses auth headers)
+export const dynamic = 'force-dynamic';
+
 // Helper function to safely parse date
 function parseReleaseYear(releaseDate: string): number {
   if (!releaseDate) return 0;
