@@ -3,13 +3,23 @@
 "use client";
 import { useState } from "react";
 import { SessionProvider, useSession, signIn, signOut } from "next-auth/react";
+import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
+import { useSpotifyData, useSpotifyError, SpotifyTrack, SpotifyArtist } from "@/hooks/useSpotifyData";
+import { ErrorDisplay } from "@/components/ErrorHandling";
+import { DashboardLoadingSkeleton, ButtonLoadingSpinner } from "@/components/LoadingSkeleton";
 import PopularityBar from "@/components/PopularityBar";
+import ListeningHeatmap from "@/components/ListeningHeatmap";
+import MusicTimeline from '@/components/MusicTimeline';
+import TopTracks from '@/components/TopTracks';
+import TopArtists from '@/components/TopArtists';
 
 export default function Home() {
   return (
-    <SessionProvider>
-      <Content />
-    </SessionProvider>
+    <ReactQueryProvider>
+      <SessionProvider>
+        <Content />
+      </SessionProvider>
+    </ReactQueryProvider>
   );
 }
 
@@ -18,21 +28,26 @@ function Content() {
 
   if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4">My Spotify Wrapped</h1>
-          <p className="mb-4 text-sm sm:text-base">Not signed in</p>
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="bg-white/10 backdrop-blur-lg p-6 sm:p-8 lg:p-12 rounded-2xl border border-white/20 shadow-2xl text-center max-w-md w-full">
+          <div className="mb-8">
+            <div className="text-4xl sm:text-5xl mb-4">🎵</div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">My Spotify Wrapped</h1>
+            <p className="text-gray-300 text-sm sm:text-base">Discover your musical journey</p>
+          </div>
+
           <button
             onClick={() => signIn("spotify")}
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg w-full sm:w-auto min-h-[44px]"
+            className="bg-[#1DB954] hover:bg-[#1ed760] text-white px-6 py-3 sm:px-8 rounded-full font-semibold text-base sm:text-lg shadow-lg transform transition hover:scale-105 w-full min-h-[44px] mb-6"
           >
-            Sign in with Spotify
+            🎵 Sign in with Spotify
           </button>
 
           {/* Spotify Logo for Brand Compliance */}
-          <div className="mt-8 flex flex-col items-center">
+          <div className="flex flex-col items-center">
             <div className="flex items-center space-x-2">
               <span className="text-gray-400 text-xs sm:text-sm">Powered by</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/spotify-logo.svg"
                 alt="Spotify"
@@ -56,39 +71,42 @@ function Content() {
 }
 
 function SpotifyDataTest() {
-  const [spotifyData, setSpotifyData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [selectedTimeRange, setSelectedTimeRange] = useState("short_term"); // Default to most recent data
-  const [selectedTracksTimeRange, setSelectedTracksTimeRange] = useState("short_term"); // For Top Tracks section
-  const [selectedArtistsTimeRange, setSelectedArtistsTimeRange] = useState("short_term"); // For Top Artists section
+  const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
 
-  const fetchSpotifyData = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/spotify/top-items");
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  // Use React Query hook for data fetching
+  const {
+    data: spotifyData,
+    isLoading,
+    error: queryError,
+    refetch,
+    isFetching,
+    isRefetching
+  } = useSpotifyData({
+    enabled: hasAttemptedLoad, // Only fetch when user clicks the button
+    retry: (failureCount, error) => {
+      // Custom retry logic
+      if (error?.type === 'auth' || error?.type === 'insufficient_data') {
+        return false;
       }
+      return failureCount < 3;
+    }
+  });
 
-      const data = await response.json();
+  // Parse error for display
+  const displayError = useSpotifyError(queryError);
 
-      // Handle insufficient data case
-      if (data.error === "insufficient_data") {
-        setError(`${data.message}\n\nSuggestions:\n${data.suggestions.map((s: string) => `• ${s}`).join('\n')}`);
-        return;
-      }
-
-      setSpotifyData(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch Spotify data");
-    } finally {
-      setLoading(false);
+  // Handle manual fetch trigger
+  const handleFetchData = () => {
+    if (!hasAttemptedLoad) {
+      setHasAttemptedLoad(true);
+    } else {
+      refetch();
     }
   };
+
+  // Loading state includes initial loading and refetching
+  const loading = isLoading || isFetching || isRefetching;
 
   return (
     <div className="min-h-screen bg-black">
@@ -119,11 +137,17 @@ function SpotifyDataTest() {
           </div>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
             <button
-              onClick={fetchSpotifyData}
+              onClick={handleFetchData}
               disabled={loading}
               className="bg-[#1DB954] hover:bg-[#1ed760] disabled:bg-gray-600 text-white px-6 py-3 sm:px-8 rounded-full font-semibold text-base sm:text-lg shadow-lg transform transition hover:scale-105 w-full sm:w-auto min-h-[44px]"
             >
-              {loading ? "🎵 Loading..." : "🎶 Get My Spotify Data"}
+              {loading ? (
+                <ButtonLoadingSpinner />
+              ) : hasAttemptedLoad ? (
+                "🔄 Refresh Data"
+              ) : (
+                "🎶 Get My Spotify Data"
+              )}
             </button>
             <button
               onClick={() => signOut()}
@@ -134,19 +158,18 @@ function SpotifyDataTest() {
           </div>
         </div>
 
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-4 sm:px-6 rounded-lg mb-8 backdrop-blur-sm">
-            <div className="flex items-start">
-              <span className="text-xl sm:text-2xl mr-2 sm:mr-3 mt-1">⚠️</span>
-              <div>
-                <div className="font-semibold mb-2 text-sm sm:text-base">Spotify Data Issue</div>
-                <div className="whitespace-pre-line text-xs sm:text-sm">{error}</div>
-                <div className="mt-4 text-xs text-red-300">
-                  💡 This usually happens with new Spotify accounts or accounts with private listening history.
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Error Display with React Query */}
+        {displayError && (
+          <ErrorDisplay
+            error={displayError}
+            onRetry={displayError.canRetry ? handleFetchData : undefined}
+            className="mb-8"
+          />
+        )}
+
+        {/* Loading State */}
+        {loading && !spotifyData && (
+          <DashboardLoadingSkeleton />
         )}
 
         {spotifyData && (
@@ -158,24 +181,24 @@ function SpotifyDataTest() {
                   <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#1DB954] rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-lg sm:text-xl font-bold">
-                        {spotifyData.userProfile.display_name?.charAt(0) || '🎵'}
+                        {spotifyData.userProfile?.display_name?.charAt(0) || '🎵'}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-white text-base sm:text-lg font-semibold truncate">
-                        {spotifyData.userProfile.display_name || 'Spotify User'}
+                        {spotifyData.userProfile?.display_name || 'Spotify User'}
                       </h3>
                       <p className="text-green-300 text-xs sm:text-sm leading-tight">
-                        📊 Your personal Spotify data • {spotifyData.userProfile.country || 'Unknown'} • {spotifyData.userProfile.followers || 0} followers
+                        📊 Your personal Spotify data • {spotifyData.userProfile?.country || 'Unknown'} • {spotifyData.userProfile?.followers || 0} followers
                       </p>
                     </div>
                   </div>
                   <div className="text-left sm:text-right w-full sm:w-auto">
                     <div className="text-green-400 text-xs sm:text-sm font-medium">
-                      {spotifyData.userProfile.product === 'premium' ? '👑 Premium' : '🎵 Free'}
+                      {spotifyData.userProfile?.product === 'premium' ? '👑 Premium' : '🎵 Free'}
                     </div>
                     <div className="text-gray-400 text-xs">
-                      ID: {spotifyData.userProfile.id || 'Unknown'}
+                      ID: {spotifyData.userProfile?.id || 'Unknown'}
                     </div>
                   </div>
                 </div>
@@ -184,120 +207,16 @@ function SpotifyDataTest() {
 
             {/* Top Tracks and Artists Row */}
             <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
-              {/* Top Tracks */}
-              <div className="bg-[#191414] p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-800 shadow-xl">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
-                  <div className="flex items-center">
-                    <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🎵</span>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white">Top Tracks</h2>
-                  </div>
-                  <select
-                    className="bg-black/40 text-white text-sm px-3 py-2 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none w-full sm:w-auto min-h-[44px] touch-manipulation"
-                    value={selectedTracksTimeRange}
-                    onChange={(e) => setSelectedTracksTimeRange(e.target.value)}
-                  >
-                    <option value="short_term">📅 Last 4 Weeks</option>
-                    <option value="medium_term">📊 Last 6 Months</option>
-                    <option value="long_term">🏆 ~1 Year of Data</option>
-                  </select>
-                </div>
-                <div className="space-y-3 sm:space-y-4">
-                  {(spotifyData.topTracksByTimeRange?.[selectedTracksTimeRange] || spotifyData.topTracks || [])?.slice(0, 5).map((track: any, index: number) => (
-                    <div key={track.id} className="flex items-center space-x-3 sm:space-x-4 p-3 rounded-lg bg-black/20 hover:bg-black/40 transition-all">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
-                        {index + 1}
-                      </div>
-                      {track.images?.[2] && (
-                        <img
-                          src={track.images[2].url}
-                          alt={track.name}
-                          className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover flex-shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-white text-sm sm:text-lg">
-                          <div className="truncate">{track.name}</div>
-                          {track.external_urls?.spotify && (
-                            <a
-                              href={track.external_urls.spotify}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center px-2 sm:px-3 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs font-medium rounded-full transition-colors mt-1 sm:mt-0 sm:ml-2 min-h-[32px] sm:min-h-[28px] touch-manipulation"
-                            >
-                              <span className="mr-1">🎵</span>
-                              <span className="hidden sm:inline">Open in Spotify</span>
-                              <span className="sm:hidden">Spotify</span>
-                            </a>
-                          )}
-                        </div>
-                        <div className="text-gray-300 text-sm truncate">{track.artist}</div>
-                      </div>
-                      <div className="w-24 sm:w-32 flex-shrink-0">
-                        <PopularityBar
-                          popularity={track.popularity}
-                          label="Popularity"
-                          className="p-2"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Top Artists */}
-              <div className="bg-[#191414] p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-800 shadow-xl">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
-                  <div className="flex items-center">
-                    <span className="text-2xl sm:text-3xl mr-2 sm:mr-3">🎤</span>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white">Top Artists</h2>
-                  </div>
-                  <select
-                    className="bg-black/40 text-white text-sm px-3 py-2 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none w-full sm:w-auto min-h-[44px] touch-manipulation"
-                    value={selectedArtistsTimeRange}
-                    onChange={(e) => setSelectedArtistsTimeRange(e.target.value)}
-                  >
-                    <option value="short_term">📅 Last 4 Weeks</option>
-                    <option value="medium_term">📊 Last 6 Months</option>
-                    <option value="long_term">🏆 ~1 Year of Data</option>
-                  </select>
-                </div>
-                <div className="space-y-3 sm:space-y-4">
-                  {(spotifyData.topArtistsByTimeRange?.[selectedArtistsTimeRange] || spotifyData.topArtists || [])?.slice(0, 5).map((artist: any, index: number) => (
-                    <div key={artist.id} className="flex items-center space-x-3 sm:space-x-4 p-3 rounded-lg bg-black/20 hover:bg-black/40 transition-all">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
-                        {index + 1}
-                      </div>
-                      {artist.images?.[2] && (
-                        <img
-                          src={artist.images[2].url}
-                          alt={artist.name}
-                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-white text-sm sm:text-lg">
-                          <div className="truncate">{artist.name}</div>
-                          {artist.external_urls?.spotify && (
-                            <a
-                              href={artist.external_urls.spotify}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors mt-1 sm:mt-0 sm:ml-2 min-h-[32px] touch-manipulation"
-                            >
-                              <span className="mr-1">🎤</span>
-                              <span className="hidden sm:inline">Spotify</span>
-                              <span className="sm:hidden">🎵</span>
-                            </a>
-                          )}
-                        </div>
-                        <div className="text-gray-300 text-xs sm:text-sm truncate">
-                          {artist.genres?.slice(0, 2).join(", ") || "No genres"}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <TopTracks
+                topTracksByTimeRange={spotifyData.topTracksByTimeRange}
+                topTracks={spotifyData.topTracks as SpotifyTrack[] | undefined}
+                isLoading={loading && !spotifyData}
+              />
+              <TopArtists
+                topArtistsByTimeRange={spotifyData.topArtistsByTimeRange}
+                topArtists={spotifyData.topArtists as SpotifyArtist[] | undefined}
+                isLoading={loading && !spotifyData}
+              />
             </div>
 
             {/* Genres and Stats Row */}
@@ -339,10 +258,10 @@ function SpotifyDataTest() {
                   <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                     <div className="flex-1">
                       <div className="text-gray-300 text-sm sm:text-base">Average Popularity</div>
-                      <div className="text-xl sm:text-2xl font-bold text-green-400">{spotifyData.stats?.averagePopularity}/100</div>
+                      <div className="text-xl sm:text-2xl font-bold text-green-400">{spotifyData.stats?.averagePopularity || 0}/100</div>
                       <div className="text-xs sm:text-sm text-gray-400">
-                        {spotifyData.stats?.averagePopularity >= 70 ? "Mainstream taste" :
-                         spotifyData.stats?.averagePopularity >= 50 ? "Balanced taste" : "Underground vibes"}
+                        {(spotifyData.stats?.averagePopularity || 0) >= 70 ? "Mainstream taste" :
+                         (spotifyData.stats?.averagePopularity || 0) >= 50 ? "Balanced taste" : "Underground vibes"}
                       </div>
                     </div>
                     <div className="text-3xl sm:text-4xl">🔥</div>
@@ -350,14 +269,14 @@ function SpotifyDataTest() {
                   <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                     <div className="flex-1">
                       <div className="text-gray-300 text-sm sm:text-base">Tracks Analyzed</div>
-                      <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.stats?.totalTracksAnalyzed}</div>
+                      <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.stats?.totalTracksAnalyzed || 0}</div>
                     </div>
                     <div className="text-3xl sm:text-4xl">🎵</div>
                   </div>
                   <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                     <div className="flex-1">
                       <div className="text-gray-300 text-sm sm:text-base">Artists Analyzed</div>
-                      <div className="text-xl sm:text-2xl font-bold text-purple-400">{spotifyData.stats?.totalArtistsAnalyzed}</div>
+                      <div className="text-xl sm:text-2xl font-bold text-purple-400">{spotifyData.stats?.totalArtistsAnalyzed || 0}</div>
                     </div>
                     <div className="text-3xl sm:text-4xl">👨‍🎤</div>
                   </div>
@@ -393,13 +312,13 @@ function SpotifyDataTest() {
                 </div>
 
                 {/* Time Range Info */}
-                {(spotifyData.mostPlayedSongs[selectedTimeRange] || []).length > 0 && (
+                {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).length > 0 && (
                   <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                     <p className="text-blue-400 text-xs sm:text-sm flex items-start sm:items-center">
                       <span className="mr-2 mt-0.5 sm:mt-0">📊</span>
                       <span>
                         <strong>
-                          Period: {(spotifyData.mostPlayedSongs[selectedTimeRange] || [])[0]?.periodDescription || 'Unknown'}
+                          Period: {(spotifyData.mostPlayedSongs?.[selectedTimeRange] as any)?.[0]?.periodDescription || 'Unknown'}
                         </strong>
                         <br className="sm:hidden" />
                         <span className="sm:ml-2">Your actual Spotify top tracks rankings for this period</span>
@@ -409,7 +328,7 @@ function SpotifyDataTest() {
                 )}
 
                 <div className="space-y-3">
-                  {(spotifyData.mostPlayedSongs[selectedTimeRange] || []).map((track: any) => (
+                  {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).map((track: any) => (
                     <div key={track.id} className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all">
                       <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-lg flex-shrink-0">
                         {track.rank}
@@ -483,10 +402,10 @@ function SpotifyDataTest() {
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
                           <div className="text-gray-300 text-sm sm:text-base">Mainstream Taste</div>
-                          <div className="text-xl sm:text-2xl font-bold text-green-400">{spotifyData.discoveryMetrics.mainstreamTaste}%</div>
+                          <div className="text-xl sm:text-2xl font-bold text-green-400">{spotifyData.discoveryMetrics.mainstreamTaste || 0}%</div>
                           <div className="text-xs sm:text-sm text-gray-400">
-                            {spotifyData.discoveryMetrics.mainstreamTaste > 70 ? "Chart follower" :
-                             spotifyData.discoveryMetrics.mainstreamTaste > 50 ? "Balanced taste" : "Underground explorer"}
+                            {(spotifyData.discoveryMetrics.mainstreamTaste || 0) > 70 ? "Chart follower" :
+                             (spotifyData.discoveryMetrics.mainstreamTaste || 0) > 50 ? "Balanced taste" : "Underground explorer"}
                           </div>
                         </div>
                         <div className="text-3xl sm:text-4xl">📈</div>
@@ -494,10 +413,10 @@ function SpotifyDataTest() {
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
                           <div className="text-gray-300 text-sm sm:text-base">Artist Diversity</div>
-                          <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.discoveryMetrics.artistDiversity}%</div>
+                          <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.discoveryMetrics.artistDiversity || 0}%</div>
                           <div className="text-xs sm:text-sm text-gray-400">
-                            {spotifyData.discoveryMetrics.artistDiversity > 70 ? "Explorer" :
-                             spotifyData.discoveryMetrics.artistDiversity > 50 ? "Balanced" : "Loyal fan"}
+                            {(spotifyData.discoveryMetrics.artistDiversity || 0) > 70 ? "Explorer" :
+                             (spotifyData.discoveryMetrics.artistDiversity || 0) > 50 ? "Balanced" : "Loyal fan"}
                           </div>
                         </div>
                         <div className="text-3xl sm:text-4xl">🎭</div>
@@ -505,10 +424,10 @@ function SpotifyDataTest() {
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
                           <div className="text-gray-300 text-sm sm:text-base">Recent Music Lover</div>
-                          <div className="text-xl sm:text-2xl font-bold text-purple-400">{spotifyData.discoveryMetrics.recentMusicLover}%</div>
+                          <div className="text-xl sm:text-2xl font-bold text-purple-400">{spotifyData.discoveryMetrics.recentMusicLover || 0}%</div>
                           <div className="text-xs sm:text-sm text-gray-400">
-                            {spotifyData.discoveryMetrics.recentMusicLover > 60 ? "Trend follower" :
-                             spotifyData.discoveryMetrics.recentMusicLover > 30 ? "Balanced" : "Vintage collector"}
+                            {(spotifyData.discoveryMetrics.recentMusicLover || 0) > 60 ? "Trend follower" :
+                             (spotifyData.discoveryMetrics.recentMusicLover || 0) > 30 ? "Balanced" : "Vintage collector"}
                           </div>
                         </div>
                         <div className="text-3xl sm:text-4xl">🆕</div>
@@ -530,7 +449,7 @@ function SpotifyDataTest() {
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
                           <div className="text-gray-300 text-sm sm:text-base">Following Artists</div>
-                          <div className="text-xl sm:text-2xl font-bold text-green-400">{spotifyData.socialMetrics.followedArtistsCount}</div>
+                          <div className="text-xl sm:text-2xl font-bold text-green-400">{spotifyData.socialMetrics.followedArtistsCount || 0}</div>
                           <div className="text-xs sm:text-sm text-gray-400">Artists you follow</div>
                         </div>
                         <div className="text-3xl sm:text-4xl">❤️</div>
@@ -538,7 +457,7 @@ function SpotifyDataTest() {
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
                           <div className="text-gray-300 text-sm sm:text-base">Your Playlists</div>
-                          <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.socialMetrics.playlistsOwned}</div>
+                          <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.socialMetrics.playlistsOwned || 0}</div>
                           <div className="text-xs sm:text-sm text-gray-400">Playlists you created</div>
                         </div>
                         <div className="text-3xl sm:text-4xl">📝</div>
@@ -546,7 +465,7 @@ function SpotifyDataTest() {
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
                           <div className="text-gray-300 text-sm sm:text-base">Account Type</div>
-                          <div className="text-xl sm:text-2xl font-bold text-purple-400 capitalize">{spotifyData.socialMetrics.accountType}</div>
+                          <div className="text-xl sm:text-2xl font-bold text-purple-400 capitalize">{spotifyData.socialMetrics.accountType || 'Free'}</div>
                           <div className="text-xs sm:text-sm text-gray-400">Spotify subscription</div>
                         </div>
                         <div className="text-3xl sm:text-4xl">👑</div>
@@ -557,6 +476,11 @@ function SpotifyDataTest() {
               </div>
             </div>
 
+            {/* Music Timeline */}
+            {spotifyData.allTracksData && spotifyData.allTracksData.length > 0 && (
+              <MusicTimeline tracks={spotifyData.allTracksData as any} />
+            )}
+
             {/* RAW DATA: Listening Time Patterns */}
             {spotifyData.listeningHabits && (
               <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl mt-6 sm:mt-8">
@@ -566,21 +490,28 @@ function SpotifyDataTest() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.listeningHabits.peakListeningHour}:00</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.listeningHabits.peakListeningHour || 0}:00</div>
                     <div className="text-gray-300 text-sm sm:text-base">Peak listening hour</div>
                   </div>
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.listeningHabits.peakListeningDay}</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.listeningHabits.peakListeningDay || 'Unknown'}</div>
                     <div className="text-gray-300 text-sm sm:text-base">Most active day</div>
                   </div>
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white capitalize">{spotifyData.listeningHabits.preferredTimeOfDay}</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white capitalize">{spotifyData.listeningHabits.preferredTimeOfDay || 'Unknown'}</div>
                     <div className="text-gray-300 text-sm sm:text-base">Most active period</div>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* Listening Activity Heatmap */}
+            {spotifyData.listeningHabits && (
+              <ListeningHeatmap
+                listeningHabits={spotifyData.listeningHabits}
+                className="mt-6 sm:mt-8"
+              />
+            )}
 
             {/* RAW DATA: Time Range Evolution */}
             <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl mt-6 sm:mt-8">
@@ -623,23 +554,23 @@ function SpotifyDataTest() {
                     <>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Unique Artists</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.uniqueArtistsCount}</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.uniqueArtistsCount || 0}</span>
                       </div>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Unique Albums</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.uniqueAlbumsCount}</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.uniqueAlbumsCount || 0}</span>
                       </div>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Average Tracks per Artist</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.artistLoyalty}</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.artistLoyalty || 0}</span>
                       </div>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Oldest Track Year</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.oldestTrackYear}</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.oldestTrackYear || 'N/A'}</span>
                       </div>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Newest Track Year</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.newestTrackYear}</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.newestTrackYear || 'N/A'}</span>
                       </div>
                     </>
                   )}
@@ -656,23 +587,23 @@ function SpotifyDataTest() {
                     <>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Mainstream Score</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.mainstreamTaste}%</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.mainstreamTaste || 0}%</span>
                       </div>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Underground Score</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.undergroundTaste}%</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.undergroundTaste || 0}%</span>
                       </div>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Recent Music (2023-2025)</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.recentMusicLover}%</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.recentMusicLover || 0}%</span>
                       </div>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Vintage Music (Pre-2000)</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.vintageCollector}%</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.vintageCollector || 0}%</span>
                       </div>
                       <div className="flex justify-between p-3 bg-white/5 rounded-lg">
                         <span className="text-gray-300 text-sm sm:text-base">Artist Diversity</span>
-                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.artistDiversity}%</span>
+                        <span className="text-white font-bold text-sm sm:text-base">{spotifyData.discoveryMetrics.artistDiversity || 0}%</span>
                       </div>
                     </>
                   )}
@@ -826,12 +757,12 @@ function SpotifyDataTest() {
                     <h2 className="text-xl sm:text-2xl font-bold text-white">Genre Statistics</h2>
                   </div>
                   <span className="sm:ml-4 px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300">
-                    {Object.keys(spotifyData.genreData).length} genres
+                    {Object.keys(spotifyData.genreData || {}).length} genres
                   </span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 max-h-64 sm:max-h-80 overflow-y-auto">
-                  {Object.entries(spotifyData.genreData)
-                    .sort(([,a]: [string, any], [,b]: [string, any]) => b.count - a.count)
+                  {Object.entries(spotifyData.genreData || {})
+                    .sort(([,a]: [string, any], [,b]: [string, any]) => (b as any)?.count - (a as any)?.count)
                     .slice(0, 20)
                     .map(([genre, data]: [string, any]) => (
                     <div key={genre} className="flex justify-between items-center p-2 sm:p-3 bg-white/5 rounded-lg">
@@ -852,19 +783,19 @@ function SpotifyDataTest() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.artistAnalysis.totalUniqueArtists}</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.artistAnalysis.totalUniqueArtists || 0}</div>
                     <div className="text-gray-300 text-sm sm:text-base">Total Artists</div>
                   </div>
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.artistAnalysis.averagePopularity}</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.artistAnalysis.averagePopularity || 0}</div>
                     <div className="text-gray-300 text-sm sm:text-base">Avg Popularity</div>
                   </div>
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{(spotifyData.artistAnalysis.averageFollowers / 1000000).toFixed(1)}M</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{((spotifyData.artistAnalysis.averageFollowers || 0) / 1000000).toFixed(1)}M</div>
                     <div className="text-gray-300 text-sm sm:text-base">Avg Followers</div>
                   </div>
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.artistAnalysis.averageGenresPerArtist}</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.artistAnalysis.averageGenresPerArtist || 0}</div>
                     <div className="text-gray-300 text-sm sm:text-base">Genres per Artist</div>
                   </div>
                 </div>
@@ -888,7 +819,7 @@ function SpotifyDataTest() {
                             </a>
                           )}
                         </div>
-                        <div className="text-xs sm:text-sm">Popularity: {spotifyData.artistAnalysis.mostPopularArtist.popularity}/100</div>
+                        <div className="text-xs sm:text-sm">Popularity: {spotifyData.artistAnalysis.mostPopularArtist.popularity || 0}/100</div>
                       </div>
                     )}
                   </div>
@@ -911,7 +842,7 @@ function SpotifyDataTest() {
                             </a>
                           )}
                         </div>
-                        <div className="text-xs sm:text-sm">{spotifyData.artistAnalysis.biggestArtist.followers.total.toLocaleString()} followers</div>
+                        <div className="text-xs sm:text-sm">{(spotifyData.artistAnalysis.biggestArtist.followers?.total || 0).toLocaleString()} followers</div>
                       </div>
                     )}
                   </div>
@@ -928,19 +859,19 @@ function SpotifyDataTest() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.albumAnalysis.totalUniqueAlbums}</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.albumAnalysis.totalUniqueAlbums || 0}</div>
                     <div className="text-gray-300 text-sm sm:text-base">Unique Albums</div>
                   </div>
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.albumAnalysis.yearSpread}</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.albumAnalysis.yearSpread || 0}</div>
                     <div className="text-gray-300 text-sm sm:text-base">Year Spread</div>
                   </div>
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.albumAnalysis.averageReleaseYear}</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{spotifyData.albumAnalysis.averageReleaseYear || 0}</div>
                     <div className="text-gray-300 text-sm sm:text-base">Avg Release Year</div>
                   </div>
                   <div className="text-center p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-2xl sm:text-3xl font-bold text-white">{Object.keys(spotifyData.albumAnalysis.albumTypes).length}</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-white">{Object.keys(spotifyData.albumAnalysis.albumTypes || {}).length}</div>
                     <div className="text-gray-300 text-sm sm:text-base">Album Types</div>
                   </div>
                 </div>
@@ -948,7 +879,7 @@ function SpotifyDataTest() {
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
                     <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Decade Distribution</h3>
                     <div className="space-y-2">
-                      {Object.entries(spotifyData.albumAnalysis.decadeDistribution)
+                      {Object.entries(spotifyData.albumAnalysis.decadeDistribution || {})
                         .sort(([,a]: [string, any], [,b]: [string, any]) => b - a)
                         .slice(0, 5)
                         .map(([decade, count]: [string, any]) => (
@@ -962,7 +893,7 @@ function SpotifyDataTest() {
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
                     <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Album Types</h3>
                     <div className="space-y-2">
-                      {Object.entries(spotifyData.albumAnalysis.albumTypes).map(([type, count]: [string, any]) => (
+                      {Object.entries(spotifyData.albumAnalysis.albumTypes || {}).map(([type, count]: [string, any]) => (
                         <div key={type} className="flex justify-between text-xs sm:text-sm">
                           <span className="text-gray-300 capitalize">{type}</span>
                           <span className="text-white font-bold">{count}</span>
@@ -983,47 +914,47 @@ function SpotifyDataTest() {
                     <h2 className="text-xl sm:text-2xl font-bold text-white">Complete API Capabilities</h2>
                   </div>
                   <span className="sm:ml-4 px-3 py-1 bg-green-500/20 rounded-full text-sm text-green-300">
-                    {spotifyData.stats.dataCompletenessScore}% Complete
+                    {spotifyData.stats.dataCompletenessScore || 0}% Complete
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.totalTracksAnalyzed}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.totalTracksAnalyzed || 0}</div>
                     <div className="text-gray-300 text-xs sm:text-sm">Total Tracks</div>
                   </div>
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.uniqueArtistsCount}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.uniqueArtistsCount || 0}</div>
                     <div className="text-gray-300 text-xs sm:text-sm">Unique Artists</div>
                   </div>
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.uniqueAlbumsCount}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.uniqueAlbumsCount || 0}</div>
                     <div className="text-gray-300 text-xs sm:text-sm">Unique Albums</div>
                   </div>
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.totalGenresFound}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.totalGenresFound || 0}</div>
                     <div className="text-gray-300 text-xs sm:text-sm">Genres Found</div>
                   </div>
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.playlistsAnalyzed}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.playlistsAnalyzed || 0}</div>
                     <div className="text-gray-300 text-xs sm:text-sm">Playlists</div>
                   </div>
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.followedArtistsCount}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.followedArtistsCount || 0}</div>
                     <div className="text-gray-300 text-xs sm:text-sm">Followed Artists</div>
                   </div>
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.recentTracksAnalyzed}</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.recentTracksAnalyzed || 0}</div>
                     <div className="text-gray-300 text-xs sm:text-sm">Recent Tracks</div>
                   </div>
                   <div className="p-3 sm:p-4 bg-white/5 rounded-xl">
-                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.audioFeaturesCoverage}%</div>
+                    <div className="text-xl sm:text-2xl font-bold text-white">{spotifyData.stats.audioFeaturesCoverage || 0}%</div>
                     <div className="text-gray-300 text-xs sm:text-sm">Audio Features</div>
                   </div>
                 </div>
                 <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-white/5 rounded-xl">
                   <h3 className="text-base sm:text-lg font-semibold text-white mb-3">API Endpoint Status</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    {Object.entries(spotifyData.stats.scopesWorking).map(([scope, working]: [string, any]) => (
+                    {Object.entries(spotifyData.stats.scopesWorking || {}).map(([scope, working]: [string, any]) => (
                       <div key={scope} className="flex items-center justify-between text-xs sm:text-sm">
                         <span className="text-gray-300 truncate mr-2">{scope.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
                         <span className={`px-2 py-1 rounded-full text-xs flex-shrink-0 ${working ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
