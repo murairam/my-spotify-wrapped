@@ -112,7 +112,8 @@ export default function MusicTimeline({ tracks }: MusicTimelineProps) {
         </div>
         <div className="bg-white/5 p-4 rounded-xl text-center">
           <div className="text-2xl font-bold text-white">{yearSpread}</div>
-          <div className="text-sm text-gray-300">Year span</div>
+          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+          <div className="text-sm text-gray-200">Year span</div>
         </div>
       </div>
     </div>

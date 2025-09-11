@@ -112,7 +112,8 @@ export default function TopArtists({
                     </a>
                   )}
                 </div>
-                <div className="text-gray-300 text-xs sm:text-sm truncate">
+                {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                <div className="text-gray-200 text-xs sm:text-sm truncate">
                   {artist.genres?.slice(0, 2).join(", ") || "No genres"}
                 </div>
               </div>

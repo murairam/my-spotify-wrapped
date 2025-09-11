@@ -33,7 +33,8 @@ function Content() {
           <div className="mb-8">
             <div className="text-4xl sm:text-5xl mb-4">🎵</div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">My Spotify Wrapped</h1>
-            <p className="text-gray-300 text-sm sm:text-base">Discover your musical journey</p>
+            {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+            <p className="text-gray-200 text-sm sm:text-base">Discover your musical journey</p>
           </div>
 
           <button
@@ -46,7 +47,8 @@ function Content() {
           {/* Spotify Logo for Brand Compliance */}
           <div className="flex flex-col items-center">
             <div className="flex items-center space-x-2">
-              <span className="text-gray-400 text-xs sm:text-sm">Powered by</span>
+              {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+              <span className="text-gray-200 text-xs sm:text-sm">Powered by</span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/spotify-logo.svg"
@@ -114,7 +116,7 @@ function SpotifyDataTest() {
           console.log('✅ Using cached time range data');
         }
       };
-      
+
       let timeoutId: NodeJS.Timeout;
       return (newTimeRange: string) => {
         clearTimeout(timeoutId);
@@ -128,7 +130,7 @@ function SpotifyDataTest() {
   const handleFetchData = useCallback(() => {
     fetchStartTime.current = performance.now();
     console.log('🚀 Starting data fetch...');
-    
+
     if (!hasAttemptedLoad) {
       setHasAttemptedLoad(true);
     } else {
@@ -159,7 +161,7 @@ function SpotifyDataTest() {
     if (isLoading && fetchStartTime.current > 0) {
       console.log('⏳ Data loading started...');
     }
-    
+
     if (!isLoading && !isFetching && spotifyData && fetchStartTime.current > 0) {
       const fetchEndTime = performance.now();
       const fetchDuration = fetchEndTime - fetchStartTime.current;
@@ -207,7 +209,7 @@ function SpotifyDataTest() {
     />
   ), [loading, spotifyData]);
 
-  const genresComponent = useMemo(() => 
+  const genresComponent = useMemo(() =>
     spotifyData?.topGenres?.slice(0, 10).map((genreObj: any, index: number) => (
       <span
         key={genreObj.genre || genreObj}
@@ -226,7 +228,7 @@ function SpotifyDataTest() {
       </span>
     )) || [], [spotifyData?.topGenres]);
 
-  const musicTimelineComponent = useMemo(() => 
+  const musicTimelineComponent = useMemo(() =>
     spotifyData?.allTracksData && spotifyData.allTracksData.length > 0 ? (
       <MusicTimeline tracks={spotifyData.allTracksData as any} />
     ) : null, [spotifyData?.allTracksData]);
@@ -239,12 +241,14 @@ function SpotifyDataTest() {
           <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4">
             My Spotify Wrapped
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-6">
+          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+          <p className="text-base sm:text-lg lg:text-xl text-gray-200 mb-6">
             Discover your unique music personality and listening patterns
           </p>
           {/* Spotify Attribution */}
           <div className="flex items-center justify-center space-x-2 mb-8">
-            <span className="text-gray-400 text-xs sm:text-sm">Powered by</span>
+            {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+            <span className="text-gray-200 text-xs sm:text-sm">Powered by</span>
             <img
               src="/spotify-logo.svg"
               alt="Spotify"
@@ -320,7 +324,8 @@ function SpotifyDataTest() {
                     <div className="text-green-400 text-xs sm:text-sm font-medium">
                       {spotifyData.userProfile?.product === 'premium' ? '👑 Premium' : '🎵 Free'}
                     </div>
-                    <div className="text-gray-400 text-xs">
+                    {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                    <div className="text-gray-200 text-xs">
                       ID: {spotifyData.userProfile?.id || 'Unknown'}
                     </div>
                   </div>
@@ -356,9 +361,11 @@ function SpotifyDataTest() {
                 <div className="space-y-4 sm:space-y-6">
                   <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                     <div className="flex-1">
-                      <div className="text-gray-300 text-sm sm:text-base">Average Popularity</div>
+                      {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                      <div className="text-gray-200 text-sm sm:text-base">Average Popularity</div>
                       <div className="text-xl sm:text-2xl font-bold text-green-400">{spotifyData.stats?.averagePopularity || 0}/100</div>
-                      <div className="text-xs sm:text-sm text-gray-400">
+                      {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                      <div className="text-xs sm:text-sm text-gray-200">
                         {(spotifyData.stats?.averagePopularity || 0) >= 70 ? "Mainstream taste" :
                          (spotifyData.stats?.averagePopularity || 0) >= 50 ? "Balanced taste" : "Underground vibes"}
                       </div>
@@ -367,14 +374,16 @@ function SpotifyDataTest() {
                   </div>
                   <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                     <div className="flex-1">
-                      <div className="text-gray-300 text-sm sm:text-base">Tracks Analyzed</div>
+                      {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                      <div className="text-gray-200 text-sm sm:text-base">Tracks Analyzed</div>
                       <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.stats?.totalTracksAnalyzed || 0}</div>
                     </div>
                     <div className="text-3xl sm:text-4xl">🎵</div>
                   </div>
                   <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                     <div className="flex-1">
-                      <div className="text-gray-300 text-sm sm:text-base">Artists Analyzed</div>
+                      {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                      <div className="text-gray-200 text-sm sm:text-base">Artists Analyzed</div>
                       <div className="text-xl sm:text-2xl font-bold text-purple-400">{spotifyData.stats?.totalArtistsAnalyzed || 0}</div>
                     </div>
                     <div className="text-3xl sm:text-4xl">👨‍🎤</div>
@@ -397,7 +406,8 @@ function SpotifyDataTest() {
 
                   {/* Time Range Selector */}
                   <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
-                    <span className="text-gray-300 text-sm">Period:</span>
+                    {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                    <span className="text-gray-200 text-sm">Period:</span>
                     <select
                       value={selectedTimeRange}
                       onChange={(e) => debouncedTimeRangeChange(e.target.value)}
@@ -456,11 +466,13 @@ function SpotifyDataTest() {
                           )}
                         </div>
                         <div className="text-[#b3b3b3] truncate text-sm">{track.artist}</div>
-                        <div className="text-xs sm:text-sm text-gray-400 truncate">{track.album.name}</div>
+                        {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                        <div className="text-xs sm:text-sm text-gray-200 truncate">{track.album.name}</div>
                       </div>
                       <div className="text-right space-y-2">
                         <div className="text-[#1DB954] font-bold text-lg sm:text-2xl">#{track.rank}</div>
-                        <div className="text-gray-400 text-xs sm:text-sm">ranking</div>
+                        {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                        <div className="text-gray-200 text-xs sm:text-sm">ranking</div>
                         <div className="w-20 sm:w-24">
                           <PopularityBar
                             popularity={track.popularity}
@@ -500,9 +512,11 @@ function SpotifyDataTest() {
                     <>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
-                          <div className="text-gray-300 text-sm sm:text-base">Mainstream Taste</div>
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-gray-200 text-sm sm:text-base">Mainstream Taste</div>
                           <div className="text-xl sm:text-2xl font-bold text-green-400">{spotifyData.discoveryMetrics.mainstreamTaste || 0}%</div>
-                          <div className="text-xs sm:text-sm text-gray-400">
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-xs sm:text-sm text-gray-200">
                             {(spotifyData.discoveryMetrics.mainstreamTaste || 0) > 70 ? "Chart follower" :
                              (spotifyData.discoveryMetrics.mainstreamTaste || 0) > 50 ? "Balanced taste" : "Underground explorer"}
                           </div>
@@ -511,9 +525,11 @@ function SpotifyDataTest() {
                       </div>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
-                          <div className="text-gray-300 text-sm sm:text-base">Artist Diversity</div>
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-gray-200 text-sm sm:text-base">Artist Diversity</div>
                           <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.discoveryMetrics.artistDiversity || 0}%</div>
-                          <div className="text-xs sm:text-sm text-gray-400">
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-xs sm:text-sm text-gray-200">
                             {(spotifyData.discoveryMetrics.artistDiversity || 0) > 70 ? "Explorer" :
                              (spotifyData.discoveryMetrics.artistDiversity || 0) > 50 ? "Balanced" : "Loyal fan"}
                           </div>
@@ -522,9 +538,11 @@ function SpotifyDataTest() {
                       </div>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
-                          <div className="text-gray-300 text-sm sm:text-base">Recent Music Lover</div>
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-gray-200 text-sm sm:text-base">Recent Music Lover</div>
                           <div className="text-xl sm:text-2xl font-bold text-purple-400">{spotifyData.discoveryMetrics.recentMusicLover || 0}%</div>
-                          <div className="text-xs sm:text-sm text-gray-400">
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-xs sm:text-sm text-gray-200">
                             {(spotifyData.discoveryMetrics.recentMusicLover || 0) > 60 ? "Trend follower" :
                              (spotifyData.discoveryMetrics.recentMusicLover || 0) > 30 ? "Balanced" : "Vintage collector"}
                           </div>
@@ -547,25 +565,31 @@ function SpotifyDataTest() {
                     <>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
-                          <div className="text-gray-300 text-sm sm:text-base">Following Artists</div>
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-gray-200 text-sm sm:text-base">Following Artists</div>
                           <div className="text-xl sm:text-2xl font-bold text-green-400">{spotifyData.socialMetrics.followedArtistsCount || 0}</div>
-                          <div className="text-xs sm:text-sm text-gray-400">Artists you follow</div>
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-xs sm:text-sm text-gray-200">Artists you follow</div>
                         </div>
                         <div className="text-3xl sm:text-4xl">❤️</div>
                       </div>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
-                          <div className="text-gray-300 text-sm sm:text-base">Your Playlists</div>
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-gray-200 text-sm sm:text-base">Your Playlists</div>
                           <div className="text-xl sm:text-2xl font-bold text-blue-400">{spotifyData.socialMetrics.playlistsOwned || 0}</div>
-                          <div className="text-xs sm:text-sm text-gray-400">Playlists you created</div>
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-xs sm:text-sm text-gray-200">Playlists you created</div>
                         </div>
                         <div className="text-3xl sm:text-4xl">📝</div>
                       </div>
                       <div className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-xl">
                         <div className="flex-1">
-                          <div className="text-gray-300 text-sm sm:text-base">Account Type</div>
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-gray-200 text-sm sm:text-base">Account Type</div>
                           <div className="text-xl sm:text-2xl font-bold text-purple-400 capitalize">{spotifyData.socialMetrics.accountType || 'Free'}</div>
-                          <div className="text-xs sm:text-sm text-gray-400">Spotify subscription</div>
+                          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                          <div className="text-xs sm:text-sm text-gray-200">Spotify subscription</div>
                         </div>
                         <div className="text-3xl sm:text-4xl">👑</div>
                       </div>

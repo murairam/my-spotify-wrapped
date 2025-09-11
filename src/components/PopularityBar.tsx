@@ -30,7 +30,8 @@ const PopularityBar: React.FC<PopularityBarProps> = ({
   return (
     <div className={`${className}`}>
       {label && (
-        <div className="text-xs text-gray-400 mb-1">{label}</div>
+        /* Fixed contrast for accessibility (Spotify guideline compliance) */
+        <div className="text-xs text-gray-200 mb-1">{label}</div>
       )}
       <div className="flex items-center space-x-2">
         <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">

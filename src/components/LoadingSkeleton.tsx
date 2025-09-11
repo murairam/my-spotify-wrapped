@@ -140,7 +140,8 @@ export function DashboardLoadingSkeleton() {
 
       {/* Loading message */}
       <div className="text-center py-8">
-        <div className="inline-flex items-center space-x-2 text-gray-300">
+        {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+        <div className="inline-flex items-center space-x-2 text-gray-200">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1DB954]"></div>
           <span className="text-sm">Loading your Spotify data...</span>
         </div>

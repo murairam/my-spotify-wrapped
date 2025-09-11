@@ -45,7 +45,7 @@ const queryClient = new QueryClient({
 
       // Performance optimizations
       notifyOnChangeProps: ['data', 'error', 'isLoading'], // Only re-render on specific prop changes
-      
+
       // Structural sharing for better performance
       structuralSharing: true,
     },
@@ -62,7 +62,7 @@ queryClient.getQueryCache().subscribe((event) => {
   if (event?.type === 'observerResultsUpdated' && event.query.state.dataUpdatedAt > 0) {
     const queryKey = event.query.queryKey.join('-');
     const duration = Date.now() - event.query.state.dataUpdatedAt;
-    
+
     // Only log if duration is meaningful
     if (duration > 0 && duration < 60000) { // Less than 60 seconds
       logQueryPerformance(queryKey, duration);

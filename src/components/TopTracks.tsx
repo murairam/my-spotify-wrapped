@@ -114,7 +114,8 @@ export default function TopTracks({
                     </a>
                   )}
                 </div>
-                <div className="text-gray-300 text-sm truncate">{track.artist}</div>
+                {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                <div className="text-gray-200 text-sm truncate">{track.artist}</div>
               </div>
 
               {/* Popularity bar */}

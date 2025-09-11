@@ -35,8 +35,10 @@ const ListeningHeatmap: React.FC<ListeningHeatmapProps> = ({
           <h2 className="text-xl sm:text-2xl font-bold text-white">Listening Heatmap</h2>
         </div>
         <div className="text-center py-8">
-          <p className="text-gray-400">No listening pattern data available</p>
-          <p className="text-gray-500 text-sm mt-2">Connect your Spotify account to see your listening habits</p>
+          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+          <p className="text-gray-200">No listening pattern data available</p>
+          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+          <p className="text-gray-200 text-sm mt-2">Connect your Spotify account to see your listening habits</p>
         </div>
       </div>
     );
@@ -93,7 +95,8 @@ const ListeningHeatmap: React.FC<ListeningHeatmapProps> = ({
         <span className="text-2xl sm:text-3xl mr-3">🎵</span>
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-white">Listening Activity</h2>
-          <p className="text-sm text-gray-300 mt-1">Your music habits throughout the week</p>
+          {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+          <p className="text-sm text-gray-200 mt-1">Your music habits throughout the week</p>
         </div>
       </div>
 
@@ -104,7 +107,8 @@ const ListeningHeatmap: React.FC<ListeningHeatmapProps> = ({
           {timeBlocks.map((block) => (
             <div key={block.name} className="text-center">
               <div className={`text-sm font-semibold ${block.color}`}>{block.name}</div>
-              <div className="text-xs text-gray-400 mt-1">{block.hours}</div>
+                            {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+              <div className="text-xs text-gray-200 mt-1">{block.hours}</div>
             </div>
           ))}
         </div>
@@ -114,8 +118,8 @@ const ListeningHeatmap: React.FC<ListeningHeatmapProps> = ({
       <div className="space-y-3">
         {days.map((day, dayIndex) => (
           <div key={day} className="flex items-center">
-            {/* Day label */}
-            <div className="w-20 text-sm font-medium text-gray-300 pr-4 text-right">
+            {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+            <div className="w-20 text-sm font-medium text-gray-200 pr-4 text-right">
               {day}
             </div>
 
@@ -158,13 +162,15 @@ const ListeningHeatmap: React.FC<ListeningHeatmapProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* Activity Legend */}
           <div className="flex items-center space-x-3">
-            <span className="text-sm text-gray-300 font-medium">Activity Level:</span>
+            {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+            <span className="text-sm text-gray-200 font-medium">Activity Level:</span>
             <div className="flex items-center space-x-2">
               {[0, 20, 40, 60, 80, 100].map((intensity, index) => (
                 <div key={intensity} className="flex flex-col items-center space-y-1">
                   <div className={`w-4 h-4 rounded ${getBlockColor(intensity)}`}></div>
-                  {index === 0 && <span className="text-xs text-gray-400">None</span>}
-                  {index === 5 && <span className="text-xs text-gray-400">Peak</span>}
+                  {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+                  {index === 0 && <span className="text-xs text-gray-200">None</span>}
+                  {index === 5 && <span className="text-xs text-gray-200">Peak</span>}
                 </div>
               ))}
             </div>
@@ -172,7 +178,8 @@ const ListeningHeatmap: React.FC<ListeningHeatmapProps> = ({
         </div>
 
         {/* Instructions */}
-        <div className="text-xs text-gray-400 text-center bg-white/5 p-2 rounded">
+        {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
+        <div className="text-xs text-gray-200 text-center bg-white/5 p-2 rounded">
           Each block shows your average listening activity for that time period. Hover for details.
         </div>
       </div>

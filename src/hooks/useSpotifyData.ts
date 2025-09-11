@@ -149,7 +149,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(func: T, del
  */
 async function fetchSpotifyData(): Promise<SpotifyData> {
   const startTime = performance.now();
-  
+
   try {
     const response = await fetch('/api/spotify/top-items', {
       method: 'GET',
@@ -161,7 +161,7 @@ async function fetchSpotifyData(): Promise<SpotifyData> {
     if (!response.ok) {
       const endTime = performance.now();
       logPerformanceMetrics('API Error', startTime, endTime);
-      
+
       // Create error object with response details
       const errorData: {
         status: number;
@@ -212,7 +212,7 @@ async function fetchSpotifyData(): Promise<SpotifyData> {
  */
 async function fetchTopTracks(timeRange: string = 'short_term'): Promise<SpotifyTrack[]> {
   const startTime = performance.now();
-  
+
   try {
     const response = await fetch(`/api/spotify/top-items?type=tracks&time_range=${timeRange}`, {
       method: 'GET',
@@ -227,7 +227,7 @@ async function fetchTopTracks(timeRange: string = 'short_term'): Promise<Spotify
 
     const data = await response.json() as { topTracks: SpotifyTrack[] };
     const endTime = performance.now();
-    
+
     logPerformanceMetrics('Top Tracks Fetch', startTime, endTime, data.topTracks?.length);
     return data.topTracks || [];
   } catch (error) {
@@ -242,7 +242,7 @@ async function fetchTopTracks(timeRange: string = 'short_term'): Promise<Spotify
  */
 async function fetchTopArtists(timeRange: string = 'short_term'): Promise<SpotifyArtist[]> {
   const startTime = performance.now();
-  
+
   try {
     const response = await fetch(`/api/spotify/top-items?type=artists&time_range=${timeRange}`, {
       method: 'GET',
@@ -257,7 +257,7 @@ async function fetchTopArtists(timeRange: string = 'short_term'): Promise<Spotif
 
     const data = await response.json() as { topArtists: SpotifyArtist[] };
     const endTime = performance.now();
-    
+
     logPerformanceMetrics('Top Artists Fetch', startTime, endTime, data.topArtists?.length);
     return data.topArtists || [];
   } catch (error) {
@@ -275,7 +275,7 @@ async function fetchParallelSpotifyData(timeRange: string = 'short_term'): Promi
   topArtists: SpotifyArtist[];
 }> {
   const startTime = performance.now();
-  
+
   try {
     // Fetch tracks and artists in parallel using Promise.all
     const [topTracks, topArtists] = await Promise.all([
@@ -284,7 +284,7 @@ async function fetchParallelSpotifyData(timeRange: string = 'short_term'): Promi
     ]);
 
     const endTime = performance.now();
-    logPerformanceMetrics('Parallel Fetch Complete', startTime, endTime, 
+    logPerformanceMetrics('Parallel Fetch Complete', startTime, endTime,
       (topTracks?.length || 0) + (topArtists?.length || 0));
 
     return {
@@ -370,9 +370,9 @@ export function useDebouncedSpotifyData(
   debounceDelay: number = 1000
 ) {
   const debouncedRefetchRef = useRef<() => void>();
-  
+
   const query = useSpotifyData(options);
-  
+
   // Create debounced refetch function
   const debouncedRefetch = useMemo(
     () => debounce(() => {
@@ -381,10 +381,10 @@ export function useDebouncedSpotifyData(
     }, debounceDelay),
     [query, debounceDelay]
   );
-  
+
   // Store debounced function in ref for external access
   debouncedRefetchRef.current = debouncedRefetch;
-  
+
   return {
     ...query,
     debouncedRefetch: useCallback(() => {
@@ -398,7 +398,7 @@ export function useDebouncedSpotifyData(
  */
 export function useTimeRangeData(timeRanges: string[] = ['short_term', 'medium_term', 'long_term']) {
   const startTime = useRef(performance.now());
-  
+
   const queries = useQueries({
     queries: timeRanges.map(timeRange => ({
       queryKey: ['spotify-parallel-data', timeRange],
@@ -413,14 +413,14 @@ export function useTimeRangeData(timeRanges: string[] = ['short_term', 'medium_t
   // Log performance when all queries complete
   const allLoaded = queries.every(q => !q.isLoading);
   const hasData = queries.some(q => q.data);
-  
+
   if (allLoaded && hasData) {
     const endTime = performance.now();
     const totalItems = queries.reduce((sum, q) => {
       const data = q.data;
       return sum + (data?.topTracks?.length || 0) + (data?.topArtists?.length || 0);
     }, 0);
-    
+
     logPerformanceMetrics('All Time Ranges Loaded', startTime.current, endTime, totalItems);
   }
 
