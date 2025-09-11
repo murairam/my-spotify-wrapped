@@ -212,13 +212,6 @@ export async function GET() {
       ...topTracksLong.body.items
     ];
 
-    // Remove duplicates and get track IDs, but filter out invalid ones
-    const uniqueTrackIds = Array.from(new Set(
-      allTracks
-        .map(track => track.id)
-        .filter(id => id && typeof id === 'string' && id.length > 0)
-    ));
-
     // 3. Audio features are disabled in development mode due to API limitations
     console.log("ℹ️  Audio features disabled (requires extended quota mode in Spotify dashboard)");
     const allAudioFeatures: any[] = [];
@@ -651,6 +644,7 @@ export async function GET() {
             album: track.album,
             popularity: track.popularity,
             images: track.album.images,
+            external_urls: track.external_urls,
             timeRange: label,
             periodDescription: periodDescription
           }));

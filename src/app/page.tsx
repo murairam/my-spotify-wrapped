@@ -214,7 +214,20 @@ function SpotifyDataTest() {
                         />
                       )}
                       <div className="flex-1">
-                        <div className="font-semibold text-white text-lg">{track.name}</div>
+                        <div className="font-semibold text-white text-lg">
+                          {track.name}
+                          {track.external_urls?.spotify && (
+                            <a 
+                              href={track.external_urls.spotify}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-3 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs font-medium rounded-full transition-colors ml-2"
+                            >
+                              <span className="mr-1">🎵</span>
+                              Open in Spotify
+                            </a>
+                          )}
+                        </div>
                         <div className="text-gray-300">{track.artist}</div>
                       </div>
                       <div className="text-right">
@@ -262,7 +275,20 @@ function SpotifyDataTest() {
                         />
                       )}
                       <div className="flex-1">
-                        <div className="font-semibold text-white text-lg">{artist.name}</div>
+                        <div className="font-semibold text-white text-lg">
+                          {artist.name}
+                          {artist.external_urls?.spotify && (
+                            <a 
+                              href={artist.external_urls.spotify}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors ml-2"
+                            >
+                              <span className="mr-1">🎤</span>
+                              Spotify
+                            </a>
+                          )}
+                        </div>
                         <div className="text-gray-300 text-sm">
                           {artist.genres?.slice(0, 2).join(", ") || "No genres"}
                         </div>
@@ -392,7 +418,20 @@ function SpotifyDataTest() {
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-white text-lg truncate">{track.name}</div>
+                        <div className="font-semibold text-white text-lg truncate">
+                          {track.name}
+                          {track.external_urls?.spotify && (
+                            <a 
+                              href={track.external_urls.spotify}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-3 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs font-medium rounded-full transition-colors ml-2"
+                            >
+                              <span className="mr-1">🎵</span>
+                              Open in Spotify
+                            </a>
+                          )}
+                        </div>
                         <div className="text-[#b3b3b3] truncate">{track.artist}</div>
                         <div className="text-sm text-gray-400">{track.album.name}</div>
                       </div>
@@ -650,7 +689,20 @@ function SpotifyDataTest() {
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="text-white text-sm truncate">{track.track.name}</div>
+                        <div className="text-white text-sm truncate">
+                          {track.track.name}
+                          {track.track.external_urls?.spotify && (
+                            <a 
+                              href={track.track.external_urls.spotify}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors ml-2"
+                            >
+                              <span className="mr-1">🎵</span>
+                              Open
+                            </a>
+                          )}
+                        </div>
                         <div className="text-gray-300 text-xs truncate">{track.track.artists[0]?.name}</div>
                       </div>
                       <div className="text-gray-400 text-xs">
@@ -675,7 +727,20 @@ function SpotifyDataTest() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
                   {spotifyData.playlists.map((playlist: any) => (
                     <div key={playlist.id} className="p-4 bg-white/5 rounded-lg">
-                      <div className="text-white font-medium text-sm mb-2 truncate">{playlist.name}</div>
+                      <div className="text-white font-medium text-sm mb-2 truncate">
+                        {playlist.name}
+                        {playlist.external_urls?.spotify && (
+                          <a 
+                            href={playlist.external_urls.spotify}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors ml-2"
+                          >
+                            <span className="mr-1">📝</span>
+                            Open
+                          </a>
+                        )}
+                      </div>
                       <div className="flex justify-between text-xs text-gray-300">
                         <span>{playlist.tracks.total} tracks</span>
                         <span>{playlist.public ? 'Public' : 'Private'}</span>
@@ -709,7 +774,20 @@ function SpotifyDataTest() {
                           className="w-16 h-16 rounded-full mx-auto mb-2"
                         />
                       )}
-                      <div className="text-white text-sm truncate">{artist.name}</div>
+                      <div className="text-white text-sm truncate">
+                        {artist.name}
+                        {artist.external_urls?.spotify && (
+                          <a 
+                            href={artist.external_urls.spotify}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors mt-1"
+                          >
+                            <span className="mr-1">🎤</span>
+                            Spotify
+                          </a>
+                        )}
+                      </div>
                       <div className="text-xs text-gray-300">{artist.followers.total.toLocaleString()} followers</div>
                     </div>
                   ))}
@@ -771,7 +849,20 @@ function SpotifyDataTest() {
                     <h3 className="text-lg font-semibold text-white mb-2">Most Popular Artist</h3>
                     {spotifyData.artistAnalysis.mostPopularArtist && (
                       <div className="text-gray-300">
-                        <div className="font-bold text-white">{spotifyData.artistAnalysis.mostPopularArtist.name}</div>
+                        <div className="font-bold text-white">
+                          {spotifyData.artistAnalysis.mostPopularArtist.name}
+                          {spotifyData.artistAnalysis.mostPopularArtist.external_urls?.spotify && (
+                            <a 
+                              href={spotifyData.artistAnalysis.mostPopularArtist.external_urls.spotify}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors ml-2"
+                            >
+                              <span className="mr-1">🎤</span>
+                              Spotify
+                            </a>
+                          )}
+                        </div>
                         <div>Popularity: {spotifyData.artistAnalysis.mostPopularArtist.popularity}/100</div>
                       </div>
                     )}
@@ -780,7 +871,20 @@ function SpotifyDataTest() {
                     <h3 className="text-lg font-semibold text-white mb-2">Biggest Artist</h3>
                     {spotifyData.artistAnalysis.biggestArtist && (
                       <div className="text-gray-300">
-                        <div className="font-bold text-white">{spotifyData.artistAnalysis.biggestArtist.name}</div>
+                        <div className="font-bold text-white">
+                          {spotifyData.artistAnalysis.biggestArtist.name}
+                          {spotifyData.artistAnalysis.biggestArtist.external_urls?.spotify && (
+                            <a 
+                              href={spotifyData.artistAnalysis.biggestArtist.external_urls.spotify}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-2 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs rounded-full transition-colors ml-2"
+                            >
+                              <span className="mr-1">🎤</span>
+                              Spotify
+                            </a>
+                          )}
+                        </div>
                         <div>{spotifyData.artistAnalysis.biggestArtist.followers.total.toLocaleString()} followers</div>
                       </div>
                     )}
