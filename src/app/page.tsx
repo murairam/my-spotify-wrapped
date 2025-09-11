@@ -3,6 +3,7 @@
 "use client";
 import { useState } from "react";
 import { SessionProvider, useSession, signIn, signOut } from "next-auth/react";
+import PopularityBar from "@/components/PopularityBar";
 
 export default function Home() {
   return (
@@ -231,14 +232,12 @@ function SpotifyDataTest() {
                         </div>
                         <div className="text-gray-300 text-sm truncate">{track.artist}</div>
                       </div>
-                      <div className="text-right flex-shrink-0">
-                        <div className="text-xs sm:text-sm text-gray-400">Popularity</div>
-                        <div className="text-[#1DB954] font-bold text-sm sm:text-base" title="Spotify's algorithm score based on recent plays and trends">{track.popularity}/100</div>
-                        <div className="text-xs text-gray-500 hidden sm:block">
-                          {track.popularity >= 80 ? "🔥 Trending" :
-                           track.popularity >= 60 ? "📈 Popular" :
-                           track.popularity >= 40 ? "🎵 Moderate" : "💎 Niche"}
-                        </div>
+                      <div className="w-24 sm:w-32 flex-shrink-0">
+                        <PopularityBar
+                          popularity={track.popularity}
+                          label="Popularity"
+                          className="p-2"
+                        />
                       </div>
                     </div>
                   ))}
@@ -441,10 +440,16 @@ function SpotifyDataTest() {
                         <div className="text-[#b3b3b3] truncate text-sm">{track.artist}</div>
                         <div className="text-xs sm:text-sm text-gray-400 truncate">{track.album.name}</div>
                       </div>
-                      <div className="text-right flex-shrink-0">
+                      <div className="text-right space-y-2">
                         <div className="text-[#1DB954] font-bold text-lg sm:text-2xl">#{track.rank}</div>
                         <div className="text-gray-400 text-xs sm:text-sm">ranking</div>
-                        <div className="text-xs text-gray-500 hidden sm:block">Popularity: {track.popularity}/100</div>
+                        <div className="w-20 sm:w-24">
+                          <PopularityBar
+                            popularity={track.popularity}
+                            label=""
+                            className="p-1"
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
