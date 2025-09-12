@@ -19,13 +19,16 @@ export interface SpotifyTrack {
   id: string;
   name: string;
   artist: string;
+  artists?: Array<{ name: string }>;
   popularity: number;
   images?: Array<{ url: string }>;
   external_urls?: { spotify?: string };
   album?: {
     name: string;
     release_date: string;
+    images: Array<{ url: string; height?: number; width?: number }>;
   };
+  duration_ms?: number;
   rank?: number;
 }
 

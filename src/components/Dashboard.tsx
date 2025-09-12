@@ -50,20 +50,7 @@ interface MostPlayedSongs {
 
 
 
-interface RecentTrack {
-  track?: {
-    id: string;
-    name: string;
-    artists: Array<{ name: string }>;
-    album: {
-      name: string;
-      images: Array<{ url: string; height?: number; width?: number }>;
-    };
-    duration_ms: number;
-    external_urls?: { spotify: string };
-  };
-  played_at: string;
-}
+
 
 
 
@@ -613,7 +600,7 @@ export default function Dashboard() {
             {spotifyData?.recentTracks && (
               <div className="mt-6 sm:mt-8">
                 <RecentlyPlayedTimeline
-                  recentTracks={spotifyData?.recentTracks as unknown as RecentTrack[]}
+                  recentTracks={spotifyData.recentTracks}
                   isLoading={loading && !spotifyData}
                 />
               </div>

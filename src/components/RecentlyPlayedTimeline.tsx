@@ -9,13 +9,13 @@ interface RecentTrack {
   track?: {
     id: string;
     name: string;
-    artists: Array<{ name: string }>;
-    album: {
+    artists?: Array<{ name: string }>;
+    album?: {
       name: string;
       images: Array<{ url: string; height?: number; width?: number }>;
     };
-    duration_ms: number;
-    external_urls?: { spotify: string };
+    duration_ms?: number;
+    external_urls?: { spotify?: string };
   };
   played_at: string;
 }
@@ -56,21 +56,21 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
       }
 
       // Format duration
-      const minutes = Math.floor(track.duration_ms / 60000);
-      const seconds = Math.floor((track.duration_ms % 60000) / 1000);
+      const minutes = track.duration_ms ? Math.floor(track.duration_ms / 60000) : 0;
+      const seconds = track.duration_ms ? Math.floor((track.duration_ms % 60000) / 1000) : 0;
       const duration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
-      // Get album image
-      const albumImage = track.album.images.find(img => img.height && img.height >= 64) ||
-                        track.album.images[0] ||
-                        null;
+  // Get album image
+  const albumImage = track.album?.images?.find(img => img.height && img.height >= 64) ||
+        track.album?.images?.[0] ||
+        null;
 
       return {
         id: track.id || `track-${index}`,
         uniqueKey: `${track.id}-${item.played_at}-${index}`, // Unique key for React rendering
         name: track.name,
-        artists: track.artists.map(artist => artist.name).join(', '),
-        album: track.album.name,
+        artists: track.artists?.map(artist => artist.name).join(', ') || 'Unknown Artist',
+        album: track.album?.name || 'Unknown Album',
         duration,
         timeAgo,
         albumImage: albumImage?.url,
