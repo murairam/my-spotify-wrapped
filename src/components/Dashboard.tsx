@@ -13,7 +13,7 @@ import {
   FaPlay,
   FaCrown,
 } from "react-icons/fa";
-import { g9git add .useSpotifyData, useSpotifyError, useTimeRangeSpotifyData, SpotifyArtist } from "@/hooks/useSpotifyData";
+import { useSpotifyData, useSpotifyError, useTimeRangeSpotifyData, SpotifyArtist } from "@/hooks/useSpotifyData";
 import { ErrorDisplay } from "@/components/ErrorHandling";
 import { DashboardLoadingSkeleton, ButtonLoadingSpinner } from "@/components/LoadingSkeleton";
 import PopularityBar from "@/components/PopularityBar";
