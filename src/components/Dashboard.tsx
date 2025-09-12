@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
+import Image from 'next/image';
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { signOut } from "next-auth/react";
 // Replaced emojis with FontAwesome icons for Spotify design compliance
@@ -302,17 +302,14 @@ export default function Dashboard() {
           <div className="flex items-center justify-center space-x-2 mb-8">
             {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
             <span className="text-gray-200 text-xs sm:text-sm">Powered by</span>
-            <img
+            <Image
               src="/spotify-logo.svg"
               alt="Spotify"
+              width={96}
+              height={24}
               className="h-5 sm:h-6"
-              style={{
-                filter: 'brightness(0) saturate(100%) invert(100%)'
-              }}
-              onError={(e) => {
-                console.log('Header Spotify logo failed to load');
-                e.currentTarget.outerHTML = '<span class="text-[#1DB954] font-bold">Spotify</span>';
-              }}
+              style={{ filter: 'brightness(0) saturate(100%) invert(100%)' }}
+              // onError removed: next/image does not support onError for static imports
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
@@ -577,9 +574,11 @@ export default function Dashboard() {
                             <div key={track.id} className="bg-white/10 backdrop-blur-lg rounded-xl p-4 flex flex-col hover:bg-white/15 transition-all duration-300 border border-white/20 shadow-lg">
                               {/* Album Art */}
                               {track.images?.[0] && (
-                                <img
+                                <Image
                                   src={track.images[0].url}
                                   alt={`Album cover for ${track.name}`}
+                                  width={400}
+                                  height={400}
                                   className="w-full aspect-square object-cover rounded-lg mb-4 shadow-md"
                                 />
                               )}
@@ -652,9 +651,11 @@ export default function Dashboard() {
 
                             {/* Album Art (smaller) */}
                             {track.images?.[2] && (
-                              <img
+                              <Image
                                 src={track.images[2].url}
                                 alt={`Album cover for ${track.name}`}
+                                width={48}
+                                height={48}
                                 className="w-12 h-12 rounded-lg mr-4 object-cover shadow-sm"
                               />
                             )}

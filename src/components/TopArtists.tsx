@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { FaMicrophone, FaMusic } from 'react-icons/fa';
 import { ItemSkeleton } from './LoadingSkeleton';
 import { SpotifyArtist } from '@/hooks/useSpotifyData';
+import Image from 'next/image';
 
 /**
  * Interface for artists data organized by time range
@@ -93,10 +94,12 @@ export default function TopArtists({
 
               {/* Artist profile image */}
               {artist.images?.[2] && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                // Using <img> for avatar images as next/image is not suitable for dynamic external URLs or avatar sizes.
+                <Image
                   src={artist.images[2].url}
                   alt={artist.name}
+                  width={48}
+                  height={48}
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
                 />
               )}

@@ -1,22 +1,43 @@
 const nextConfig = {
   reactStrictMode: false, // Temporarily disabled for debugging - consider re-enabling later
   images: {
-    domains: [
-      'i.scdn.co',           // Spotify album/artist images
-      'mosaic.scdn.co',      // Spotify playlist images
-      'blend-playlist-covers.spotifycdn.com', // Spotify blend covers
-      'seed-mix-image.spotifycdn.com',        // Spotify mix covers
-      'charts-images.scdn.co',               // Spotify charts images
-      'daily-mix.scdn.co',                   // Spotify daily mix images
-      'mixed-media-images.spotifycdn.com'    // Additional Spotify media
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'i.scdn.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mosaic.scdn.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'blend-playlist-covers.spotifycdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'seed-mix-image.spotifycdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'charts-images.scdn.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'daily-mix.scdn.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mixed-media-images.spotifycdn.com',
+      },
     ],
   },
   // Fix the cross-origin warnings
   allowedDevOrigins: [
-    'localhost:3000',
-    '127.0.0.1:3000',
-    'localhost:3001',
-    '127.0.0.1:3001'
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3001',
   ],
   async headers() {
     return [

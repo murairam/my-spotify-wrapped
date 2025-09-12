@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { FaMusic } from 'react-icons/fa';
 import PopularityBar from './PopularityBar';
 import { ItemSkeleton } from './LoadingSkeleton';
+import Image from 'next/image';
 
 import { SpotifyTrack } from '@/hooks/useSpotifyData';
 
@@ -95,10 +96,12 @@ export default function TopTracks({
 
               {/* Track artwork */}
               {track.images?.[2] && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                // Using <img> for artwork images as next/image is not suitable for dynamic external URLs or artwork sizes.
+                <Image
                   src={track.images[2].url}
                   alt={track.name}
+                  width={48}
+                  height={48}
                   className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover flex-shrink-0"
                 />
               )}
