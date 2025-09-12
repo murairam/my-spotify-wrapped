@@ -1,4 +1,7 @@
+
+import { useState } from 'react';
 import { FaCrown, FaClock } from 'react-icons/fa';
+
 
 interface MusicTimelineProps {
   tracks: Array<{
@@ -8,15 +11,27 @@ interface MusicTimelineProps {
       release_date?: string;
     };
   }>;
+  tracksData?: {
+    short_term?: Array<{ id: string; name: string; album?: { release_date?: string } }>;
+    medium_term?: Array<{ id: string; name: string; album?: { release_date?: string } }>;
+    long_term?: Array<{ id: string; name: string; album?: { release_date?: string } }>;
+  };
 }
 
-export default function MusicTimeline({ tracks }: MusicTimelineProps) {
-  if (!tracks || tracks.length === 0) {
+
+
+export default function MusicTimeline({ tracks, tracksData }: MusicTimelineProps) {
+  const [selectedTimeRange, setSelectedTimeRange] = useState("long_term");
+
+  // Use selected time range data or fallback to props
+  const currentTracks = tracksData?.[selectedTimeRange as keyof NonNullable<typeof tracksData>] || tracks || [];
+
+  if (!currentTracks || currentTracks.length === 0) {
     return null;
   }
 
   // Process tracks into decade data
-  const decadeData = tracks.reduce((acc: Record<string, number>, track) => {
+  const decadeData = currentTracks.reduce((acc: Record<string, number>, track: { album?: { release_date?: string } }) => {
     const year = track.album?.release_date ? new Date(track.album.release_date).getFullYear() : null;
     if (year !== null && !isNaN(year)) {
       const decade = Math.floor(year / 10) * 10;
@@ -25,7 +40,7 @@ export default function MusicTimeline({ tracks }: MusicTimelineProps) {
     return acc;
   }, {});
 
-  const years = tracks.map((t): number | null => t.album?.release_date ? new Date(t.album.release_date).getFullYear() : null).filter((y): y is number => y !== null && !isNaN(y));
+  const years = currentTracks.map((t: { album?: { release_date?: string } }): number | null => t.album?.release_date ? new Date(t.album.release_date).getFullYear() : null).filter((y: number | null): y is number => y !== null && !isNaN(y));
   const oldestYear = years.length > 0 ? Math.min(...years) : 0;
   const newestYear = years.length > 0 ? Math.max(...years) : 0;
   const yearSpread = newestYear - oldestYear;
@@ -48,13 +63,24 @@ export default function MusicTimeline({ tracks }: MusicTimelineProps) {
   return (
     <div className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 backdrop-blur-lg p-6 lg:p-8 rounded-2xl border border-purple-500/20 shadow-2xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 space-y-3 sm:space-y-0">
         <div className="flex items-center">
           <FaClock className="text-3xl mr-3 text-purple-400" />
           <h2 className="text-2xl lg:text-3xl font-bold text-white">Musical Time Machine</h2>
         </div>
-        <div className="text-sm text-purple-200">
-          Spanning {yearSpread} years of music
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <select
+            className="bg-black/40 text-white text-sm px-3 py-2 rounded-lg border border-purple-600 focus:border-purple-400 focus:outline-none w-full sm:w-auto min-h-[44px] touch-manipulation"
+            value={selectedTimeRange}
+            onChange={(e) => setSelectedTimeRange(e.target.value)}
+          >
+            <option value="short_term">Last 4 Weeks</option>
+            <option value="medium_term">Last 6 Months</option>
+            <option value="long_term">~1 Year of Data</option>
+          </select>
+          <div className="text-sm text-purple-200">
+            Spanning {yearSpread} years of music
+          </div>
         </div>
       </div>
 

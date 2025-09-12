@@ -261,30 +261,40 @@ export default function Dashboard() {
   }, [spotifyData?.topGenres]);
 
   const musicTimelineComponent = useMemo(() => {
-    // Use longTerm data if available, else fallback to short_term/topTracks
-    const longTermTracks = longTerm.data?.topTracks || [];
-    const tracksData = longTermTracks.length > 0
-      ? longTermTracks.map((track: any) => ({
-          id: track.id,
-          name: track.name,
-          album: {
-            release_date: track.album?.release_date || new Date().toISOString()
-          }
-        }))
-      : (spotifyData?.allTracksData && spotifyData.allTracksData.length > 0
-        ? spotifyData.allTracksData
-        : spotifyData?.topTracks?.map((track: any) => ({
-            id: track.id,
-            name: track.name,
-            album: {
-              release_date: track.album?.release_date || new Date().toISOString()
-            }
-          })) || []);
+    // Prepare all time range data for timeline
+    const timelineTracksData = {
+      short_term: spotifyData?.topTracksByTimeRange?.short_term?.map((track: any) => ({
+        id: track.id,
+        name: track.name,
+        album: {
+          release_date: track.album?.release_date || new Date().toISOString()
+        }
+      })) || [],
+      medium_term: spotifyData?.topTracksByTimeRange?.medium_term?.map((track: any) => ({
+        id: track.id,
+        name: track.name,
+        album: {
+          release_date: track.album?.release_date || new Date().toISOString()
+        }
+      })) || [],
+      long_term: longTerm.data?.topTracks?.map((track: any) => ({
+        id: track.id,
+        name: track.name,
+        album: {
+          release_date: track.album?.release_date || new Date().toISOString()
+        }
+      })) || []
+    };
 
-    return tracksData.length > 0 ? (
-      <MusicTimeline tracks={tracksData} />
+    const hasAnyData = Object.values(timelineTracksData).some(tracks => tracks.length > 0);
+
+    return hasAnyData ? (
+      <MusicTimeline
+        tracks={timelineTracksData.long_term}
+        tracksData={timelineTracksData}
+      />
     ) : null;
-  }, [longTerm.data, spotifyData?.allTracksData, spotifyData?.topTracks]);
+  }, [spotifyData?.topTracksByTimeRange, longTerm.data]);
 
   return (
     <div className="min-h-screen bg-black">
