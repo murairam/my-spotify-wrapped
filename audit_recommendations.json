@@ -1,0 +1,110 @@
+[
+  {
+    "title": "[Priority 1] Fix OAuth 2.0 token expiration",
+    "labels": ["priority-1", "bug"],
+    "body": "### Description\nEnsure all API calls use valid access tokens and follow Spotify’s [authorization code flow](https://developer.spotify.com/documentation/web-api/tutorials/getting-started).\n\n### Why?\nPrevents unauthorized access and complies with Spotify’s API terms.\n\n### Acceptance Criteria\n- [ ] Tokens refresh automatically\n- [ ] Errors are handled gracefully\n- [ ] Tested with expired tokens\n\n### Audit Reference\n[Spotify Web API Docs](https://developer.spotify.com/documentation/web-api/tutorials/getting-started)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 1] Implement rate limiting and caching",
+    "labels": ["priority-1", "bug"],
+    "body": "### Description\nUse `ETag` headers and client-side caching (e.g., `localStorage` or `React Query`) to minimize API calls.\n\n### Why?\nAvoids hitting rate limits and improves performance.\n\n### Acceptance Criteria\n- [ ] Implement caching for API responses\n- [ ] Respect Spotify’s rate limits\n- [ ] Test with high-frequency requests\n\n### Audit Reference\n[Spotify API Calls](https://developer.spotify.com/documentation/web-api/concepts/api-calls)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 1] Add proper error handling for API failures",
+    "labels": ["priority-1", "bug"],
+    "body": "### Description\nDisplay user-friendly error messages and retry mechanisms for failed requests.\n\n### Why?\nEnhances robustness and user experience.\n\n### Acceptance Criteria\n- [ ] Show user-friendly error messages\n- [ ] Implement retry logic for failed requests\n- [ ] Log errors for debugging\n\n### Audit Reference\n[Spotify Web API Docs](https://developer.spotify.com/documentation/web-api)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 1] Run Knip to detect unused code",
+    "labels": ["priority-1", "maintenance"],
+    "body": "### Description\nInstall Knip (`npm install knip -D`) and run `npx knip` to identify unused files, dependencies, and exports.\n\n### Why?\nReduces bundle size and simplifies maintenance.\n\n### Acceptance Criteria\n- [ ] Remove unused code and dependencies\n- [ ] Update `package.json`\n- [ ] Verify build size reduction\n\n### Audit Reference\n[Knip Documentation](https://knip.dev/)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 1] Review and update privacy policy",
+    "labels": ["priority-1", "compliance"],
+    "body": "### Description\nEnsure compliance with GDPR and Spotify’s [Developer Policy](https://developer.spotify.com/policy).\n\n### Why?\nAvoids legal risks and ensures user trust.\n\n### Acceptance Criteria\n- [ ] Update privacy policy document\n- [ ] Add user consent for data collection\n- [ ] Allow users to disconnect Spotify accounts\n\n### Audit Reference\n[Spotify Developer Policy](https://developer.spotify.com/policy)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 1] Add ARIA labels and keyboard navigation",
+    "labels": ["priority-1", "accessibility"],
+    "body": "### Description\nEnsure all interactive elements (buttons, charts) are accessible via keyboard and screen readers.\n\n### Why?\nMeets [WCAG 2.1 AA](https://developer.spotify.com/documentation/accessibility) and Spotify’s accessibility guidelines.\n\n### Acceptance Criteria\n- [ ] Add ARIA labels to all interactive elements\n- [ ] Test keyboard navigation\n- [ ] Verify screen reader compatibility\n\n### Audit Reference\n[Spotify Accessibility Guidelines](https://developer.spotify.com/documentation/accessibility)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 1] Check color contrast and alt text",
+    "labels": ["priority-1", "accessibility"],
+    "body": "### Description\nUse tools like [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) to verify contrast ratios.\n\n### Why?\nMakes the app usable for visually impaired users.\n\n### Acceptance Criteria\n- [ ] Fix color contrast issues\n- [ ] Add alt text for images and charts\n- [ ] Test with accessibility tools\n\n### Audit Reference\n[WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/), [Spotify Accessibility Guidelines](https://developer.spotify.com/documentation/accessibility)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 2] Replace static chart with interactive visualization",
+    "labels": ["priority-2", "enhancement"],
+    "body": "### Description\nUse a combination of **line charts** (for trends) and **layered area charts** (for comparisons).\n\n### Why?\nMakes data trends clearer and more engaging.\n\n### Acceptance Criteria\n- [ ] Implement line/area charts using `chart.js`\n- [ ] Ensure charts are responsive\n- [ ] Test with sample data\n\n### Audit Reference\n[Data Visualization Best Practices](https://www.toptal.com/designers/data-visualization/data-visualization-best-practices)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 2] Add tooltips and filters to Musical Time Machine chart",
+    "labels": ["priority-2", "enhancement"],
+    "body": "### Description\nImplement hover tooltips (e.g., using `react-tooltip`) and time-range filters.\n\n### Why?\nLets users explore data dynamically.\n\n### Acceptance Criteria\n- [ ] Add tooltips for data points\n- [ ] Implement time-range filters\n- [ ] Test interactivity\n\n### Audit Reference\n[React Tooltip](https://www.npmjs.com/package/react-tooltip), [Data Visualization UX Best Practices](https://userpilot.com/blog/data-visualization-ux-best-practices/)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 2] Apply Spotify’s design system",
+    "labels": ["priority-2", "design"],
+    "body": "### Description\nUse Spotify’s [color palette](https://developer.spotify.com/documentation/design) and typography for consistency.\n\n### Why?\nAligns with Spotify’s branding and improves professionalism.\n\n### Acceptance Criteria\n- [ ] Update colors and fonts\n- [ ] Ensure visual consistency\n- [ ] Test with design tools\n\n### Audit Reference\n[Spotify Design Guidelines](https://developer.spotify.com/documentation/design)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 2] Implement storytelling elements in the chart",
+    "labels": ["priority-2", "enhancement"],
+    "body": "### Description\nAdd narrative text or annotations to guide users through the data.\n\n### Why?\nEnhances user comprehension and retention.\n\n### Acceptance Criteria\n- [ ] Add narrative annotations\n- [ ] Highlight key insights\n- [ ] Test user understanding\n\n### Audit Reference\n[Implementing Storytelling Dashboards](https://datacalculus.com/en/knowledge-hub/data-analytics/data-visualization/implementing-storytelling-dashboards/)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 2] Restructure dashboard layout for logical flow",
+    "labels": ["priority-2", "design"],
+    "body": "### Description\nGroup related metrics (e.g., 'Top Artists,' 'Listening Trends') into clear sections.\n\n### Why?\nReduces cognitive load and improves usability.\n\n### Acceptance Criteria\n- [ ] Organize metrics into sections\n- [ ] Improve visual hierarchy\n- [ ] Test user navigation\n\n### Audit Reference\n[Dashboard Design Principles](https://www.rib-software.com/en/blogs/bi-dashboard-design-principles-best-practices)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 3] Migrate to React Context API or Redux",
+    "labels": ["priority-3", "refactor"],
+    "body": "### Description\nCentralize state for user data, auth, and chart settings.\n\n### Why?\nReduces prop drilling and simplifies debugging.\n\n### Acceptance Criteria\n- [ ] Implement Context API or Redux\n- [ ] Migrate state to the new system\n- [ ] Test state management\n\n### Audit Reference\n[React Context API](https://reactjs.org/docs/context.html), [Redux Docs](https://redux.js.org/)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 3] Create an API service layer",
+    "labels": ["priority-3", "refactor"],
+    "body": "### Description\nAbstract Spotify API calls into a dedicated service (e.g., `src/services/spotify.ts`).\n\n### Why?\nImproves code organization and reusability.\n\n### Acceptance Criteria\n- [ ] Create API service layer\n- [ ] Migrate API calls to the service\n- [ ] Test API integration\n\n### Audit Reference\n[Spotify Web API Docs](https://developer.spotify.com/documentation/web-api)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 3] Convert key files to TypeScript",
+    "labels": ["priority-3", "refactor"],
+    "body": "### Description\nStart with API response types and chart data structures.\n\n### Why?\nCatches errors early and improves developer experience.\n\n### Acceptance Criteria\n- [ ] Convert 3-5 key files to TypeScript\n- [ ] Update `tsconfig.json`\n- [ ] Test type safety\n\n### Audit Reference\n[TypeScript Docs](https://www.typescriptlang.org/docs/)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 3] Memoize expensive components",
+    "labels": ["priority-3", "performance"],
+    "body": "### Description\nUse `React.memo` or `useMemo` for components rendering large datasets.\n\n### Why?\nReduces unnecessary re-renders.\n\n### Acceptance Criteria\n- [ ] Identify expensive components\n- [ ] Implement memoization\n- [ ] Test performance improvements\n\n### Audit Reference\n[React Memoization](https://reactjs.org/docs/react-api.html#reactmemo)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 4] Add animations with framer-motion",
+    "labels": ["priority-4", "enhancement"],
+    "body": "### Description\nUse `framer-motion` for smooth transitions between chart states.\n\n### Why?\nEnhances visual appeal.\n\n### Acceptance Criteria\n- [ ] Add animations to chart interactions\n- [ ] Test performance impact\n- [ ] Ensure smooth transitions\n\n### Audit Reference\n[Framer Motion Docs](https://www.framer.com/motion/)",
+    "assignee": "murairam"
+  },
+  {
+    "title": "[Priority 4] Implement user customization",
+    "labels": ["priority-4", "enhancement"],
+    "body": "### Description\nLet users toggle between light/dark mode or adjust chart colors.\n\n### Why?\nIncreases personalization and accessibility.\n\n### Acceptance Criteria\n- [ ] Add customization options\n- [ ] Save user preferences\n- [ ] Test customization\n\n### Audit Reference\n[Dark Mode in React](https://css-tricks.com/dark-modes-with-css/)",
+    "assignee": "murairam"
+  }
+]

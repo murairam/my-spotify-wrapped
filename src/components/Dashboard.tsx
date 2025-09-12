@@ -13,7 +13,7 @@ import {
   FaPlay,
   FaCrown,
 } from "react-icons/fa";
-import { useSpotifyError, useDebouncedSpotifyData, useTimeRangeData, SpotifyArtist } from "@/hooks/useSpotifyData";
+import { useSpotifyError, useSpotifyData, SpotifyArtist } from "@/hooks/useSpotifyData";
 import { ErrorDisplay } from "@/components/ErrorHandling";
 import { DashboardLoadingSkeleton, ButtonLoadingSpinner } from "@/components/LoadingSkeleton";
 import PopularityBar from "@/components/PopularityBar";
@@ -48,27 +48,46 @@ interface MostPlayedSongs {
   long_term?: MostPlayedTrack[];
 }
 
+
+
+interface RecentTrack {
+  track?: {
+    id: string;
+    name: string;
+    artists: Array<{ name: string }>;
+    album: {
+      name: string;
+      images: Array<{ url: string; height?: number; width?: number }>;
+    };
+    duration_ms: number;
+    external_urls?: { spotify: string };
+  };
+  played_at: string;
+}
+
+
+
 export default function Dashboard() {
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
-  const [selectedTimeRange, setSelectedTimeRange] = useState('short_term');
+  // Time range selection removed to reduce API calls
   const fetchStartTime = useRef(0);
   const renderStartTime = useRef(0);
 
   // Add useRef for timeout cleanup
   const debounceTimeoutRef = useRef<NodeJS.Timeout>();
-  const timeRangeTimeoutRef = useRef<NodeJS.Timeout>();
+  // Time range timeout ref removed
 
   // Data fetching hooks
   const {
     data: spotifyData,
     isLoading,
-    isFetching,
-    isRefetching,
-    refetch: originalRefetch,
-    error
-  } = useDebouncedSpotifyData({ enabled: hasAttemptedLoad });
-
-  const timeRangeData = useTimeRangeData();
+    error,
+    refetch
+  } = useSpotifyData({
+    enabled: hasAttemptedLoad,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false
+  });
   const displayError = useSpotifyError(error);
 
   // Debounced refetch with proper cleanup
@@ -77,32 +96,13 @@ export default function Dashboard() {
       clearTimeout(debounceTimeoutRef.current);
     }
     debounceTimeoutRef.current = setTimeout(() => {
-      originalRefetch();
+      refetch();
     }, 500);
-  }, [originalRefetch]);
+  }, [refetch]);
 
-  // Debounced time range change with proper cleanup and equality check
-  const debouncedTimeRangeChange = useCallback((newTimeRange: string) => {
-    // Prevent unnecessary state updates
-    if (newTimeRange === selectedTimeRange) return;
+  // Time range change logic removed to reduce API calls
 
-    if (timeRangeTimeoutRef.current) {
-      clearTimeout(timeRangeTimeoutRef.current);
-    }
-    timeRangeTimeoutRef.current = setTimeout(() => {
-      setSelectedTimeRange(newTimeRange);
-    }, 300);
-  }, [selectedTimeRange]);
-
-  // Sync with time range data when available - FIXED: proper dependencies
-  useEffect(() => {
-    if (timeRangeData.data && Object.keys(timeRangeData.data).length > 0) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔄 Time range data updated, triggering refresh...');
-      }
-      debouncedRefetch();
-    }
-  }, [timeRangeData.data, debouncedRefetch]);
+  // Time range data removed to reduce API calls - focusing on current listening habits
 
   // Handle manual fetch trigger with conditional performance logging
   const handleFetchData = useCallback(() => {
@@ -136,9 +136,6 @@ export default function Dashboard() {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
       }
-      if (timeRangeTimeoutRef.current) {
-        clearTimeout(timeRangeTimeoutRef.current);
-      }
       fetchStartTime.current = 0;
       renderStartTime.current = 0;
       lastRefreshTime.current = 0;
@@ -149,7 +146,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return;
 
-    if (!isLoading && !isFetching && spotifyData && fetchStartTime.current > 0) {
+    if (!isLoading && spotifyData && fetchStartTime.current > 0) {
       // Clear console and show only audio features debug
       console.clear();
       console.log('%c� AUDIO FEATURES DEBUG REPORT', 'background: #1DB954; color: white; font-size: 16px; padding: 8px; border-radius: 4px;');
@@ -197,7 +194,7 @@ export default function Dashboard() {
 
       fetchStartTime.current = 0;
     }
-  }, [isLoading, isFetching, spotifyData]);
+  }, [isLoading, spotifyData]);
 
   // Performance monitoring for rendering (development only) - FIXED: added dependency array
   useEffect(() => {
@@ -216,7 +213,7 @@ export default function Dashboard() {
   }, [spotifyData]); // FIXED: Added missing dependency array
 
   // Loading state includes initial loading and refetching
-  const loading = isLoading || isFetching || isRefetching;
+  const loading = isLoading;
 
   // Memoized components to prevent unnecessary re-renders
   const topArtistsComponent = useMemo(() => (
@@ -437,7 +434,9 @@ export default function Dashboard() {
             </div>
 
             {/* NEW: Most Played Songs */}
-            {spotifyData.mostPlayedSongs && (
+            {spotifyData.mostPlayedSongs && (() => {
+              const mostPlayedSongs = spotifyData.mostPlayedSongs as MostPlayedSongs | undefined;
+              return mostPlayedSongs && (
               <div className="bg-[#191414] p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-800 shadow-xl mt-6 sm:mt-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-3 sm:space-y-0">
                   <div className="flex items-center">
@@ -449,36 +448,24 @@ export default function Dashboard() {
                       <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center">
                         Top 10 Tracks
                         <span className="ml-3 px-3 py-1 bg-[#1DB954] text-white rounded-full text-xs font-medium">
-                          {selectedTimeRange === 'short_term' ? 'Last 4 Weeks' :
-                           selectedTimeRange === 'medium_term' ? 'Last 6 Months' :
-                           '~1 Year'}
+                          Current Favorites
                         </span>
                       </h2>
                       <p className="text-gray-300 text-sm mt-1">Your most played tracks from Spotify</p>
                     </div>
                   </div>
 
-                  {/* Time Range Selector */}
+                  {/* Time Range Message */}
                   <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
-                    {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
-                    <span className="text-gray-200 text-sm">Period:</span>
-                    <select
-                      value={selectedTimeRange}
-                      onChange={(e) => debouncedTimeRangeChange(e.target.value)}
-                      className="bg-[#2a2a2a] text-white px-3 sm:px-4 py-2 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none text-sm flex-1 sm:flex-none min-h-[44px] touch-manipulation"
-                    >
-                      {/* Replaced emojis with text for cleaner design */}
-                      <option value="short_term">Last 4 Weeks</option>
-                      <option value="medium_term">Last 6 Months</option>
-                      <option value="long_term">~1 Year of Data</option>
-                    </select>
+                    <div className="bg-[#2a2a2a] text-gray-300 px-3 sm:px-4 py-2 rounded-lg border border-gray-600 text-sm flex-1 sm:flex-none">
+                      📊 Multiple time ranges coming soon - focusing on current listening habits
+                    </div>
                   </div>
                 </div>
 
-                {/* Time Range Info */}
+                {/* Current Tracks Info */}
                 {(() => {
-                  const mostPlayedSongs = spotifyData.mostPlayedSongs as MostPlayedSongs | undefined;
-                  const currentTracks = mostPlayedSongs?.[selectedTimeRange as keyof MostPlayedSongs] || [];
+                  const currentTracks = spotifyData.topTracks || [];
                   return currentTracks.length > 0 ? (
                     <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                       <p className="text-blue-400 text-xs sm:text-sm flex items-start sm:items-center">
@@ -486,7 +473,7 @@ export default function Dashboard() {
                         <FaChartBar className="mr-2 mt-0.5 sm:mt-0" />
                         <span>
                           <strong>
-                            Period: {currentTracks[0]?.periodDescription || 'Unknown'}
+                            Current Listening Habits
                           </strong>
                           <br className="sm:hidden" />
                           <span className="sm:ml-2">Your actual Spotify top tracks rankings for this period</span>
@@ -498,8 +485,7 @@ export default function Dashboard() {
 
                 <div className="space-y-6">
                   {(() => {
-                    const mostPlayedSongs = spotifyData.mostPlayedSongs as MostPlayedSongs | undefined;
-                    const currentTracks = mostPlayedSongs?.[selectedTimeRange as keyof MostPlayedSongs] || [];
+                    const currentTracks = spotifyData.topTracks || [];
 
                     if (currentTracks.length === 0) return null;
 
@@ -523,13 +509,7 @@ export default function Dashboard() {
                                 <h3 className="font-bold text-white text-lg leading-tight">{track.name}</h3>
                                 <p className="text-gray-200 text-sm font-medium">{track.artist}</p>
                                 <div className="flex items-center justify-between">
-                                  <p className="text-gray-300 text-xs">{track.album?.name}</p>
-                                  {track.duration_ms && (
-                                    <span className="text-gray-400 text-xs">
-                                      {Math.floor(track.duration_ms / 60000)}:
-                                      {Math.floor((track.duration_ms % 60000) / 1000).toString().padStart(2, '0')}
-                                    </span>
-                                  )}
+                                  <p className="text-gray-300 text-xs">{typeof track.album === 'string' ? track.album : track.album?.name || 'Unknown Album'}</p>
                                 </div>
 
 
@@ -636,15 +616,14 @@ export default function Dashboard() {
                   })()}
                 </div>
               </div>
-            )}
-
-
+              );
+            })()}
 
             {/* Recently Played Timeline */}
             {spotifyData?.recentTracks && (
               <div className="mt-6 sm:mt-8">
                 <RecentlyPlayedTimeline
-                  recentTracks={spotifyData?.recentTracks as any}
+                  recentTracks={spotifyData?.recentTracks as unknown as RecentTrack[]}
                   isLoading={loading && !spotifyData}
                 />
               </div>
@@ -669,83 +648,7 @@ export default function Dashboard() {
 
 
 
-            {/* Raw Data Section */}
-            <details className="mt-6 sm:mt-8 bg-black/20 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-white/10">
-              <summary className="cursor-pointer font-semibold text-white hover:text-gray-300 text-sm sm:text-base min-h-[44px] flex items-center touch-manipulation">🔍 Raw Data (for debugging)</summary>
 
-              {/* Audio Features Debugging */}
-              <div className="mt-4 space-y-4">
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-                  <h4 className="text-blue-400 font-semibold text-sm mb-2">🎵 Audio Features Debug</h4>
-                  <div className="text-xs text-gray-300 space-y-1">
-                    <p><strong>audioFeatures available:</strong> {(spotifyData as any)?.audioFeatures ? 'YES' : 'NO'}</p>
-                    <p><strong>topTracks available:</strong> {(spotifyData as any)?.topTracks ? `YES (${Array.isArray((spotifyData as any).topTracks) ? (spotifyData as any).topTracks.length : 0} tracks)` : 'NO'}</p>
-                    <p><strong>recentTracks available:</strong> {(spotifyData as any)?.recentTracks ? `YES (${Array.isArray((spotifyData as any).recentTracks) ? (spotifyData as any).recentTracks.length : 0} tracks)` : 'NO'}</p>
-
-                    {/* Check if mostPlayedSongs tracks have audio features */}
-                    {(() => {
-                      const mostPlayedSongs = spotifyData?.mostPlayedSongs as any;
-                      const currentTracks = mostPlayedSongs?.[selectedTimeRange] || [];
-                      const tracksWithAudio = currentTracks.filter((track: any) =>
-                        track.audio_features ||
-                        track.energy !== undefined ||
-                        track.danceability !== undefined ||
-                        track.valence !== undefined ||
-                        track.acousticness !== undefined
-                      );
-
-                      return (
-                        <>
-                          <p><strong>mostPlayedSongs ({selectedTimeRange}) tracks:</strong> {currentTracks.length}</p>
-                          <p><strong>Tracks with audio features:</strong> {tracksWithAudio.length}</p>
-
-                          {tracksWithAudio.length > 0 && (
-                            <div className="mt-2 bg-black/30 p-2 rounded text-xs">
-                              <p><strong>Sample track audio features:</strong></p>
-                              <pre className="text-green-400 mt-1">
-                                {JSON.stringify({
-                                  name: tracksWithAudio[0]?.name,
-                                  audio_features: tracksWithAudio[0]?.audio_features,
-                                  energy: tracksWithAudio[0]?.energy,
-                                  danceability: tracksWithAudio[0]?.danceability,
-                                  valence: tracksWithAudio[0]?.valence,
-                                  acousticness: tracksWithAudio[0]?.acousticness,
-                                  tempo: tracksWithAudio[0]?.tempo
-                                }, null, 2)}
-                              </pre>
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                {/* Search for audio_features in data */}
-                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                  <h4 className="text-green-400 font-semibold text-sm mb-2">🔍 Audio Data Search</h4>
-                  <div className="text-xs text-gray-300">
-                    {(() => {
-                      const dataStr = JSON.stringify(spotifyData);
-                      const searches = ['audio_features', 'energy', 'danceability', 'valence', 'acousticness', 'tempo'];
-
-                      return searches.map(term => {
-                        const count = (dataStr.match(new RegExp(`"${term}"`, 'g')) || []).length;
-                        return (
-                          <p key={term} className={count > 0 ? 'text-green-400' : 'text-red-400'}>
-                            <strong>{term}:</strong> {count > 0 ? `Found ${count} times` : 'Not found'}
-                          </p>
-                        );
-                      });
-                    })()}
-                  </div>
-                </div>
-              </div>
-
-              <pre className="mt-4 text-xs overflow-auto text-gray-300 bg-black/30 p-3 sm:p-4 rounded-lg max-h-64 sm:max-h-96">
-                {JSON.stringify(spotifyData, null, 2)}
-              </pre>
-            </details>
           </div>
         )}
       </div>

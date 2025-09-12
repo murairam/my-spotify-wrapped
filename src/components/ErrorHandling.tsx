@@ -190,11 +190,19 @@ export function parseSpotifyError(error: unknown): SpotifyError {
         };
 
       case 429:
-        return {
+        // Check if we have specific wait time information from our API
+        const errorWithData = error as { response?: { data?: Record<string, unknown> }; data?: Record<string, unknown> };
+        const responseData = errorWithData?.response?.data || errorWithData?.data;
+        const waitMinutes = responseData?.waitMinutes as number | undefined;
+        const waitMessage = waitMinutes ? `Please wait ${waitMinutes} minutes before trying again.` : 'Please wait before trying again.';        return {
           type: 'rate_limit',
-          message: 'Too Many Requests',
-          details: 'Spotify API rate limit exceeded. Please wait before trying again.',
-          suggestions: [
+          message: 'Spotify API Rate Limit Exceeded',
+          details: `Too many requests to Spotify API. ${waitMessage}`,
+          suggestions: waitMinutes ? [
+            `Wait ${waitMinutes} minutes before retrying`,
+            'This is normal when testing frequently',
+            'The limit will reset automatically'
+          ] : [
             'Wait 30-60 seconds before retrying',
             'Try again in a few minutes',
             'Avoid repeatedly clicking the load button'
