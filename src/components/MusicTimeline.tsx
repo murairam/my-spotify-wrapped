@@ -1,27 +1,33 @@
-import { FaCrown } from 'react-icons/fa';
+import { FaCrown, FaClock } from 'react-icons/fa';
 
 interface MusicTimelineProps {
   tracks: Array<{
     id: string;
     name: string;
-    album: {
-      release_date: string;
+    album?: {
+      release_date?: string;
     };
   }>;
 }
 
 export default function MusicTimeline({ tracks }: MusicTimelineProps) {
+  if (!tracks || tracks.length === 0) {
+    return null;
+  }
+
   // Process tracks into decade data
   const decadeData = tracks.reduce((acc: Record<string, number>, track) => {
-    const year = new Date(track.album.release_date).getFullYear();
-    const decade = Math.floor(year / 10) * 10;
-    acc[`${decade}s`] = (acc[`${decade}s`] || 0) + 1;
+    const year = track.album?.release_date ? new Date(track.album.release_date).getFullYear() : null;
+    if (year !== null && !isNaN(year)) {
+      const decade = Math.floor(year / 10) * 10;
+      acc[`${decade}s`] = (acc[`${decade}s`] || 0) + 1;
+    }
     return acc;
   }, {});
 
-  const years = tracks.map(t => new Date(t.album.release_date).getFullYear()).filter(y => !isNaN(y));
-  const oldestYear = Math.min(...years);
-  const newestYear = Math.max(...years);
+  const years = tracks.map((t): number | null => t.album?.release_date ? new Date(t.album.release_date).getFullYear() : null).filter((y): y is number => y !== null && !isNaN(y));
+  const oldestYear = years.length > 0 ? Math.min(...years) : 0;
+  const newestYear = years.length > 0 ? Math.max(...years) : 0;
   const yearSpread = newestYear - oldestYear;
 
   // Replaced emojis with clean text for Spotify design compliance
@@ -44,7 +50,7 @@ export default function MusicTimeline({ tracks }: MusicTimelineProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center">
-          <span className="text-3xl mr-3">🕰️</span>
+          <FaClock className="text-3xl mr-3 text-purple-400" />
           <h2 className="text-2xl lg:text-3xl font-bold text-white">Musical Time Machine</h2>
         </div>
         <div className="text-sm text-purple-200">
@@ -56,9 +62,11 @@ export default function MusicTimeline({ tracks }: MusicTimelineProps) {
       <div className="space-y-4 mb-6">
         {Object.entries(decadeData)
           .sort(([a], [b]) => b.localeCompare(a)) // Most recent first
-          .map(([decade, count], index) => {
-            const percentage = (count / Math.max(...Object.values(decadeData))) * 100;
-            const isTopDecade = count === Math.max(...Object.values(decadeData));
+          .map(([decade, countRaw], index) => {
+            const count = Number(countRaw);
+            const maxCount = Math.max(...Object.values(decadeData).map(Number));
+            const percentage = (count / maxCount) * 100;
+            const isTopDecade = count === maxCount;
 
             return (
               <div key={decade} className="group">
