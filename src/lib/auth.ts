@@ -75,12 +75,16 @@ export const authOptions = {
       return await refreshAccessToken(token);
     },
     async session({ session, token }: any) {
-      console.log("Session callback - Token:", token);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Session callback - Token:", token);
+      }
       // Send properties to the client
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
       session.error = token.error;
-      console.log("Session callback - Session:", session);
+      if (process.env.NODE_ENV === 'development') {
+        console.log("Session callback - Session:", session);
+      }
       return session;
     },
   },

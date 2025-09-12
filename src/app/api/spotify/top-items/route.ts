@@ -69,7 +69,9 @@ export async function GET(request: Request) {
     }
 
     // Default: fetch ALL time ranges (main change)
-    console.log('Loading comprehensive data for all time ranges...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Loading comprehensive data for all time ranges...');
+    }
     const [userProfile, recentlyPlayed, ...allTimeRangeData] = await Promise.all([
       spotifyApi.getMe(),
       spotifyApi.getMyRecentlyPlayedTracks({ limit: 50 }),
@@ -193,7 +195,9 @@ export async function GET(request: Request) {
       socialMetrics
     });
   } catch (error) {
-    console.error("Error fetching comprehensive Spotify data:", error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error fetching comprehensive Spotify data:", error);
+    }
     return NextResponse.json({ error: "Failed to fetch Spotify data", details: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
   }
 }

@@ -128,12 +128,18 @@ export interface SpotifyData {
 const logPerformanceMetrics = (operation: string, startTime: number, endTime: number, dataSize?: number) => {
   const duration = endTime - startTime;
   console.group(`🎵 Spotify API Performance - ${operation}`);
-  console.log(`⏱️ Duration: ${duration.toFixed(2)}ms`);
-  if (dataSize !== undefined) {
-    console.log(`📦 Data size: ${dataSize} items`);
-    console.log(`⚡ Throughput: ${(dataSize / duration * 1000).toFixed(2)} items/sec`);
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`⏱️ Duration: ${duration.toFixed(2)}ms`);
   }
-  console.log(`🕒 Timestamp: ${new Date(endTime).toISOString()}`);
+  if (dataSize !== undefined) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📦 Data size: ${dataSize} items`);
+      console.log(`⚡ Throughput: ${(dataSize / duration * 1000).toFixed(2)} items/sec`);
+    }
+  }
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🕒 Timestamp: ${new Date(endTime).toISOString()}`);
+  }
   console.groupEnd();
 };
 
@@ -380,7 +386,9 @@ export function useDebouncedSpotifyData(
   // Create debounced refetch function
   const debouncedRefetch = useMemo(
     () => debounce(() => {
-      console.log('🔄 Debounced refetch triggered');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Debounced refetch triggered');
+      }
       query.refetch();
     }, debounceDelay),
     [query, debounceDelay]

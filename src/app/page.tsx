@@ -49,7 +49,9 @@ function Content() {
                 filter: 'brightness(0) saturate(100%) invert(100%)'
               }}
               onError={() => {
-                console.log('Spotify logo failed to load, using fallback');
+                if (process.env.NODE_ENV === 'development') {
+                  console.log('Spotify logo failed to load, using fallback');
+                }
               }}
             />
           </div>

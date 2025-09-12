@@ -116,7 +116,9 @@ export default function Dashboard() {
   const handleFetchData = useCallback(() => {
     if (process.env.NODE_ENV === 'development') {
       fetchStartTime.current = performance.now();
-      console.log('🚀 Starting data fetch...');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚀 Starting data fetch...');
+      }
     }
 
     if (!hasAttemptedLoad) {
@@ -134,7 +136,9 @@ export default function Dashboard() {
       lastRefreshTime.current = now;
       handleFetchData();
     } else if (process.env.NODE_ENV === 'development') {
-      console.log('🚫 Refresh throttled - please wait');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚫 Refresh throttled - please wait');
+      }
     }
   }, [handleFetchData]);
 
@@ -156,8 +160,10 @@ export default function Dashboard() {
 
     if (!isLoading && spotifyData && fetchStartTime.current > 0) {
       // Clear console and show only audio features debug
-      console.clear();
-      console.log('%c� AUDIO FEATURES DEBUG REPORT', 'background: #1DB954; color: white; font-size: 16px; padding: 8px; border-radius: 4px;');
+      if (process.env.NODE_ENV === 'development') {
+        console.clear();
+        console.log('%c� AUDIO FEATURES DEBUG REPORT', 'background: #1DB954; color: white; font-size: 16px; padding: 8px; border-radius: 4px;');
+      }
 
       // Check mostPlayedSongs for audio features
       const mostPlayedSongs = spotifyData.mostPlayedSongs as any;
@@ -178,27 +184,33 @@ export default function Dashboard() {
           totalTracks += tracks.length;
           totalTracksWithAudio += tracksWithAudio.length;
 
-          console.log(`%c${timeRange.toUpperCase()}:`, 'color: #1DB954; font-weight: bold;',
-            `${tracksWithAudio.length}/${tracks.length} tracks have audio features`);
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`%c${timeRange.toUpperCase()}:`, 'color: #1DB954; font-weight: bold;',
+              `${tracksWithAudio.length}/${tracks.length} tracks have audio features`);
+          }
 
           if (tracksWithAudio.length > 0 && tracks.length > 0) {
             const sampleTrack = tracksWithAudio[0];
-            console.log(`%cSample: "${sampleTrack?.name}"`, 'color: #1ed760;', {
-              audio_features: sampleTrack?.audio_features ? '✅ Present' : '❌ Missing',
-              energy: sampleTrack?.energy ?? 'N/A',
-              danceability: sampleTrack?.danceability ?? 'N/A',
-              valence: sampleTrack?.valence ?? 'N/A',
-              acousticness: sampleTrack?.acousticness ?? 'N/A',
-              tempo: sampleTrack?.tempo ?? 'N/A'
-            });
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`%cSample: "${sampleTrack?.name}"`, 'color: #1ed760;', {
+                audio_features: sampleTrack?.audio_features ? '✅ Present' : '❌ Missing',
+                energy: sampleTrack?.energy ?? 'N/A',
+                danceability: sampleTrack?.danceability ?? 'N/A',
+                valence: sampleTrack?.valence ?? 'N/A',
+                acousticness: sampleTrack?.acousticness ?? 'N/A',
+                tempo: sampleTrack?.tempo ?? 'N/A'
+              });
+            }
           }
         });
       }
 
       // Summary
       const percentage = totalTracks > 0 ? ((totalTracksWithAudio / totalTracks) * 100).toFixed(1) : '0';
-      console.log(`%c📊 SUMMARY: ${totalTracksWithAudio}/${totalTracks} tracks (${percentage}%) have audio features`,
-        totalTracksWithAudio > 0 ? 'background: green; color: white; padding: 4px;' : 'background: red; color: white; padding: 4px;');
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`%c📊 SUMMARY: ${totalTracksWithAudio}/${totalTracks} tracks (${percentage}%) have audio features`,
+          totalTracksWithAudio > 0 ? 'background: green; color: white; padding: 4px;' : 'background: red; color: white; padding: 4px;');
+      }
 
       fetchStartTime.current = 0;
     }
@@ -215,7 +227,9 @@ export default function Dashboard() {
     if (spotifyData && renderStartTime.current > 0) {
       const renderEndTime = performance.now();
       const renderDuration = renderEndTime - renderStartTime.current;
-      console.log(`🎨 UI render time: ${renderDuration.toFixed(2)}ms`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🎨 UI render time: ${renderDuration.toFixed(2)}ms`);
+      }
       renderStartTime.current = 0;
     }
   }, [spotifyData]); // FIXED: Added missing dependency array

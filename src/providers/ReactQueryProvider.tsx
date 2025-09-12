@@ -10,7 +10,9 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // Performance monitoring
 const logQueryPerformance = (queryKey: string, duration: number) => {
-  console.log(`🚀 Query Performance - ${queryKey}: ${duration.toFixed(2)}ms`);
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🚀 Query Performance - ${queryKey}: ${duration.toFixed(2)}ms`);
+  }
 };
 
 // Create a client with optimized settings for the Spotify API
