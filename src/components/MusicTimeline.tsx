@@ -4,30 +4,40 @@ import { FaCrown, FaClock } from 'react-icons/fa';
 
 
 interface MusicTimelineProps {
-  tracks: Array<{
-    id: string;
-    name: string;
-    album?: {
-      release_date?: string;
-    };
-  }>;
   tracksData?: {
-    short_term?: Array<{ id: string; name: string; album?: { release_date?: string } }>;
-    medium_term?: Array<{ id: string; name: string; album?: { release_date?: string } }>;
-    long_term?: Array<{ id: string; name: string; album?: { release_date?: string } }>;
+    short_term?: Array<{id: string; name: string; album?: {name: string; release_date?: string; images?: Array<{url: string}>}}>
+    medium_term?: Array<{id: string; name: string; album?: {name: string; release_date?: string; images?: Array<{url: string}>}}>
+    long_term?: Array<{id: string; name: string; album?: {name: string; release_date?: string; images?: Array<{url: string}>}}>
   };
+  isLoading?: boolean;
 }
 
 
 
-export default function MusicTimeline({ tracks, tracksData }: MusicTimelineProps) {
-  const [selectedTimeRange, setSelectedTimeRange] = useState("long_term");
 
-  // Use selected time range data or fallback to props
-  const currentTracks = tracksData?.[selectedTimeRange as keyof NonNullable<typeof tracksData>] || tracks || [];
+export default function MusicTimeline({ tracksData, isLoading = false }: MusicTimelineProps) {
+  const [selectedTimeRange, setSelectedTimeRange] = useState<'short_term' | 'medium_term' | 'long_term'>('long_term');
+
+  // Get current tracks based on selection, with fallbacks
+  const currentTracks = (() => {
+    if (!tracksData) return [];
+    return tracksData[selectedTimeRange] ||
+           tracksData.long_term ||
+           tracksData.medium_term ||
+           tracksData.short_term ||
+           [];
+  })();
+
+  if (isLoading) {
+    return <div className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 backdrop-blur-lg p-6 lg:p-8 rounded-2xl border border-purple-500/20 shadow-2xl">
+      <div className="animate-pulse">Loading timeline...</div>
+    </div>;
+  }
 
   if (!currentTracks || currentTracks.length === 0) {
-    return null;
+    return <div className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 backdrop-blur-lg p-6 lg:p-8 rounded-2xl border border-purple-500/20 shadow-2xl">
+      <div className="text-center text-white">No timeline data available for this time range.</div>
+    </div>;
   }
 
   // Process tracks into decade data
@@ -70,16 +80,16 @@ export default function MusicTimeline({ tracks, tracksData }: MusicTimelineProps
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <select
-            className="bg-black/40 text-white text-sm px-3 py-2 rounded-lg border border-purple-600 focus:border-purple-400 focus:outline-none w-full sm:w-auto min-h-[44px] touch-manipulation"
+            className="bg-black/40 text-white text-sm px-3 py-2 rounded-lg border border-purple-600 focus:border-purple-400 focus:outline-none w-full sm:w-auto min-h-[44px]"
             value={selectedTimeRange}
-            onChange={(e) => setSelectedTimeRange(e.target.value)}
+            onChange={(e) => setSelectedTimeRange(e.target.value as 'short_term' | 'medium_term' | 'long_term')}
           >
-            <option value="short_term">Last 4 Weeks</option>
-            <option value="medium_term">Last 6 Months</option>
             <option value="long_term">~1 Year of Data</option>
+            <option value="medium_term">Last 6 Months</option>
+            <option value="short_term">Last 4 Weeks</option>
           </select>
           <div className="text-sm text-purple-200">
-            Spanning {yearSpread} years of music
+            {currentTracks.length} tracks • Spanning {yearSpread} years
           </div>
         </div>
       </div>

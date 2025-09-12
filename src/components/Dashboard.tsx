@@ -13,7 +13,7 @@ import {
   FaPlay,
   FaCrown,
 } from "react-icons/fa";
-import { useSpotifyData, useSpotifyError, useTimeRangeSpotifyData, SpotifyArtist } from "@/hooks/useSpotifyData";
+import { useSpotifyData, useSpotifyError, SpotifyArtist } from "@/hooks/useSpotifyData";
 import { ErrorDisplay } from "@/components/ErrorHandling";
 import { DashboardLoadingSkeleton, ButtonLoadingSpinner } from "@/components/LoadingSkeleton";
 import PopularityBar from "@/components/PopularityBar";
@@ -77,13 +77,7 @@ export default function Dashboard() {
   });
   const displayError = useSpotifyError(error);
 
-  // Progressive time range loading (must come after spotifyData is defined)
-  const { longTerm } = useTimeRangeSpotifyData();
-  useEffect(() => {
-    if (spotifyData && !longTerm.data) {
-      longTerm.refetch();
-    }
-  }, [spotifyData, longTerm]);
+
 
   // Debounced refetch with proper cleanup
   const debouncedRefetch = useCallback(() => {
@@ -261,40 +255,22 @@ export default function Dashboard() {
   }, [spotifyData?.topGenres]);
 
   const musicTimelineComponent = useMemo(() => {
-    // Prepare all time range data for timeline
-    const timelineTracksData = {
-      short_term: spotifyData?.topTracksByTimeRange?.short_term?.map((track: any) => ({
-        id: track.id,
-        name: track.name,
-        album: {
-          release_date: track.album?.release_date || new Date().toISOString()
-        }
-      })) || [],
-      medium_term: spotifyData?.topTracksByTimeRange?.medium_term?.map((track: any) => ({
-        id: track.id,
-        name: track.name,
-        album: {
-          release_date: track.album?.release_date || new Date().toISOString()
-        }
-      })) || [],
-      long_term: longTerm.data?.topTracks?.map((track: any) => ({
-        id: track.id,
-        name: track.name,
-        album: {
-          release_date: track.album?.release_date || new Date().toISOString()
-        }
-      })) || []
-    };
+    // Check if we have any time range data for timeline
+    const hasTimeRangeData = spotifyData?.topTracksByTimeRange && (
+      spotifyData.topTracksByTimeRange.long_term?.length > 0 ||
+      spotifyData.topTracksByTimeRange.medium_term?.length > 0 ||
+      spotifyData.topTracksByTimeRange.short_term?.length > 0
+    );
 
-    const hasAnyData = Object.values(timelineTracksData).some(tracks => tracks.length > 0);
+    if (!hasTimeRangeData) return null;
 
-    return hasAnyData ? (
+    return (
       <MusicTimeline
-        tracks={timelineTracksData.long_term}
-        tracksData={timelineTracksData}
+        tracksData={spotifyData.topTracksByTimeRange}
+        isLoading={loading}
       />
-    ) : null;
-  }, [spotifyData?.topTracksByTimeRange, longTerm.data]);
+    );
+  }, [spotifyData?.topTracksByTimeRange, loading]);
 
   return (
     <div className="min-h-screen bg-black">
@@ -389,7 +365,11 @@ export default function Dashboard() {
                       </h3>
                       <p className="text-green-300 text-xs sm:text-sm leading-tight flex items-center gap-1">
                         {/* Replaced emoji with FaChartBar for Spotify design compliance */}
-                        <FaChartBar /> Your personal Spotify data • {spotifyData.userProfile?.country || 'Unknown'} • {spotifyData.userProfile?.followers || 0} followers
+                        <FaChartBar /> Your personal Spotify data • {spotifyData.userProfile?.country || 'Unknown'} • {
+                          typeof spotifyData.userProfile?.followers === 'object'
+                            ? (spotifyData.userProfile?.followers as { total?: number })?.total
+                            : spotifyData.userProfile?.followers || 0
+                        } followers
                       </p>
                     </div>
                   </div>

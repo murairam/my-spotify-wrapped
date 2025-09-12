@@ -1,24 +1,4 @@
-// Efficient time range fetching and caching for progressive loading
 
-
-// Progressive time range hook
-export function useTimeRangeSpotifyData() {
-  const longTerm = useQuery({
-    queryKey: ['spotify-data', 'long_term'],
-    queryFn: () => fetch('/api/spotify/top-items?time_range=long_term&limit=50').then(r => r.json()),
-    staleTime: 15 * 60 * 1000, // 15 minutes cache
-    enabled: false, // Only fetch when explicitly called
-  });
-
-  const mediumTerm = useQuery({
-    queryKey: ['spotify-data', 'medium_term'],
-    queryFn: () => fetch('/api/spotify/top-items?time_range=medium_term&limit=50').then(r => r.json()),
-    staleTime: 10 * 60 * 1000,
-    enabled: false,
-  });
-
-  return { longTerm, mediumTerm };
-}
 /**
  * Custom hooks for Spotify data fetching with React Query
  * Provides caching, automatic retries, error handling, and performance optimizations
