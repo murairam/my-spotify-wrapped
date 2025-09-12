@@ -403,34 +403,24 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* Genres and Stats Row */}
-            <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
-              {/* Top Genres */}
-              <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl">
-                <div className="flex items-center mb-4 sm:mb-6">
-                  {/* Replaced emoji with FaPalette for Spotify design compliance */}
-                  <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
-                    <FaPalette />
-                  </div>
-                  <div className="flex items-center">
-                    <h2 className="text-xl sm:text-2xl font-bold text-white">Music DNA</h2>
-                    {/* Subtitle displaying total number of genres as specified */}
-                    <span className="ml-3 text-sm text-gray-400">
-                      {spotifyData?.topGenres?.length || 0} genres
-                    </span>
-                  </div>
+            {/* Top Genres Section */}
+            <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl">
+              <div className="flex items-center mb-4 sm:mb-6">
+                {/* Replaced emoji with FaPalette for Spotify design compliance */}
+                <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
+                  <FaPalette />
                 </div>
-                <div className="flex flex-wrap gap-2 sm:gap-3">
-                  {genresComponent}
+                <div className="flex items-center">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">Music DNA</h2>
+                  {/* Subtitle displaying total number of genres as specified */}
+                  <span className="ml-3 text-sm text-gray-400">
+                    {spotifyData?.topGenres?.length || 0} genres
+                  </span>
                 </div>
               </div>
-
-              {/* Music Intelligence */}
-              <MusicIntelligence
-                discoveryMetrics={spotifyData.discoveryMetrics}
-                socialMetrics={spotifyData.socialMetrics}
-                isLoading={isLoading}
-              />
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                {genresComponent}
+              </div>
             </div>
 
             {/* NEW: Most Played Songs */}
