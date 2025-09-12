@@ -43,11 +43,11 @@
 //   }
 // }
 
-// function createMistralPrompt(data: any): string {
+// function createMistralPrompt(data: { topTracks: Array<{ name: string }>; topArtists: Array<{ name: string }>; topGenres: string[]; stats: { averagePopularity: number } }): string {
 //   const { topTracks, topArtists, topGenres, stats } = data;
 
-//   const trackNames = topTracks.slice(0, 5).map((track: any) => track.name);
-//   const artistNames = topArtists.slice(0, 5).map((artist: any) => artist.name);
+//   const trackNames = topTracks.slice(0, 5).map((track) => track.name);
+//   const artistNames = topArtists.slice(0, 5).map((artist) => artist.name);
 //   const genreList = topGenres.slice(0, 5);
 
 //   return `

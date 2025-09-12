@@ -1,7 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import SpotifyProvider from "next-auth/providers/spotify";
+import { JWT } from "next-auth/jwt";
+import { Session as NextAuthSession, Account } from "next-auth";
 
-async function refreshAccessToken(token: any) {
+interface ExtendedToken extends JWT {
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt?: number;
+  error?: string;
+}
+
+interface ExtendedSession extends NextAuthSession {
+  accessToken?: string;
+  refreshToken?: string;
+  error?: string;
+}
+
+async function refreshAccessToken(token: ExtendedToken) {
   try {
     const url = "https://accounts.spotify.com/api/token";
 
@@ -15,7 +29,7 @@ async function refreshAccessToken(token: any) {
       method: "POST",
       body: new URLSearchParams({
         grant_type: "refresh_token",
-        refresh_token: token.refreshToken,
+        refresh_token: token.refreshToken || "",
       }),
     });
 
@@ -54,7 +68,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, account }: any) {
+  async jwt({ token, account }: { token: ExtendedToken; account?: Account | null }) {
       console.log("JWT callback - Account:", account);
       console.log("JWT callback - Token before:", token);
       // Persist the OAuth access_token to the token right after signin
@@ -65,8 +79,10 @@ export const authOptions = {
       }
 
       // Return previous token if the access token has not expired yet
-      if (Date.now() < token.expiresAt * 1000) {
-        console.log("JWT callback - Token still valid");
+      if (typeof token.expiresAt === 'number' && Date.now() < token.expiresAt * 1000) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log("JWT callback - Token still valid");
+        }
         return token;
       }
 
@@ -74,18 +90,19 @@ export const authOptions = {
       console.log("JWT callback - Token expired, refreshing...");
       return await refreshAccessToken(token);
     },
-    async session({ session, token }: any) {
+    async session({ session, token }: { session: NextAuthSession; token: ExtendedToken }) {
       if (process.env.NODE_ENV === 'development') {
         console.log("Session callback - Token:", token);
       }
-      // Send properties to the client
-      session.accessToken = token.accessToken;
-      session.refreshToken = token.refreshToken;
-      session.error = token.error;
+      // Cast session to ExtendedSession to allow custom properties
+      const extSession = session as ExtendedSession;
+      extSession.accessToken = token.accessToken;
+      extSession.refreshToken = token.refreshToken;
+      extSession.error = token.error;
       if (process.env.NODE_ENV === 'development') {
-        console.log("Session callback - Session:", session);
+        console.log("Session callback - Session:", extSession);
       }
-      return session;
+      return extSession;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

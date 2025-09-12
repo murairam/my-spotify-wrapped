@@ -1,8 +1,26 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import SpotifyWebApi from "spotify-web-api-node";
+
+interface SpotifyApiTrack {
+  id: string;
+  name: string;
+  artists: Array<{ name: string }>;
+  album: { name: string; release_date: string; images: Array<{ url: string }> };
+  popularity: number;
+  external_urls?: { spotify?: string };
+}
+
+interface SpotifyApiArtist {
+  id: string;
+  name: string;
+  genres: string[];
+  popularity: number;
+  images: Array<{ url: string }>;
+  external_urls?: { spotify?: string };
+  followers: { total: number };
+}
 
 // Force dynamic rendering for this API route (uses auth headers)
 export const dynamic = 'force-dynamic';
@@ -34,7 +52,7 @@ export async function GET(request: Request) {
         spotifyApi.getMyTopTracks({ limit, time_range: singleTimeRange as 'short_term' | 'medium_term' | 'long_term' }),
         spotifyApi.getMyTopArtists({ limit, time_range: singleTimeRange as 'short_term' | 'medium_term' | 'long_term' })
       ]);
-      const formatTrackData = (tracks: any, timeRange: string) => tracks.body.items.slice(0, limit).map((track: any, index: number) => ({
+  const formatTrackData = (tracks: { body: { items: SpotifyApiTrack[] } }, timeRange: string) => tracks.body.items.slice(0, limit).map((track: SpotifyApiTrack, index: number) => ({
         id: track.id,
         name: track.name,
         artist: track.artists[0].name,
@@ -50,7 +68,7 @@ export async function GET(request: Request) {
         rank: index + 1,
         timeRange
       }));
-      const formatArtistData = (artists: any, timeRange: string) => artists.body.items.slice(0, limit).map((artist: any, index: number) => ({
+  const formatArtistData = (artists: { body: { items: SpotifyApiArtist[] } }, timeRange: string) => artists.body.items.slice(0, limit).map((artist: SpotifyApiArtist, index: number) => ({
         id: artist.id,
         name: artist.name,
         genres: artist.genres,
@@ -92,7 +110,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "insufficient_data" });
     }
 
-    const formatTrackData = (tracks: any, timeRange: string) => tracks.body.items.slice(0, 50).map((track: any, index: number) => ({
+  const formatTrackData = (tracks: { body: { items: SpotifyApiTrack[] } }, timeRange: string) => tracks.body.items.slice(0, 50).map((track: SpotifyApiTrack, index: number) => ({
       id: track.id,
       name: track.name,
       artist: track.artists[0].name,
@@ -108,7 +126,7 @@ export async function GET(request: Request) {
       rank: index + 1,
       timeRange
     }));
-    const formatArtistData = (artists: any, timeRange: string) => artists.body.items.slice(0, 50).map((artist: any, index: number) => ({
+  const formatArtistData = (artists: { body: { items: SpotifyApiArtist[] } }, timeRange: string) => artists.body.items.slice(0, 50).map((artist: SpotifyApiArtist, index: number) => ({
       id: artist.id,
       name: artist.name,
       genres: artist.genres,
@@ -186,7 +204,7 @@ export async function GET(request: Request) {
       topTracks: formatTrackData(shortTracks, 'short_term').slice(0, 10),
       topArtists: formatArtistData(shortArtists, 'short_term').slice(0, 10),
       userProfile: userProfile.body,
-      recentTracks: recentlyPlayed && recentlyPlayed.body?.items ? recentlyPlayed.body.items.slice(0, 20).map((item: any) => ({
+      recentTracks: recentlyPlayed && recentlyPlayed.body?.items ? recentlyPlayed.body.items.slice(0, 20).map((item: { track: SpotifyApiTrack; played_at: string; context?: unknown }) => ({
         track: item.track,
         played_at: item.played_at,
         context: item.context

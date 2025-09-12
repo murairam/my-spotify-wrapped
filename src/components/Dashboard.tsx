@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
@@ -76,7 +75,7 @@ export default function Dashboard() {
 
   // Calculate decade distribution from long_term tracks
   const decadeData = useMemo(() => {
-    const tracks = (spotifyData?.topTracksByTimeRange?.long_term || []) as any[];
+    const tracks = (spotifyData?.topTracksByTimeRange?.long_term || []) as import("@/hooks/useSpotifyData").SpotifyTrack[];
     if (!tracks.length) return [];
     const decadeCounts: Record<string, number> = {};
     tracks.forEach((track) => {
@@ -166,20 +165,14 @@ export default function Dashboard() {
       }
 
       // Check mostPlayedSongs for audio features
-      const mostPlayedSongs = spotifyData.mostPlayedSongs as any;
+  const mostPlayedSongs = spotifyData.mostPlayedSongs as Record<string, import("@/hooks/useSpotifyData").SpotifyTrack[]> | undefined;
       let totalTracksWithAudio = 0;
       let totalTracks = 0;
 
       if (mostPlayedSongs) {
         Object.keys(mostPlayedSongs).forEach(timeRange => {
           const tracks = mostPlayedSongs[timeRange] || [];
-          const tracksWithAudio = tracks.filter((track: any) =>
-            track.audio_features ||
-            track.energy !== undefined ||
-            track.danceability !== undefined ||
-            track.valence !== undefined ||
-            track.acousticness !== undefined
-          );
+          const tracksWithAudio = tracks; // No audio features in dev mode
 
           totalTracks += tracks.length;
           totalTracksWithAudio += tracksWithAudio.length;
@@ -189,19 +182,7 @@ export default function Dashboard() {
               `${tracksWithAudio.length}/${tracks.length} tracks have audio features`);
           }
 
-          if (tracksWithAudio.length > 0 && tracks.length > 0) {
-            const sampleTrack = tracksWithAudio[0];
-            if (process.env.NODE_ENV === 'development') {
-              console.log(`%cSample: "${sampleTrack?.name}"`, 'color: #1ed760;', {
-                audio_features: sampleTrack?.audio_features ? '✅ Present' : '❌ Missing',
-                energy: sampleTrack?.energy ?? 'N/A',
-                danceability: sampleTrack?.danceability ?? 'N/A',
-                valence: sampleTrack?.valence ?? 'N/A',
-                acousticness: sampleTrack?.acousticness ?? 'N/A',
-                tempo: sampleTrack?.tempo ?? 'N/A'
-              });
-            }
-          }
+          // Skipped: audio feature sample logging (not used in dev mode)
         });
       }
 
