@@ -17,6 +17,7 @@ import { useSpotifyData, useSpotifyError, SpotifyArtist } from "@/hooks/useSpoti
 import { ErrorDisplay } from "@/components/ErrorHandling";
 import { DashboardLoadingSkeleton, ButtonLoadingSpinner } from "@/components/LoadingSkeleton";
 import PopularityBar from "@/components/PopularityBar";
+import TopTracks from "@/components/TopTracks";
 import ListeningInsights from "@/components/ListeningInsights";
 import MusicTimeline from '@/components/MusicTimeline';
 import TopArtists from '@/components/TopArtists';
@@ -416,6 +417,15 @@ export default function Dashboard() {
             {/* Top Artists Row - Optimized for Performance */}
             <div className="grid lg:grid-cols-1 gap-6 sm:gap-8">
               {topArtistsComponent}
+            </div>
+
+            {/* Top Tracks Section */}
+            <div className="mt-6 sm:mt-8">
+              <TopTracks
+                topTracksByTimeRange={spotifyData.topTracksByTimeRange}
+                topTracks={spotifyData.topTracks}
+                isLoading={loading && !spotifyData}
+              />
             </div>
 
             {/* Music Intelligence Section */}
