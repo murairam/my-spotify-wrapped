@@ -50,7 +50,7 @@ export default function Dashboard() {
   const [selectedTimeRange, setSelectedTimeRange] = useState('short_term');
   const fetchStartTime = useRef(0);
   const renderStartTime = useRef(0);
-  
+
   // Add useRef for timeout cleanup
   const debounceTimeoutRef = useRef<NodeJS.Timeout>();
   const timeRangeTimeoutRef = useRef<NodeJS.Timeout>();
@@ -82,7 +82,7 @@ export default function Dashboard() {
   const debouncedTimeRangeChange = useCallback((newTimeRange: string) => {
     // Prevent unnecessary state updates
     if (newTimeRange === selectedTimeRange) return;
-    
+
     if (timeRangeTimeoutRef.current) {
       clearTimeout(timeRangeTimeoutRef.current);
     }
@@ -145,7 +145,7 @@ export default function Dashboard() {
   // Performance monitoring for data loading (development only)
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return;
-    
+
     if (isLoading && fetchStartTime.current > 0) {
       console.log('⏳ Data loading started...');
     }
@@ -193,7 +193,7 @@ export default function Dashboard() {
 
   const genresComponent = useMemo(() => {
     const genres = spotifyData?.topGenres?.slice(0, 10) || [];
-    const maxGenreCount = Math.max(...genres.map((g) => 
+    const maxGenreCount = Math.max(...genres.map((g) =>
       (typeof g === 'object' && g && 'count' in g) ? (g as { count: number }).count : 1
     ));
 
@@ -455,9 +455,9 @@ export default function Dashboard() {
                   {(() => {
                     const mostPlayedSongs = spotifyData.mostPlayedSongs as MostPlayedSongs | undefined;
                     const currentTracks = mostPlayedSongs?.[selectedTimeRange as keyof MostPlayedSongs] || [];
-                    
+
                     if (currentTracks.length === 0) return null;
-                    
+
                     return (
                       <>
                         {/* Top 3: Grid layout */}
