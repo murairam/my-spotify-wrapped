@@ -22,11 +22,38 @@ import MusicTimeline from '@/components/MusicTimeline';
 import TopArtists from '@/components/TopArtists';
 import MusicIntelligence from '@/components/MusicIntelligence';
 
+// Define proper TypeScript interfaces
+interface MostPlayedTrack {
+  id: string;
+  name: string;
+  artist: string;
+  album?: {
+    name: string;
+  };
+  images?: Array<{ url: string }>;
+  popularity: number;
+  external_urls?: {
+    spotify?: string;
+  };
+  rank: number;
+  periodDescription?: string;
+}
+
+interface MostPlayedSongs {
+  short_term?: MostPlayedTrack[];
+  medium_term?: MostPlayedTrack[];
+  long_term?: MostPlayedTrack[];
+}
+
 export default function Dashboard() {
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
   const [selectedTimeRange, setSelectedTimeRange] = useState('short_term');
   const fetchStartTime = useRef(0);
   const renderStartTime = useRef(0);
+  
+  // Add useRef for timeout cleanup
+  const debounceTimeoutRef = useRef<NodeJS.Timeout>();
+  const timeRangeTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Data fetching hooks
   const {
@@ -41,69 +68,84 @@ export default function Dashboard() {
   const timeRangeData = useTimeRangeData();
   const displayError = useSpotifyError(error);
 
-  // Debounced refetch to prevent excessive API calls during quick interactions
-  const debouncedRefetch = useMemo(() => {
-    let timeoutId: NodeJS.Timeout;
-    return () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        originalRefetch();
-      }, 500); // 500ms debounce
-    };
+  // Debounced refetch with proper cleanup
+  const debouncedRefetch = useCallback(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    debounceTimeoutRef.current = setTimeout(() => {
+      originalRefetch();
+    }, 500);
   }, [originalRefetch]);
 
-  // Debounced time range change to prevent excessive API calls
-  const debouncedTimeRangeChange = useMemo(() => {
-    let timeoutId: NodeJS.Timeout;
-    return (newTimeRange: string) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setSelectedTimeRange(newTimeRange);
-      }, 300); // Shorter debounce for better UX
-    };
-  }, []);
+  // Debounced time range change with proper cleanup and equality check
+  const debouncedTimeRangeChange = useCallback((newTimeRange: string) => {
+    // Prevent unnecessary state updates
+    if (newTimeRange === selectedTimeRange) return;
+    
+    if (timeRangeTimeoutRef.current) {
+      clearTimeout(timeRangeTimeoutRef.current);
+    }
+    timeRangeTimeoutRef.current = setTimeout(() => {
+      setSelectedTimeRange(newTimeRange);
+    }, 300);
+  }, [selectedTimeRange]);
 
-  // Sync with time range data when available
+  // Sync with time range data when available - FIXED: proper dependencies
   useEffect(() => {
     if (timeRangeData.data && Object.keys(timeRangeData.data).length > 0) {
-      console.log('🔄 Time range data updated, triggering refresh...');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Time range data updated, triggering refresh...');
+      }
       debouncedRefetch();
     }
-  }, // 300ms debounce for time range changes
-  [timeRangeData.data, debouncedRefetch]);
+  }, [timeRangeData.data, debouncedRefetch]);
 
-  // Handle manual fetch trigger with performance logging
+  // Handle manual fetch trigger with conditional performance logging
   const handleFetchData = useCallback(() => {
-    fetchStartTime.current = performance.now();
-    console.log('🚀 Starting data fetch...');
+    if (process.env.NODE_ENV === 'development') {
+      fetchStartTime.current = performance.now();
+      console.log('🚀 Starting data fetch...');
+    }
 
     if (!hasAttemptedLoad) {
       setHasAttemptedLoad(true);
     } else {
-      // Use debounced refetch to prevent rapid successive calls
       debouncedRefetch();
     }
   }, [hasAttemptedLoad, debouncedRefetch]);
 
-  // Throttled refresh function to prevent excessive API calls
-  const throttledRefresh = useMemo(
-    () => {
-      let lastRefresh = 0;
-      return () => {
-        const now = Date.now();
-        if (now - lastRefresh > 2000) { // 2 second throttle
-          lastRefresh = now;
-          handleFetchData();
-        } else {
-          console.log('🚫 Refresh throttled - please wait');
-        }
-      };
-    },
-    [handleFetchData]
-  );
+  // Throttled refresh function with proper cleanup
+  const lastRefreshTime = useRef(0);
+  const throttledRefresh = useCallback(() => {
+    const now = Date.now();
+    if (now - lastRefreshTime.current > 2000) {
+      lastRefreshTime.current = now;
+      handleFetchData();
+    } else if (process.env.NODE_ENV === 'development') {
+      console.log('🚫 Refresh throttled - please wait');
+    }
+  }, [handleFetchData]);
 
-  // Performance monitoring for data loading
+  // Cleanup effect for all timers
   useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      if (timeRangeTimeoutRef.current) {
+        clearTimeout(timeRangeTimeoutRef.current);
+      }
+      fetchStartTime.current = 0;
+      renderStartTime.current = 0;
+      lastRefreshTime.current = 0;
+    };
+  }, []);
+
+  // Performance monitoring for data loading (development only)
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
+    
     if (isLoading && fetchStartTime.current > 0) {
       console.log('⏳ Data loading started...');
     }
@@ -121,19 +163,21 @@ export default function Dashboard() {
     }
   }, [isLoading, isFetching, spotifyData]);
 
-  // Performance monitoring for rendering
+  // Performance monitoring for rendering (development only) - FIXED: added dependency array
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
     renderStartTime.current = performance.now();
   }, [spotifyData]);
 
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return;
     if (spotifyData && renderStartTime.current > 0) {
       const renderEndTime = performance.now();
       const renderDuration = renderEndTime - renderStartTime.current;
       console.log(`🎨 UI render time: ${renderDuration.toFixed(2)}ms`);
       renderStartTime.current = 0;
     }
-  });
+  }, [spotifyData]); // FIXED: Added missing dependency array
 
   // Loading state includes initial loading and refetching
   const loading = isLoading || isFetching || isRefetching;
@@ -149,10 +193,15 @@ export default function Dashboard() {
 
   const genresComponent = useMemo(() => {
     const genres = spotifyData?.topGenres?.slice(0, 10) || [];
-    const maxGenreCount = Math.max(...genres.map((g: any) => g.count || 1));
+    const maxGenreCount = Math.max(...genres.map((g) => 
+      (typeof g === 'object' && g && 'count' in g) ? (g as { count: number }).count : 1
+    ));
 
-    return genres.map((genreObj: any) => {
-      const count = genreObj.count || 1;
+    return genres.map((genreObj) => {
+      // Type-safe handling of genre objects
+      const isGenreObject = typeof genreObj === 'object' && genreObj && 'genre' in genreObj;
+      const genreName = isGenreObject ? genreObj.genre : (typeof genreObj === 'string' ? genreObj : 'Unknown');
+      const count = isGenreObject && genreObj.count ? genreObj.count : 1;
 
       // Apply proportional sizing formulas as specified
       const opacity = 0.7 + (0.3 * (count / maxGenreCount)); // Opacity formula: 0.7 + (0.3 * ratio)
@@ -160,7 +209,7 @@ export default function Dashboard() {
 
       return (
         <span
-          key={genreObj.genre || genreObj}
+          key={genreName}
           className="inline-block text-white rounded-full font-medium shadow-lg hover:scale-105 transition-all duration-200 touch-manipulation"
           style={{
             // Uniform Spotify green gradient for all genre tags
@@ -170,10 +219,10 @@ export default function Dashboard() {
             padding: `${Math.max(8, fontSize * 0.4)}px ${Math.max(12, fontSize * 0.6)}px`,
             boxShadow: `0 4px 12px rgba(29, 185, 84, ${opacity * 0.4})`
           }}
-          title={genreObj.count ? `${genreObj.count} artists` : undefined}
+          title={isGenreObject && genreObj.count ? `${genreObj.count} artists` : undefined}
         >
-          {genreObj.genre || genreObj}
-          {genreObj.count && (
+          {genreName}
+          {isGenreObject && genreObj.count && (
             <span className="ml-2 opacity-80" style={{ fontSize: `${fontSize * 0.8}px` }}>
               {genreObj.count}
             </span>
@@ -185,7 +234,7 @@ export default function Dashboard() {
 
   const musicTimelineComponent = useMemo(() =>
     spotifyData?.allTracksData && spotifyData.allTracksData.length > 0 ? (
-      <MusicTimeline tracks={spotifyData.allTracksData as any} />
+      <MusicTimeline tracks={spotifyData.allTracksData} />
     ) : null, [spotifyData?.allTracksData]);
 
   return (
@@ -382,91 +431,99 @@ export default function Dashboard() {
                 </div>
 
                 {/* Time Range Info */}
-                {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).length > 0 && (
-                  <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                    <p className="text-blue-400 text-xs sm:text-sm flex items-start sm:items-center">
-                      {/* Replaced emoji with FaChartBar for Spotify design compliance */}
-                      <FaChartBar className="mr-2 mt-0.5 sm:mt-0" />
-                      <span>
-                        <strong>
-                          Period: {(spotifyData.mostPlayedSongs?.[selectedTimeRange] as any)?.[0]?.periodDescription || 'Unknown'}
-                        </strong>
-                        <br className="sm:hidden" />
-                        <span className="sm:ml-2">Your actual Spotify top tracks rankings for this period</span>
-                      </span>
-                    </p>
-                  </div>
-                )}
+                {(() => {
+                  const mostPlayedSongs = spotifyData.mostPlayedSongs as MostPlayedSongs | undefined;
+                  const currentTracks = mostPlayedSongs?.[selectedTimeRange as keyof MostPlayedSongs] || [];
+                  return currentTracks.length > 0 ? (
+                    <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                      <p className="text-blue-400 text-xs sm:text-sm flex items-start sm:items-center">
+                        {/* Replaced emoji with FaChartBar for Spotify design compliance */}
+                        <FaChartBar className="mr-2 mt-0.5 sm:mt-0" />
+                        <span>
+                          <strong>
+                            Period: {currentTracks[0]?.periodDescription || 'Unknown'}
+                          </strong>
+                          <br className="sm:hidden" />
+                          <span className="sm:ml-2">Your actual Spotify top tracks rankings for this period</span>
+                        </span>
+                      </p>
+                    </div>
+                  ) : null;
+                })()}
 
                 <div className="space-y-6">
-                  {/* Top 3: Grid layout */}
-                  {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                      {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).slice(0, 3).map((track: any) => (
-                        <div key={track.id} className="bg-white/10 backdrop-blur-lg rounded-xl p-4 flex flex-col hover:bg-white/15 transition-all duration-300 border border-white/20 shadow-lg">
-                          {/* Album Art */}
-                          {track.images?.[0] && (
-                            <img
-                              src={track.images[0].url}
-                              alt={`Album cover for ${track.name}`}
-                              className="w-full aspect-square object-cover rounded-lg mb-4 shadow-md"
-                            />
-                          )}
+                  {(() => {
+                    const mostPlayedSongs = spotifyData.mostPlayedSongs as MostPlayedSongs | undefined;
+                    const currentTracks = mostPlayedSongs?.[selectedTimeRange as keyof MostPlayedSongs] || [];
+                    
+                    if (currentTracks.length === 0) return null;
+                    
+                    return (
+                      <>
+                        {/* Top 3: Grid layout */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                          {currentTracks.slice(0, 3).map((track) => (
+                            <div key={track.id} className="bg-white/10 backdrop-blur-lg rounded-xl p-4 flex flex-col hover:bg-white/15 transition-all duration-300 border border-white/20 shadow-lg">
+                              {/* Album Art */}
+                              {track.images?.[0] && (
+                                <img
+                                  src={track.images[0].url}
+                                  alt={`Album cover for ${track.name}`}
+                                  className="w-full aspect-square object-cover rounded-lg mb-4 shadow-md"
+                                />
+                              )}
 
-                          {/* Track Info */}
-                          <div className="flex-1 space-y-2">
-                            <h3 className="font-bold text-white text-lg leading-tight">{track.name}</h3>
-                            <p className="text-gray-200 text-sm font-medium">{track.artist}</p>
-                            <p className="text-gray-300 text-xs">{track.album?.name}</p>
-                          </div>
+                              {/* Track Info */}
+                              <div className="flex-1 space-y-2">
+                                <h3 className="font-bold text-white text-lg leading-tight">{track.name}</h3>
+                                <p className="text-gray-200 text-sm font-medium">{track.artist}</p>
+                                <p className="text-gray-300 text-xs">{track.album?.name}</p>
+                              </div>
 
-                          {/* Ranking and Popularity */}
-                          <div className="mt-4 flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-[#1DB954] font-bold text-xl">#{track.rank}</span>
-                              <span className="text-gray-300 text-xs">ranking</span>
+                              {/* Ranking and Popularity */}
+                              <div className="mt-4 flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-[#1DB954] font-bold text-xl">#{track.rank}</span>
+                                  <span className="text-gray-300 text-xs">ranking</span>
+                                </div>
+                                <div className="w-20">
+                                  <PopularityBar
+                                    popularity={track.popularity}
+                                    label=""
+                                    className="text-xs"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Spotify Button */}
+                              {track.external_urls?.spotify && (
+                                <a
+                                  href={track.external_urls.spotify}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="mt-4 bg-[#1DB954] hover:bg-[#1ed760] text-white px-4 py-2.5 rounded-full text-sm font-semibold text-center transition-all duration-200 hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
+                                >
+                                  <FaMusic />
+                                  <span>Open in Spotify</span>
+                                </a>
+                              )}
                             </div>
-                            <div className="w-20">
-                              <PopularityBar
-                                popularity={track.popularity}
-                                label=""
-                                className="text-xs"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Spotify Button */}
-                          {track.external_urls?.spotify && (
-                            <a
-                              href={track.external_urls.spotify}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="mt-4 bg-[#1DB954] hover:bg-[#1ed760] text-white px-4 py-2.5 rounded-full text-sm font-semibold text-center transition-all duration-200 hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
-                            >
-                              {/* Replaced emoji with FaMusic for Spotify design compliance */}
-                              <FaMusic />
-                              <span>Open in Spotify</span>
-                            </a>
-                          )}
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
 
-                  {/* Tracks 4-10: Compact horizontal list */}
-                  {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).length > 3 && (
-                    <>
-                      <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-white flex items-center">
-                          {/* Replaced emoji with FaChartBar for Spotify design compliance */}
-                          <FaChartBar className="mr-2" />
-                          Tracks 4-10
-                        </h3>
-                        <p className="text-gray-300 text-sm mt-1">Your remaining top tracks</p>
-                      </div>
+                        {/* Tracks 4-10: Compact horizontal list */}
+                        {currentTracks.length > 3 && (
+                          <>
+                            <div className="mb-4">
+                              <h3 className="text-lg font-semibold text-white flex items-center">
+                                <FaChartBar className="mr-2" />
+                                Tracks 4-10
+                              </h3>
+                              <p className="text-gray-300 text-sm mt-1">Your remaining top tracks</p>
+                            </div>
 
-                      <div className="space-y-3">
-                        {(spotifyData.mostPlayedSongs?.[selectedTimeRange] || []).slice(3, 10).map((track: any) => (
+                            <div className="space-y-3">
+                              {currentTracks.slice(3, 10).map((track) => (
                           <div key={track.id} className="bg-white/5 hover:bg-white/10 rounded-lg p-3 flex items-center transition-all duration-200 border border-white/10 hover:border-white/20">
                             {/* Ranking */}
                             <span className="text-[#1DB954] font-bold mr-4 text-lg w-8 text-center">#{track.rank}</span>
@@ -512,6 +569,9 @@ export default function Dashboard() {
                       </div>
                     </>
                   )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             )}
