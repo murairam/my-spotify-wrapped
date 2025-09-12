@@ -23,7 +23,10 @@ function getDayOfWeek(date: Date): string {
   return days[date.getDay()];
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const timeRange = searchParams.get('time_range') || 'short_term';
+  const limit = parseInt(searchParams.get('limit') || '50');
   try {
     const session = await getServerSession(authOptions);
 
@@ -79,18 +82,13 @@ export async function GET() {
       }, { status: 401 });
     }
 
-    // Load just current time range first (3 calls total)
-    const timeRange = 'short_term'; // Start with short_term only
-    console.log(`Loading data for ${timeRange}...`);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Fetch only what's requested
     let userProfile: any, topTracks: any, topArtists: any;
-
     try {
       [userProfile, topTracks, topArtists] = await Promise.all([
         spotifyApi.getMe(),
-        spotifyApi.getMyTopTracks({ limit: 50, time_range: timeRange }),
-        spotifyApi.getMyTopArtists({ limit: 50, time_range: timeRange })
+        spotifyApi.getMyTopTracks({ limit, time_range: timeRange as 'short_term' | 'medium_term' | 'long_term' }),
+        spotifyApi.getMyTopArtists({ limit, time_range: timeRange as 'short_term' | 'medium_term' | 'long_term' })
       ]);
 
       // Check for sufficient data

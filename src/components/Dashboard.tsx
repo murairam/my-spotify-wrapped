@@ -13,7 +13,7 @@ import {
   FaPlay,
   FaCrown,
 } from "react-icons/fa";
-import { useSpotifyError, useSpotifyData, SpotifyArtist } from "@/hooks/useSpotifyData";
+import { g9git add .useSpotifyData, useSpotifyError, useTimeRangeSpotifyData, SpotifyArtist } from "@/hooks/useSpotifyData";
 import { ErrorDisplay } from "@/components/ErrorHandling";
 import { DashboardLoadingSkeleton, ButtonLoadingSpinner } from "@/components/LoadingSkeleton";
 import PopularityBar from "@/components/PopularityBar";
@@ -76,6 +76,14 @@ export default function Dashboard() {
     refetchOnMount: false
   });
   const displayError = useSpotifyError(error);
+
+  // Progressive time range loading (must come after spotifyData is defined)
+  const { longTerm } = useTimeRangeSpotifyData();
+  useEffect(() => {
+    if (spotifyData && !longTerm.data) {
+      longTerm.refetch();
+    }
+  }, [spotifyData, longTerm]);
 
   // Debounced refetch with proper cleanup
   const debouncedRefetch = useCallback(() => {
@@ -252,10 +260,31 @@ export default function Dashboard() {
     });
   }, [spotifyData?.topGenres]);
 
-  const musicTimelineComponent = useMemo(() =>
-    spotifyData?.allTracksData && spotifyData.allTracksData.length > 0 ? (
-      <MusicTimeline tracks={spotifyData.allTracksData} />
-    ) : null, [spotifyData?.allTracksData]);
+  const musicTimelineComponent = useMemo(() => {
+    // Use longTerm data if available, else fallback to short_term/topTracks
+    const longTermTracks = longTerm.data?.topTracks || [];
+    const tracksData = longTermTracks.length > 0
+      ? longTermTracks.map((track: any) => ({
+          id: track.id,
+          name: track.name,
+          album: {
+            release_date: track.album?.release_date || new Date().toISOString()
+          }
+        }))
+      : (spotifyData?.allTracksData && spotifyData.allTracksData.length > 0
+        ? spotifyData.allTracksData
+        : spotifyData?.topTracks?.map((track: any) => ({
+            id: track.id,
+            name: track.name,
+            album: {
+              release_date: track.album?.release_date || new Date().toISOString()
+            }
+          })) || []);
+
+    return tracksData.length > 0 ? (
+      <MusicTimeline tracks={tracksData} />
+    ) : null;
+  }, [longTerm.data, spotifyData?.allTracksData, spotifyData?.topTracks]);
 
   return (
     <div className="min-h-screen bg-black">
