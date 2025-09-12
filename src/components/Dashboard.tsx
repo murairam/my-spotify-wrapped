@@ -21,6 +21,7 @@ import ListeningInsights from "@/components/ListeningInsights";
 import MusicTimeline from '@/components/MusicTimeline';
 import TopArtists from '@/components/TopArtists';
 import MusicIntelligence from '@/components/MusicIntelligence';
+import RecentlyPlayedTimeline from '@/components/RecentlyPlayedTimeline';
 
 // Define proper TypeScript interfaces
 interface MostPlayedTrack {
@@ -29,6 +30,7 @@ interface MostPlayedTrack {
   artist: string;
   album?: {
     name: string;
+    release_date?: string;
   };
   images?: Array<{ url: string }>;
   popularity: number;
@@ -37,6 +39,7 @@ interface MostPlayedTrack {
   };
   rank: number;
   periodDescription?: string;
+  duration_ms?: number;
 }
 
 interface MostPlayedSongs {
@@ -146,19 +149,52 @@ export default function Dashboard() {
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return;
 
-    if (isLoading && fetchStartTime.current > 0) {
-      console.log('⏳ Data loading started...');
-    }
-
     if (!isLoading && !isFetching && spotifyData && fetchStartTime.current > 0) {
-      const fetchEndTime = performance.now();
-      const fetchDuration = fetchEndTime - fetchStartTime.current;
-      console.group('🎵 Data Fetch Performance Summary');
-      console.log(`⏱️ Total fetch time: ${fetchDuration.toFixed(2)}ms`);
-      console.log(`📊 Tracks loaded: ${spotifyData.topTracks?.length || 0}`);
-      console.log(`🎤 Artists loaded: ${spotifyData.topArtists?.length || 0}`);
-      console.log(`🎨 Genres loaded: ${spotifyData.topGenres?.length || 0}`);
-      console.groupEnd();
+      // Clear console and show only audio features debug
+      console.clear();
+      console.log('%c� AUDIO FEATURES DEBUG REPORT', 'background: #1DB954; color: white; font-size: 16px; padding: 8px; border-radius: 4px;');
+
+      // Check mostPlayedSongs for audio features
+      const mostPlayedSongs = spotifyData.mostPlayedSongs as any;
+      let totalTracksWithAudio = 0;
+      let totalTracks = 0;
+
+      if (mostPlayedSongs) {
+        Object.keys(mostPlayedSongs).forEach(timeRange => {
+          const tracks = mostPlayedSongs[timeRange] || [];
+          const tracksWithAudio = tracks.filter((track: any) =>
+            track.audio_features ||
+            track.energy !== undefined ||
+            track.danceability !== undefined ||
+            track.valence !== undefined ||
+            track.acousticness !== undefined
+          );
+
+          totalTracks += tracks.length;
+          totalTracksWithAudio += tracksWithAudio.length;
+
+          console.log(`%c${timeRange.toUpperCase()}:`, 'color: #1DB954; font-weight: bold;',
+            `${tracksWithAudio.length}/${tracks.length} tracks have audio features`);
+
+          if (tracksWithAudio.length > 0 && tracks.length > 0) {
+            const sampleTrack = tracksWithAudio[0];
+            console.log(`%cSample: "${sampleTrack?.name}"`, 'color: #1ed760;', {
+              audio_features: sampleTrack?.audio_features ? '✅ Present' : '❌ Missing',
+              energy: sampleTrack?.energy ?? 'N/A',
+              danceability: sampleTrack?.danceability ?? 'N/A',
+              valence: sampleTrack?.valence ?? 'N/A',
+              acousticness: sampleTrack?.acousticness ?? 'N/A',
+              tempo: sampleTrack?.tempo ?? 'N/A'
+            });
+          }
+        });
+      }
+
+      // Summary
+      const percentage = totalTracks > 0 ? ((totalTracksWithAudio / totalTracks) * 100).toFixed(1) : '0';
+      console.log(`%c📊 SUMMARY: ${totalTracksWithAudio}/${totalTracks} tracks (${percentage}%) have audio features`,
+        totalTracksWithAudio > 0 ? 'background: green; color: white; padding: 4px;' : 'background: red; color: white; padding: 4px;');
+
       fetchStartTime.current = 0;
     }
   }, [isLoading, isFetching, spotifyData]);
@@ -361,6 +397,15 @@ export default function Dashboard() {
               {topArtistsComponent}
             </div>
 
+            {/* Music Intelligence Section */}
+            <div className="mt-6 sm:mt-8">
+              <MusicIntelligence
+                discoveryMetrics={spotifyData?.discoveryMetrics}
+                socialMetrics={spotifyData?.socialMetrics}
+                isLoading={loading && !spotifyData}
+              />
+            </div>
+
             {/* Genres and Stats Row */}
             <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
               {/* Top Genres */}
@@ -477,7 +522,24 @@ export default function Dashboard() {
                               <div className="flex-1 space-y-2">
                                 <h3 className="font-bold text-white text-lg leading-tight">{track.name}</h3>
                                 <p className="text-gray-200 text-sm font-medium">{track.artist}</p>
-                                <p className="text-gray-300 text-xs">{track.album?.name}</p>
+                                <div className="flex items-center justify-between">
+                                  <p className="text-gray-300 text-xs">{track.album?.name}</p>
+                                  {track.duration_ms && (
+                                    <span className="text-gray-400 text-xs">
+                                      {Math.floor(track.duration_ms / 60000)}:
+                                      {Math.floor((track.duration_ms % 60000) / 1000).toString().padStart(2, '0')}
+                                    </span>
+                                  )}
+                                </div>
+
+
+
+                                {/* Release Year */}
+                                {track.album?.release_date && (
+                                  <p className="text-gray-400 text-xs">
+                                    Released: {new Date(track.album.release_date).getFullYear()}
+                                  </p>
+                                )}
                               </div>
 
                               {/* Ranking and Popularity */}
@@ -576,6 +638,18 @@ export default function Dashboard() {
               </div>
             )}
 
+
+
+            {/* Recently Played Timeline */}
+            {spotifyData?.recentTracks && (
+              <div className="mt-6 sm:mt-8">
+                <RecentlyPlayedTimeline
+                  recentTracks={spotifyData?.recentTracks as any}
+                  isLoading={loading && !spotifyData}
+                />
+              </div>
+            )}
+
             {/* Listening Insights Section */}
             {spotifyData.listeningHabits && (
               <div className="mt-6 sm:mt-8">
@@ -593,9 +667,81 @@ export default function Dashboard() {
               </div>
             )}
 
+
+
             {/* Raw Data Section */}
             <details className="mt-6 sm:mt-8 bg-black/20 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-white/10">
               <summary className="cursor-pointer font-semibold text-white hover:text-gray-300 text-sm sm:text-base min-h-[44px] flex items-center touch-manipulation">🔍 Raw Data (for debugging)</summary>
+
+              {/* Audio Features Debugging */}
+              <div className="mt-4 space-y-4">
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                  <h4 className="text-blue-400 font-semibold text-sm mb-2">🎵 Audio Features Debug</h4>
+                  <div className="text-xs text-gray-300 space-y-1">
+                    <p><strong>audioFeatures available:</strong> {(spotifyData as any)?.audioFeatures ? 'YES' : 'NO'}</p>
+                    <p><strong>topTracks available:</strong> {(spotifyData as any)?.topTracks ? `YES (${Array.isArray((spotifyData as any).topTracks) ? (spotifyData as any).topTracks.length : 0} tracks)` : 'NO'}</p>
+                    <p><strong>recentTracks available:</strong> {(spotifyData as any)?.recentTracks ? `YES (${Array.isArray((spotifyData as any).recentTracks) ? (spotifyData as any).recentTracks.length : 0} tracks)` : 'NO'}</p>
+
+                    {/* Check if mostPlayedSongs tracks have audio features */}
+                    {(() => {
+                      const mostPlayedSongs = spotifyData?.mostPlayedSongs as any;
+                      const currentTracks = mostPlayedSongs?.[selectedTimeRange] || [];
+                      const tracksWithAudio = currentTracks.filter((track: any) =>
+                        track.audio_features ||
+                        track.energy !== undefined ||
+                        track.danceability !== undefined ||
+                        track.valence !== undefined ||
+                        track.acousticness !== undefined
+                      );
+
+                      return (
+                        <>
+                          <p><strong>mostPlayedSongs ({selectedTimeRange}) tracks:</strong> {currentTracks.length}</p>
+                          <p><strong>Tracks with audio features:</strong> {tracksWithAudio.length}</p>
+
+                          {tracksWithAudio.length > 0 && (
+                            <div className="mt-2 bg-black/30 p-2 rounded text-xs">
+                              <p><strong>Sample track audio features:</strong></p>
+                              <pre className="text-green-400 mt-1">
+                                {JSON.stringify({
+                                  name: tracksWithAudio[0]?.name,
+                                  audio_features: tracksWithAudio[0]?.audio_features,
+                                  energy: tracksWithAudio[0]?.energy,
+                                  danceability: tracksWithAudio[0]?.danceability,
+                                  valence: tracksWithAudio[0]?.valence,
+                                  acousticness: tracksWithAudio[0]?.acousticness,
+                                  tempo: tracksWithAudio[0]?.tempo
+                                }, null, 2)}
+                              </pre>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Search for audio_features in data */}
+                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                  <h4 className="text-green-400 font-semibold text-sm mb-2">🔍 Audio Data Search</h4>
+                  <div className="text-xs text-gray-300">
+                    {(() => {
+                      const dataStr = JSON.stringify(spotifyData);
+                      const searches = ['audio_features', 'energy', 'danceability', 'valence', 'acousticness', 'tempo'];
+
+                      return searches.map(term => {
+                        const count = (dataStr.match(new RegExp(`"${term}"`, 'g')) || []).length;
+                        return (
+                          <p key={term} className={count > 0 ? 'text-green-400' : 'text-red-400'}>
+                            <strong>{term}:</strong> {count > 0 ? `Found ${count} times` : 'Not found'}
+                          </p>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              </div>
+
               <pre className="mt-4 text-xs overflow-auto text-gray-300 bg-black/30 p-3 sm:p-4 rounded-lg max-h-64 sm:max-h-96">
                 {JSON.stringify(spotifyData, null, 2)}
               </pre>
