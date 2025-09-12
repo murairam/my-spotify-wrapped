@@ -22,6 +22,7 @@ import MusicTimeline from '@/components/MusicTimeline';
 import TopArtists from '@/components/TopArtists';
 import MusicIntelligence from '@/components/MusicIntelligence';
 import RecentlyPlayedTimeline from '@/components/RecentlyPlayedTimeline';
+import { DecadePieChart } from '@/components/DecadePieChart';
 
 // Define proper TypeScript interfaces
 interface MostPlayedTrack {
@@ -55,16 +56,11 @@ interface MostPlayedSongs {
 
 
 export default function Dashboard() {
+  // ...existing code...
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
-  // Time range selection removed to reduce API calls
   const fetchStartTime = useRef(0);
   const renderStartTime = useRef(0);
-
-  // Add useRef for timeout cleanup
   const debounceTimeoutRef = useRef<NodeJS.Timeout>();
-  // Time range timeout ref removed
-
-  // Data fetching hooks
   const {
     data: spotifyData,
     isLoading,
@@ -76,6 +72,28 @@ export default function Dashboard() {
     refetchOnMount: false
   });
   const displayError = useSpotifyError(error);
+
+  // Calculate decade distribution from long_term tracks
+  const decadeData = useMemo(() => {
+    const tracks = (spotifyData?.topTracksByTimeRange?.long_term || []) as any[];
+    if (!tracks.length) return [];
+    const decadeCounts: Record<string, number> = {};
+    tracks.forEach((track) => {
+      const year = track.album?.release_date ? parseInt(track.album.release_date.slice(0, 4)) : undefined;
+      if (!year || isNaN(year)) return;
+      const decade = `${Math.floor(year / 10) * 10}s`;
+      decadeCounts[decade] = (decadeCounts[decade] || 0) + 1;
+    });
+    const total = tracks.length;
+    const sorted = Object.entries(decadeCounts)
+      .map(([decade, count]) => ({
+        decade,
+        count,
+        percentage: Math.round((count / total) * 100)
+      }))
+      .sort((a, b) => a.decade.localeCompare(b.decade));
+    return sorted;
+  }, [spotifyData?.topTracksByTimeRange?.long_term]);
 
 
 
@@ -403,7 +421,36 @@ export default function Dashboard() {
             {/* Music Intelligence Section */}
             <div className="mt-6 sm:mt-8">
               <MusicIntelligence
-                discoveryMetrics={spotifyData?.discoveryMetrics}
+                discoveryMetrics={(() => {
+                  // Use only long_term data for metrics
+                  if (!spotifyData?.topTracksByTimeRange?.long_term) return undefined;
+                  const tracks = spotifyData.topTracksByTimeRange.long_term;
+                  const mainstreamTaste = tracks.length > 0 ? Math.round(tracks.reduce((sum, t) => sum + (t.popularity || 0), 0) / tracks.length) : 0;
+                  const uniqueArtists = new Set(tracks.map(t => t.artist)).size;
+                  const vintageCount = tracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) < '2010').length;
+                  const vintageCollector = tracks.length > 0 ? Math.round((vintageCount / tracks.length) * 100) : 0;
+                  const undergroundCount = tracks.filter(t => (t.popularity || 0) < 40).length;
+                  const undergroundTaste = tracks.length > 0 ? Math.round((undergroundCount / tracks.length) * 100) : 0;
+                  const recentCount = tracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) >= '2020').length;
+                  const recentMusicLover = tracks.length > 0 ? Math.round((recentCount / tracks.length) * 100) : 0;
+                  const uniqueAlbums = new Set(tracks.map(t => t.album?.name)).size;
+                  const years = tracks
+                    .map(t => t.album && t.album.release_date ? parseInt(t.album.release_date.slice(0,4)) : undefined)
+                    .filter((y): y is number => typeof y === 'number' && !isNaN(y));
+                  const oldestTrackYear = years.length > 0 ? Math.min(...years) : undefined;
+                  const newestTrackYear = years.length > 0 ? Math.max(...years) : undefined;
+                  return {
+                    mainstreamTaste,
+                    artistDiversity: uniqueArtists,
+                    vintageCollector,
+                    undergroundTaste,
+                    recentMusicLover,
+                    uniqueArtistsCount: uniqueArtists,
+                    uniqueAlbumsCount: uniqueAlbums,
+                    oldestTrackYear,
+                    newestTrackYear
+                  };
+                })()}
                 socialMetrics={spotifyData?.socialMetrics}
                 isLoading={loading && !spotifyData}
               />
@@ -412,19 +459,51 @@ export default function Dashboard() {
             {/* Top Genres Section */}
             <div className="bg-white/10 backdrop-blur-lg p-4 sm:p-6 lg:p-8 rounded-2xl border border-white/20 shadow-xl">
               <div className="flex items-center mb-4 sm:mb-6">
-                {/* Replaced emoji with FaPalette for Spotify design compliance */}
                 <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
                   <FaPalette />
                 </div>
                 <div className="flex items-center">
                   <h2 className="text-xl sm:text-2xl font-bold text-white">Music DNA</h2>
-                  {/* Subtitle displaying total number of genres as specified */}
                   <span className="ml-3 text-sm text-gray-400">
-                    {spotifyData?.topGenres?.length || 0} genres
+                    {/* Count unique genres from long_term artists */}
+                    {(() => {
+                      const artists = spotifyData?.topArtistsByTimeRange?.long_term || [];
+                      const genreSet = new Set<string>();
+                      artists.forEach(a => (a.genres || []).forEach(g => genreSet.add(g)));
+                      return genreSet.size;
+                    })()} genres
                   </span>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 sm:gap-3">
+                {/* Show genres from long_term artists, sorted by frequency */}
+                {(() => {
+                  const artists = spotifyData?.topArtistsByTimeRange?.long_term || [];
+                  const genreCount: Record<string, number> = {};
+                  artists.forEach(a => (a.genres || []).forEach(g => { genreCount[g] = (genreCount[g] || 0) + 1; }));
+                  const sorted = Object.entries(genreCount).sort((a, b) => b[1] - a[1]).slice(0, 10);
+                  const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
+                  return sorted.map(([genre, count]) => (
+                    <span
+                      key={genre}
+                      className="inline-block text-white rounded-full font-medium shadow-lg hover:scale-105 transition-all duration-200 touch-manipulation"
+                      style={{
+                        background: `linear-gradient(135deg, #1DB954 0%, #1ed760 100%)`,
+                        opacity: 0.7 + (0.3 * (count / maxCount)),
+                        fontSize: `${12 + (count / 2)}px`,
+                        padding: `${Math.max(8, (12 + (count / 2)) * 0.4)}px ${Math.max(12, (12 + (count / 2)) * 0.6)}px`,
+                        boxShadow: `0 4px 12px rgba(29, 185, 84, ${(0.7 + (0.3 * (count / maxCount))) * 0.4})`
+                      }}
+                      title={`${count} artists`}
+                    >
+                      {genre}
+                      <span className="ml-2 opacity-80" style={{ fontSize: `${(12 + (count / 2)) * 0.8}px` }}>{count}</span>
+                    </span>
+                  ));
+                })()}
+              </div>
+              {/* Render genresComponent for additional genre visualization */}
+              <div className="mt-4">
                 {genresComponent}
               </div>
             </div>
@@ -641,6 +720,11 @@ export default function Dashboard() {
                 {musicTimelineComponent}
               </div>
             )}
+
+            {/* Decade Pie Chart Section */}
+            <div className="mt-6 sm:mt-8">
+              <DecadePieChart decades={decadeData} isLoading={isLoading && !spotifyData} />
+            </div>
 
 
 

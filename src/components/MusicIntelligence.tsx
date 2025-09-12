@@ -106,10 +106,66 @@ const MusicIntelligence: React.FC<MusicIntelligenceProps> = ({
             <span className="text-white/80 font-medium">Artist Diversity</span>
           </div>
           <div className="text-xl font-bold text-white mb-2">
-            {discoveryMetrics.artistDiversity ?? 0}%
+            {discoveryMetrics.artistDiversity ?? 0}
           </div>
           <div className="text-white/60 text-sm">
-            Musical exploration range
+            Unique artists in your top tracks
+          </div>
+        </div>
+
+        {/* Vintage Collector */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-4">
+            <FontAwesomeIcon icon={faChartLine} className="text-[#1DB954] text-lg" />
+            <span className="text-white/80 font-medium">Vintage Collector</span>
+          </div>
+          <div className="text-xl font-bold text-white mb-2">
+            {discoveryMetrics.vintageCollector ?? 0}%
+          </div>
+          <div className="text-white/60 text-sm">
+            Tracks released before 2010
+          </div>
+        </div>
+
+        {/* Underground Taste */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-4">
+            <FontAwesomeIcon icon={faChartLine} className="text-[#1DB954] text-lg" />
+            <span className="text-white/80 font-medium">Underground Taste</span>
+          </div>
+          <div className="text-xl font-bold text-white mb-2">
+            {discoveryMetrics.undergroundTaste ?? 0}%
+          </div>
+          <div className="text-white/60 text-sm">
+            Tracks with popularity &lt; 40
+          </div>
+        </div>
+
+        {/* Recent Music Lover */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-4">
+            <FontAwesomeIcon icon={faChartLine} className="text-[#1DB954] text-lg" />
+            <span className="text-white/80 font-medium">Recent Music Lover</span>
+          </div>
+          <div className="text-xl font-bold text-white mb-2">
+            {discoveryMetrics.recentMusicLover ?? 0}%
+          </div>
+          <div className="text-white/60 text-sm">
+            Tracks released after 2020
+          </div>
+        </div>
+
+        {/* Unique Albums */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-4">
+            <FontAwesomeIcon icon={faChartLine} className="text-[#1DB954] text-lg" />
+            <span className="text-white/80 font-medium">Unique Albums</span>
+          </div>
+          <div className="text-xl font-bold text-white mb-2">
+            {discoveryMetrics.uniqueAlbumsCount ?? 0}
+          </div>
+          <div className="text-white/60 text-sm">
+            Distinct albums in your top tracks
           </div>
         </div>
 

@@ -118,6 +118,57 @@ export async function GET(request: Request) {
       timeRange
     }));
 
+    // Calculate discoveryMetrics
+    const allTracks = [
+      ...formatTrackData(shortTracks, 'short_term'),
+      ...formatTrackData(mediumTracks, 'medium_term'),
+      ...formatTrackData(longTracks, 'long_term')
+    ];
+
+    // Mainstream taste: average popularity of top tracks (0-100)
+    const mainstreamTaste = allTracks.length > 0 ? Math.round(allTracks.reduce((sum, t) => sum + (t.popularity || 0), 0) / allTracks.length) : 0;
+    // Artist diversity: unique artists in top tracks
+    const uniqueArtists = new Set(allTracks.map(t => t.artist)).size;
+    // Vintage collector: % of tracks released before 2010
+    const vintageCount = allTracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) < '2010').length;
+    const vintageCollector = allTracks.length > 0 ? Math.round((vintageCount / allTracks.length) * 100) : 0;
+    // Underground taste: % of tracks with popularity < 40
+    const undergroundCount = allTracks.filter(t => (t.popularity || 0) < 40).length;
+    const undergroundTaste = allTracks.length > 0 ? Math.round((undergroundCount / allTracks.length) * 100) : 0;
+    // Recent music lover: % of tracks released after 2020
+    const recentCount = allTracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) >= '2020').length;
+    const recentMusicLover = allTracks.length > 0 ? Math.round((recentCount / allTracks.length) * 100) : 0;
+    // Unique albums
+    const uniqueAlbums = new Set(allTracks.map(t => t.album?.name)).size;
+    // Oldest and newest track year
+    const years = allTracks
+      .map(t => t.album && t.album.release_date ? parseInt(t.album.release_date.slice(0,4)) : undefined)
+      .filter((y): y is number => typeof y === 'number' && !isNaN(y));
+    const oldestTrackYear = years.length > 0 ? Math.min(...years) : undefined;
+    const newestTrackYear = years.length > 0 ? Math.max(...years) : undefined;
+
+    const discoveryMetrics = {
+      mainstreamTaste,
+      artistDiversity: uniqueArtists,
+      vintageCollector,
+      undergroundTaste,
+      recentMusicLover,
+      uniqueArtistsCount: uniqueArtists,
+      uniqueAlbumsCount: uniqueAlbums,
+      oldestTrackYear,
+      newestTrackYear
+    };
+
+    // Social metrics
+    const followedArtistsCount = userProfile.body?.followers?.total || 0;
+    const playlistsOwned = 0; // Not available in this API, set to 0 or fetch elsewhere
+    const accountType = userProfile.body?.product || '';
+    const socialMetrics = {
+      followedArtistsCount,
+      playlistsOwned,
+      accountType
+    };
+
     return NextResponse.json({
       topTracksByTimeRange: {
         short_term: formatTrackData(shortTracks, 'short_term'),
@@ -137,7 +188,9 @@ export async function GET(request: Request) {
         track: item.track,
         played_at: item.played_at,
         context: item.context
-      })) : []
+      })) : [],
+      discoveryMetrics,
+      socialMetrics
     });
   } catch (error) {
     console.error("Error fetching comprehensive Spotify data:", error);
