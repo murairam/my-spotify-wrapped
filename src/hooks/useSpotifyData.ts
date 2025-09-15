@@ -126,21 +126,17 @@ export interface SpotifyData {
  * Performance logging utility
  */
 const logPerformanceMetrics = (operation: string, startTime: number, endTime: number, dataSize?: number) => {
-  const duration = endTime - startTime;
-  console.group(`🎵 Spotify API Performance - ${operation}`);
   if (process.env.NODE_ENV === 'development') {
+    const duration = endTime - startTime;
+    console.group(`🎵 Spotify API Performance - ${operation}`);
     console.log(`⏱️ Duration: ${duration.toFixed(2)}ms`);
-  }
-  if (dataSize !== undefined) {
-    if (process.env.NODE_ENV === 'development') {
+    if (dataSize !== undefined) {
       console.log(`📦 Data size: ${dataSize} items`);
       console.log(`⚡ Throughput: ${(dataSize / duration * 1000).toFixed(2)} items/sec`);
     }
-  }
-  if (process.env.NODE_ENV === 'development') {
     console.log(`🕒 Timestamp: ${new Date(endTime).toISOString()}`);
+    console.groupEnd();
   }
-  console.groupEnd();
 };
 
 /**
@@ -158,7 +154,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(func: T, del
  * Fetches Spotify data from the API with comprehensive error handling and performance logging
  */
 async function fetchSpotifyData(): Promise<SpotifyData> {
-  const startTime = performance.now();
+  const startTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
 
   try {
     const response = await fetch('/api/spotify/top-items', {
@@ -169,8 +165,10 @@ async function fetchSpotifyData(): Promise<SpotifyData> {
     });
 
     if (!response.ok) {
-      const endTime = performance.now();
-      logPerformanceMetrics('API Error', startTime, endTime);
+      const endTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
+      if (process.env.NODE_ENV === 'development') {
+        logPerformanceMetrics('API Error', startTime, endTime);
+      }
 
       // Create error object with response details
       const errorData: {
@@ -198,11 +196,12 @@ async function fetchSpotifyData(): Promise<SpotifyData> {
     }
 
     const data = await response.json() as SpotifyData & { error?: string };
-    const endTime = performance.now();
-
-    // Calculate data size for performance metrics
-    const dataSize = (data.topTracks?.length || 0) + (data.topArtists?.length || 0);
-    logPerformanceMetrics('Data Fetch Success', startTime, endTime, dataSize);
+    const endTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
+    if (process.env.NODE_ENV === 'development') {
+      // Calculate data size for performance metrics
+      const dataSize = (data.topTracks?.length || 0) + (data.topArtists?.length || 0);
+      logPerformanceMetrics('Data Fetch Success', startTime, endTime, dataSize);
+    }
 
     // Handle insufficient data case (not an error, but special case)
     if (data.error === 'insufficient_data') {
@@ -211,8 +210,10 @@ async function fetchSpotifyData(): Promise<SpotifyData> {
 
     return data;
   } catch (error) {
-    const endTime = performance.now();
-    logPerformanceMetrics('Fetch Error', startTime, endTime);
+    const endTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
+    if (process.env.NODE_ENV === 'development') {
+      logPerformanceMetrics('Fetch Error', startTime, endTime);
+    }
     throw error;
   }
 }
@@ -221,7 +222,7 @@ async function fetchSpotifyData(): Promise<SpotifyData> {
  * Fetches top tracks with performance optimization
  */
 async function fetchTopTracks(timeRange: string = 'short_term'): Promise<SpotifyTrack[]> {
-  const startTime = performance.now();
+  const startTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
 
   try {
     const response = await fetch(`/api/spotify/top-items?type=tracks&time_range=${timeRange}`, {
@@ -236,13 +237,16 @@ async function fetchTopTracks(timeRange: string = 'short_term'): Promise<Spotify
     }
 
     const data = await response.json() as { topTracks: SpotifyTrack[] };
-    const endTime = performance.now();
-
-    logPerformanceMetrics('Top Tracks Fetch', startTime, endTime, data.topTracks?.length);
+    const endTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
+    if (process.env.NODE_ENV === 'development') {
+      logPerformanceMetrics('Top Tracks Fetch', startTime, endTime, data.topTracks?.length);
+    }
     return data.topTracks || [];
   } catch (error) {
-    const endTime = performance.now();
-    logPerformanceMetrics('Top Tracks Error', startTime, endTime);
+    const endTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
+    if (process.env.NODE_ENV === 'development') {
+      logPerformanceMetrics('Top Tracks Error', startTime, endTime);
+    }
     throw error;
   }
 }
@@ -251,7 +255,7 @@ async function fetchTopTracks(timeRange: string = 'short_term'): Promise<Spotify
  * Fetches top artists with performance optimization
  */
 async function fetchTopArtists(timeRange: string = 'short_term'): Promise<SpotifyArtist[]> {
-  const startTime = performance.now();
+  const startTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
 
   try {
     const response = await fetch(`/api/spotify/top-items?type=artists&time_range=${timeRange}`, {
@@ -266,13 +270,16 @@ async function fetchTopArtists(timeRange: string = 'short_term'): Promise<Spotif
     }
 
     const data = await response.json() as { topArtists: SpotifyArtist[] };
-    const endTime = performance.now();
-
-    logPerformanceMetrics('Top Artists Fetch', startTime, endTime, data.topArtists?.length);
+    const endTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
+    if (process.env.NODE_ENV === 'development') {
+      logPerformanceMetrics('Top Artists Fetch', startTime, endTime, data.topArtists?.length);
+    }
     return data.topArtists || [];
   } catch (error) {
-    const endTime = performance.now();
-    logPerformanceMetrics('Top Artists Error', startTime, endTime);
+    const endTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
+    if (process.env.NODE_ENV === 'development') {
+      logPerformanceMetrics('Top Artists Error', startTime, endTime);
+    }
     throw error;
   }
 }
@@ -284,7 +291,7 @@ async function fetchParallelSpotifyData(timeRange: string = 'short_term'): Promi
   topTracks: SpotifyTrack[];
   topArtists: SpotifyArtist[];
 }> {
-  const startTime = performance.now();
+  const startTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
 
   try {
     // Fetch tracks and artists in parallel using Promise.all
@@ -293,9 +300,12 @@ async function fetchParallelSpotifyData(timeRange: string = 'short_term'): Promi
       fetchTopArtists(timeRange)
     ]);
 
-    const endTime = performance.now();
-    logPerformanceMetrics('Parallel Fetch Complete', startTime, endTime,
-      (topTracks?.length || 0) + (topArtists?.length || 0));
+  // Removed unused endTime variable
+    if (process.env.NODE_ENV === 'development') {
+      const parallelEndTime = performance.now();
+      logPerformanceMetrics('Parallel Fetch Complete', startTime, parallelEndTime,
+        (topTracks?.length || 0) + (topArtists?.length || 0));
+    }
 
     return {
       topTracks,

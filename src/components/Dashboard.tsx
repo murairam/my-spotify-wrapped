@@ -115,9 +115,7 @@ export default function Dashboard() {
   const handleFetchData = useCallback(() => {
     if (process.env.NODE_ENV === 'development') {
       fetchStartTime.current = performance.now();
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🚀 Starting data fetch...');
-      }
+      console.log('🚀 Starting data fetch...');
     }
 
     if (!hasAttemptedLoad) {
@@ -135,9 +133,7 @@ export default function Dashboard() {
       lastRefreshTime.current = now;
       handleFetchData();
     } else if (process.env.NODE_ENV === 'development') {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🚫 Refresh throttled - please wait');
-      }
+      console.log('🚫 Refresh throttled - please wait');
     }
   }, [handleFetchData]);
 
@@ -156,51 +152,32 @@ export default function Dashboard() {
   // Performance monitoring for data loading (development only)
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return;
-
     if (!isLoading && spotifyData && fetchStartTime.current > 0) {
-      // Clear console and show only audio features debug
-      if (process.env.NODE_ENV === 'development') {
-        console.clear();
-        console.log('%c� AUDIO FEATURES DEBUG REPORT', 'background: #1DB954; color: white; font-size: 16px; padding: 8px; border-radius: 4px;');
-      }
-
-      // Check mostPlayedSongs for audio features
-  const mostPlayedSongs = spotifyData.mostPlayedSongs as Record<string, import("@/hooks/useSpotifyData").SpotifyTrack[]> | undefined;
+      // Only run in development
+      console.clear();
+      console.log('%c� AUDIO FEATURES DEBUG REPORT', 'background: #1DB954; color: white; font-size: 16px; padding: 8px; border-radius: 4px;');
+      const mostPlayedSongs = spotifyData.mostPlayedSongs as Record<string, import("@/hooks/useSpotifyData").SpotifyTrack[]> | undefined;
       let totalTracksWithAudio = 0;
       let totalTracks = 0;
-
       if (mostPlayedSongs) {
         Object.keys(mostPlayedSongs).forEach(timeRange => {
           const tracks = mostPlayedSongs[timeRange] || [];
-          const tracksWithAudio = tracks; // No audio features in dev mode
-
+          const tracksWithAudio = tracks;
           totalTracks += tracks.length;
           totalTracksWithAudio += tracksWithAudio.length;
-
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`%c${timeRange.toUpperCase()}:`, 'color: #1DB954; font-weight: bold;',
-              `${tracksWithAudio.length}/${tracks.length} tracks have audio features`);
-          }
-
-          // Skipped: audio feature sample logging (not used in dev mode)
+          console.log(`%c${timeRange.toUpperCase()}:`, 'color: #1DB954; font-weight: bold;', `${tracksWithAudio.length}/${tracks.length} tracks have audio features`);
         });
       }
-
-      // Summary
       const percentage = totalTracks > 0 ? ((totalTracksWithAudio / totalTracks) * 100).toFixed(1) : '0';
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`%c📊 SUMMARY: ${totalTracksWithAudio}/${totalTracks} tracks (${percentage}%) have audio features`,
-          totalTracksWithAudio > 0 ? 'background: green; color: white; padding: 4px;' : 'background: red; color: white; padding: 4px;');
-      }
-
+      console.log(`%c📊 SUMMARY: ${totalTracksWithAudio}/${totalTracks} tracks (${percentage}%) have audio features`, totalTracksWithAudio > 0 ? 'background: green; color: white; padding: 4px;' : 'background: red; color: white; padding: 4px;');
       fetchStartTime.current = 0;
     }
   }, [isLoading, spotifyData]);
 
   // Performance monitoring for rendering (development only) - FIXED: added dependency array
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') return;
-    renderStartTime.current = performance.now();
+  if (process.env.NODE_ENV !== 'development') return;
+  renderStartTime.current = performance.now();
   }, [spotifyData]);
 
   useEffect(() => {
@@ -208,9 +185,7 @@ export default function Dashboard() {
     if (spotifyData && renderStartTime.current > 0) {
       const renderEndTime = performance.now();
       const renderDuration = renderEndTime - renderStartTime.current;
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`🎨 UI render time: ${renderDuration.toFixed(2)}ms`);
-      }
+      console.log(`🎨 UI render time: ${renderDuration.toFixed(2)}ms`);
       renderStartTime.current = 0;
     }
   }, [spotifyData]); // FIXED: Added missing dependency array
