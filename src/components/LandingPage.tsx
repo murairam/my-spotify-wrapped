@@ -35,13 +35,15 @@ useEffect(() => {
         const res = await fetch(`/api/spotify/top-items?time_range=${timeRange}`);
         if (!res.ok) throw new Error('Failed to fetch Spotify data');
         const data = await res.json();
-        // Transform API response to match Dashboard's expected shape
+        // Always use the correct time range for topTracks/topArtists if available
+        const topTracks = data.topTracksByTimeRange?.[timeRange] || data.topTracks || [];
+        const topArtists = data.topArtistsByTimeRange?.[timeRange] || data.topArtists || [];
         const musicIntelligence = data.discoveryMetrics || null;
         // Extract top genres from topArtists (flatten, count, sort by frequency)
         let topGenres: string[] = [];
-        if (Array.isArray(data.topArtists)) {
+        if (Array.isArray(topArtists)) {
           const genreCounts: Record<string, number> = {};
-          data.topArtists.forEach((artist: { genres?: string[] }) => {
+          topArtists.forEach((artist: { genres?: string[] }) => {
             if (Array.isArray(artist.genres)) {
               artist.genres.forEach((genre: string) => {
                 genreCounts[genre] = (genreCounts[genre] || 0) + 1;
@@ -55,6 +57,8 @@ useEffect(() => {
         }
         setSpotifyData({
           ...data,
+          topTracks,
+          topArtists,
           musicIntelligence,
           topGenres,
         });
