@@ -20,6 +20,8 @@ interface RecentTrack {
   played_at: string;
 }
 
+export type { RecentTrack };
+
 interface RecentlyPlayedTimelineProps {
   recentTracks?: RecentTrack[] | null;
   isLoading?: boolean;

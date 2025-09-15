@@ -21,6 +21,8 @@ interface SocialMetrics {
   accountType?: string;
 }
 
+export type { SocialMetrics };
+
 interface MusicIntelligenceProps {
   discoveryMetrics?: DiscoveryMetrics;
   socialMetrics?: SocialMetrics;

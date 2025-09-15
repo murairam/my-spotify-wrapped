@@ -1,3 +1,4 @@
+const path = require('path');
 const nextConfig = {
   reactStrictMode: false, // Temporarily disabled for debugging - consider re-enabling later
   images: {
@@ -58,6 +59,10 @@ const nextConfig = {
   // Add environment variable validation
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+  webpack: (config) => {
+    config.resolve.alias['@'] = path.join(__dirname, 'src');
+    return config;
   },
 };
 

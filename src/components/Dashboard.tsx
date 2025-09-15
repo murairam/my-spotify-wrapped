@@ -1,44 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { signOut } from 'next-auth/react';
 import { FaMusic, FaMicrophone, FaPalette, FaBrain, FaChartLine, FaUsers, FaCrown, FaUser, FaPlay, FaHeart, FaClock, FaCalendarAlt, FaSignOutAlt, FaExternalLinkAlt } from 'react-icons/fa';
 import { getDataForTimeRange, MockSpotifyData } from '@/lib/mockData';
+
 
 const TIME_RANGES = [
   { key: 'short_term', label: 'Last 4 Weeks' },
   { key: 'medium_term', label: 'Last 6 Months' },
   { key: 'long_term', label: 'All Time' }
 ] as const;
-
 type TimeRangeKey = typeof TIME_RANGES[number]['key'];
 
 interface DashboardProps {
   isDemo?: boolean;
   onLogout?: () => void;
   spotifyData?: MockSpotifyData;
+  timeRange?: TimeRangeKey;
+  onTimeRangeChange?: (range: TimeRangeKey) => void;
 }
 
-export default function Dashboard({ isDemo = false, onLogout, spotifyData }: DashboardProps) {
-  const [selectedRange, setSelectedRange] = useState<TimeRangeKey>('short_term');
+export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeRange = 'short_term', onTimeRangeChange }: DashboardProps) {
   const [currentData, setCurrentData] = useState<MockSpotifyData | null>(null);
 
   useEffect(() => {
-    if (isDemo) {
-      setCurrentData(getDataForTimeRange(selectedRange));
+    if (isDemo && onTimeRangeChange) {
+      setCurrentData(getDataForTimeRange(timeRange));
     } else if (spotifyData) {
       setCurrentData(spotifyData);
     }
-  }, [selectedRange, isDemo, spotifyData]);
-
-  const handleTimeRangeChange = (newRange: TimeRangeKey) => {
-    setSelectedRange(newRange);
-    if (isDemo) {
-      setCurrentData(getDataForTimeRange(newRange));
-    }
-  };
+  }, [timeRange, isDemo, spotifyData, onTimeRangeChange]);
 
   const handleLogout = () => {
-    if (onLogout) {
+    if (isDemo && onLogout) {
+      setCurrentData(null);
+  // No-op: setSelectedRange removed, handled by parent
       onLogout();
+    } else {
+      signOut({ callbackUrl: '/' });
     }
   };
 
@@ -75,17 +74,21 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData }: Das
               {/* Global Time Range Selector */}
               <div className="flex items-center gap-3">
                 <FaClock className="text-[#1DB954] text-lg" />
-                <select
-                  className="bg-[#1a1a1a] text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none text-sm font-medium min-w-[180px]"
-                  value={selectedRange}
-                  onChange={(e) => handleTimeRangeChange(e.target.value as TimeRangeKey)}
-                >
-                  {TIME_RANGES.map(range => (
-                    <option key={range.key} value={range.key}>
-                      {range.label}
-                    </option>
-                  ))}
-                </select>
+                {onTimeRangeChange ? (
+                  <select
+                    className="bg-[#1a1a1a] text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none text-sm font-medium min-w-[180px]"
+                    value={timeRange}
+                    onChange={(e) => onTimeRangeChange(e.target.value as TimeRangeKey)}
+                  >
+                    {TIME_RANGES.map(range => (
+                      <option key={range.key} value={range.key}>
+                        {range.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span>{TIME_RANGES.find(r => r.key === timeRange)?.label}</span>
+                )}
               </div>
 
               {/* Logout Button */}
@@ -141,7 +144,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData }: Das
                   <FaMusic className="text-[#1DB954] text-2xl" />
                   <h2 className="text-2xl font-bold text-white">Top Tracks</h2>
                   <span className="text-gray-400 text-sm ml-auto">
-                    {TIME_RANGES.find(r => r.key === selectedRange)?.label}
+                    {TIME_RANGES.find(r => r.key === timeRange)?.label}
                   </span>
                 </div>
               </div>
@@ -187,7 +190,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData }: Das
 
                 {/* Spotify Attribution */}
                 <div className="mt-6 pt-4 border-t border-gray-800 flex items-center justify-center gap-2 text-gray-400 text-sm">
-                  <Image src="https://open.spotifycdn.com/cdn/images/favicon16.ico" alt="Spotify" width={16} height={16} className="w-4 h-4" unoptimized />
+                  <Image src="/spotify-icon.png" alt="Spotify" width={16} height={16} className="w-4 h-4" unoptimized />
                   <span>Powered by Spotify</span>
                 </div>
               </div>
@@ -200,7 +203,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData }: Das
                   <FaMicrophone className="text-[#1DB954] text-2xl" />
                   <h2 className="text-2xl font-bold text-white">Top Artists</h2>
                   <span className="text-gray-400 text-sm ml-auto">
-                    {TIME_RANGES.find(r => r.key === selectedRange)?.label}
+                    {TIME_RANGES.find(r => r.key === timeRange)?.label}
                   </span>
                 </div>
               </div>
@@ -254,25 +257,28 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData }: Das
                 <FaBrain className="text-[#1DB954] text-2xl" />
                 <h2 className="text-xl font-bold text-white">Music Intelligence</h2>
               </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
-                  <span className="text-gray-300 text-sm">Mainstream Taste</span>
-                  <span className="text-white font-bold">{currentData.musicIntelligence.mainstreamTaste}%</span>
+              {currentData.musicIntelligence ? (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
+                    <span className="text-gray-300 text-sm">Mainstream Taste</span>
+                    <span className="text-white font-bold">{currentData.musicIntelligence.mainstreamTaste}%</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
+                    <span className="text-gray-300 text-sm">Artist Diversity</span>
+                    <span className="text-white font-bold">{currentData.musicIntelligence.artistDiversity}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
+                    <span className="text-gray-300 text-sm">Vintage Collector</span>
+                    <span className="text-white font-bold">{currentData.musicIntelligence.vintageCollector}%</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
+                    <span className="text-gray-300 text-sm">Underground Taste</span>
+                    <span className="text-white font-bold">{currentData.musicIntelligence.undergroundTaste}%</span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
-                  <span className="text-gray-300 text-sm">Artist Diversity</span>
-                  <span className="text-white font-bold">{currentData.musicIntelligence.artistDiversity}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
-                  <span className="text-gray-300 text-sm">Vintage Collector</span>
-                  <span className="text-white font-bold">{currentData.musicIntelligence.vintageCollector}%</span>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
-                  <span className="text-gray-300 text-sm">Underground Taste</span>
-                  <span className="text-white font-bold">{currentData.musicIntelligence.undergroundTaste}%</span>
-                </div>
-              </div>
+              ) : (
+                <div className="text-gray-400">Music intelligence data not available.</div>
+              )}
             </div>
 
             {/* Music DNA - Top Genres */}
@@ -280,22 +286,28 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData }: Das
               <div className="flex items-center gap-3 mb-6">
                 <FaPalette className="text-[#1DB954] text-2xl" />
                 <h2 className="text-xl font-bold text-white">Music DNA</h2>
-                <span className="text-gray-400 text-sm ml-auto">{currentData.topGenres.length} genres</span>
+                <span className="text-gray-400 text-sm ml-auto">
+                  {Array.isArray(currentData.topGenres) ? `${currentData.topGenres.length} genres` : 'No genre data'}
+                </span>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {currentData.topGenres.map((genre, index) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-2 rounded-full text-sm font-medium"
-                    style={{
-                      backgroundColor: `rgba(29, 185, 84, ${Math.max(0.3, 1 - index * 0.1)})`,
-                      color: 'white'
-                    }}
-                  >
-                    {genre}
-                  </span>
-                ))}
+                {Array.isArray(currentData.topGenres) && currentData.topGenres.length > 0 ? (
+                  currentData.topGenres.map((genre, index) => (
+                    <span
+                      key={genre}
+                      className="px-3 py-2 rounded-full text-sm font-medium"
+                      style={{
+                        backgroundColor: `rgba(29, 185, 84, ${Math.max(0.3, 1 - index * 0.1)})`,
+                        color: 'white'
+                      }}
+                    >
+                      {genre}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-gray-400">No genres available</span>
+                )}
               </div>
             </div>
 
@@ -307,21 +319,27 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData }: Das
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <FaHeart className="text-red-500" />
-                  <span className="text-gray-300">Unique Albums</span>
-                  <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.uniqueAlbumsCount}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <FaCalendarAlt className="text-blue-500" />
-                  <span className="text-gray-300">Recent Music</span>
-                  <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.recentMusicLover}%</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <FaUsers className="text-purple-500" />
-                  <span className="text-gray-300">Artist Diversity</span>
-                  <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.artistDiversity}</span>
-                </div>
+                {currentData.musicIntelligence ? (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <FaHeart className="text-red-500" />
+                      <span className="text-gray-300">Unique Albums</span>
+                      <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.uniqueAlbumsCount}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <FaCalendarAlt className="text-blue-500" />
+                      <span className="text-gray-300">Recent Music</span>
+                      <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.recentMusicLover}%</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <FaUsers className="text-purple-500" />
+                      <span className="text-gray-300">Artist Diversity</span>
+                      <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.artistDiversity}</span>
+                    </div>
+                  </>
+                ) : (
+                  <span className="text-gray-400">No quick stats available</span>
+                )}
               </div>
             </div>
           </div>
@@ -330,8 +348,11 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData }: Das
         {/* Footer Attribution */}
         <div className="mt-12 pt-8 border-t border-gray-800 text-center">
           <div className="flex items-center justify-center gap-3 text-gray-400">
-            <Image src="https://open.spotifycdn.com/cdn/images/favicon32.ico" alt="Spotify" width={32} height={32} className="w-6 h-6" unoptimized />
-            <span>Data provided by Spotify Web API</span>
+              <span className="flex items-center justify-center gap-1">
+                Data provided by
+                <Image src="/spotify-logo.svg" alt="Spotify" width={24} height={24} className="inline align-middle h-6 w-auto mx-1" unoptimized />
+                Web API
+              </span>
           </div>
         </div>
       </div>

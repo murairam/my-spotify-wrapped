@@ -1,4 +1,4 @@
-import { useState } from 'react';
+// Removed useState for centralized time range
 // Replaced emojis with FontAwesome icons for Spotify design compliance
 import { FaMusic } from 'react-icons/fa';
 import PopularityBar from './PopularityBar';
@@ -28,6 +28,8 @@ interface TopTracksProps {
   className?: string;
   /** Whether the component is in a loading state */
   isLoading?: boolean;
+  /** Centralized time range key */
+  timeRange: 'short_term' | 'medium_term' | 'long_term';
 }
 
 /**
@@ -46,34 +48,27 @@ export default function TopTracks({
   topTracksByTimeRange,
   topTracks = [],
   className = "",
-  isLoading = false
+  isLoading = false,
+  timeRange
 }: TopTracksProps) {
-  const [selectedTimeRange, setSelectedTimeRange] = useState("short_term");
-
-  // Get tracks for the selected time range or fall back to topTracks
-  const currentTracks = topTracksByTimeRange?.[selectedTimeRange as keyof TracksData] || topTracks || [];
+  // Get tracks for the centralized time range or fall back to topTracks
+  const currentTracks = topTracksByTimeRange?.[timeRange as keyof TracksData] || topTracks || [];
 
   return (
     <div className={`bg-[#191414] p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-800 shadow-xl ${className}`}>
-      {/* Header with time range selector */}
+      {/* Header with centralized time range label */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
         <div className="flex items-center">
-          {/* Replaced emoji with FaMusic for Spotify design compliance */}
           <div className="text-2xl sm:text-3xl mr-2 sm:mr-3 text-[#1DB954]">
             <FaMusic />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-white">Top Tracks</h2>
         </div>
-        <select
-          className="bg-black/40 text-white text-sm px-3 py-2 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none w-full sm:w-auto min-h-[44px] touch-manipulation"
-          value={selectedTimeRange}
-          onChange={(e) => setSelectedTimeRange(e.target.value)}
-        >
-          {/* Replaced emojis with clean text for Spotify design compliance */}
-          <option value="short_term">Last 4 Weeks</option>
-          <option value="medium_term">Last 6 Months</option>
-          <option value="long_term">~1 Year of Data</option>
-        </select>
+        <span className="text-gray-400 text-sm">
+          {timeRange === 'short_term' && 'Last 4 Weeks'}
+          {timeRange === 'medium_term' && 'Last 6 Months'}
+          {timeRange === 'long_term' && 'All Time'}
+        </span>
       </div>
 
       {/* Tracks list */}
