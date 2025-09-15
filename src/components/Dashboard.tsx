@@ -1,55 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { FaMusic, FaMicrophone, FaPalette, FaBrain, FaChartLine, FaUsers, FaCrown, FaUser, FaPlay, FaHeart, FaClock, FaCalendarAlt } from 'react-icons/fa';
-
-// Mock data for demonstration
-const mockData = {
-  userProfile: {
-    display_name: "Music Lover",
-    product: "premium",
-    country: "US",
-    followers: { total: 1234 },
-    id: "user123"
-  },
-  topTracks: [
-    { id: '1', name: 'Blinding Lights', artist: 'The Weeknd', popularity: 95, images: [{ url: 'https://via.placeholder.com/64' }] },
-    { id: '2', name: 'Good 4 U', artist: 'Olivia Rodrigo', popularity: 89, images: [{ url: 'https://via.placeholder.com/64' }] },
-    { id: '3', name: 'Levitating', artist: 'Dua Lipa', popularity: 92, images: [{ url: 'https://via.placeholder.com/64' }] },
-    { id: '4', name: 'Watermelon Sugar', artist: 'Harry Styles', popularity: 88, images: [{ url: 'https://via.placeholder.com/64' }] },
-    { id: '5', name: 'drivers license', artist: 'Olivia Rodrigo', popularity: 87, images: [{ url: 'https://via.placeholder.com/64' }] }
-  ],
-  topArtists: [
-    { id: '1', name: 'The Weeknd', genres: ['pop', 'r&b'], popularity: 95, images: [{ url: 'https://via.placeholder.com/64' }] },
-    { id: '2', name: 'Olivia Rodrigo', genres: ['pop', 'alternative'], popularity: 92, images: [{ url: 'https://via.placeholder.com/64' }] },
-    { id: '3', name: 'Dua Lipa', genres: ['pop', 'dance'], popularity: 90, images: [{ url: 'https://via.placeholder.com/64' }] },
-    { id: '4', name: 'Harry Styles', genres: ['pop', 'rock'], popularity: 89, images: [{ url: 'https://via.placeholder.com/64' }] },
-    { id: '5', name: 'Taylor Swift', genres: ['pop', 'country'], popularity: 94, images: [{ url: 'https://via.placeholder.com/64' }] }
-  ],
-  musicIntelligence: {
-    mainstreamTaste: 85,
-    artistDiversity: 42,
-    vintageCollector: 15,
-    undergroundTaste: 25,
-    recentMusicLover: 70,
-    uniqueAlbumsCount: 89
-  },
-  topGenres: ['pop', 'r&b', 'alternative', 'dance', 'rock', 'indie', 'hip-hop', 'electronic']
-};
+import { FaMusic, FaMicrophone, FaPalette, FaBrain, FaChartLine, FaUsers, FaCrown, FaUser, FaPlay, FaHeart, FaClock, FaCalendarAlt, FaSignOutAlt, FaExternalLinkAlt } from 'react-icons/fa';
+import { getDataForTimeRange, MockSpotifyData } from '@/lib/mockData';
 
 const TIME_RANGES = [
   { key: 'short_term', label: 'Last 4 Weeks' },
   { key: 'medium_term', label: 'Last 6 Months' },
   { key: 'long_term', label: 'All Time' }
-];
+] as const;
 
-export default function ImprovedDashboard() {
-  const [selectedRange, setSelectedRange] = useState('short_term');
+type TimeRangeKey = typeof TIME_RANGES[number]['key'];
+
+interface DashboardProps {
+  isDemo?: boolean;
+  onLogout?: () => void;
+  spotifyData?: MockSpotifyData;
+}
+
+export default function Dashboard({ isDemo = false, onLogout, spotifyData }: DashboardProps) {
+  const [selectedRange, setSelectedRange] = useState<TimeRangeKey>('short_term');
+  const [currentData, setCurrentData] = useState<MockSpotifyData | null>(null);
+
+  useEffect(() => {
+    if (isDemo) {
+      setCurrentData(getDataForTimeRange(selectedRange));
+    } else if (spotifyData) {
+      setCurrentData(spotifyData);
+    }
+  }, [selectedRange, isDemo, spotifyData]);
+
+  const handleTimeRangeChange = (newRange: TimeRangeKey) => {
+    setSelectedRange(newRange);
+    if (isDemo) {
+      setCurrentData(getDataForTimeRange(newRange));
+    }
+  };
+
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
+  if (!currentData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#191414] via-[#1a1a1a] to-[#121212] flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#191414] via-[#1a1a1a] to-[#121212] text-white">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
-        {/* Header with Global Time Range Selector */}
+        {/* Header with Global Time Range Selector and Logout */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
@@ -58,23 +63,39 @@ export default function ImprovedDashboard() {
               </h1>
               <p className="text-gray-400 text-lg">
                 Discover your music personality and listening habits
+                {isDemo && (
+                  <span className="ml-2 px-2 py-1 bg-purple-600/20 text-purple-400 text-xs rounded-full border border-purple-600/30">
+                    DEMO MODE
+                  </span>
+                )}
               </p>
             </div>
 
-            {/* Global Time Range Selector */}
-            <div className="flex items-center gap-3">
-              <FaClock className="text-[#1DB954] text-lg" />
-              <select
-                className="bg-[#1a1a1a] text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none text-sm font-medium min-w-[180px]"
-                value={selectedRange}
-                onChange={(e) => setSelectedRange(e.target.value)}
+            <div className="flex items-center gap-4">
+              {/* Global Time Range Selector */}
+              <div className="flex items-center gap-3">
+                <FaClock className="text-[#1DB954] text-lg" />
+                <select
+                  className="bg-[#1a1a1a] text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none text-sm font-medium min-w-[180px]"
+                  value={selectedRange}
+                  onChange={(e) => handleTimeRangeChange(e.target.value as TimeRangeKey)}
+                >
+                  {TIME_RANGES.map(range => (
+                    <option key={range.key} value={range.key}>
+                      {range.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 rounded-lg border border-red-600/30 hover:border-red-600/50 transition-all text-sm font-medium"
               >
-                {TIME_RANGES.map(range => (
-                  <option key={range.key} value={range.key}>
-                    {range.label}
-                  </option>
-                ))}
-              </select>
+                <FaSignOutAlt />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
         </div>
@@ -85,23 +106,23 @@ export default function ImprovedDashboard() {
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-[#1DB954] rounded-full flex items-center justify-center">
                 <span className="text-white text-xl font-bold">
-                  {mockData.userProfile?.display_name?.charAt(0) || <FaUser />}
+                  {currentData.userProfile?.display_name?.charAt(0) || <FaUser />}
                 </span>
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-white">
-                  {mockData.userProfile?.display_name}
+                  {currentData.userProfile?.display_name}
                 </h3>
                 <p className="text-green-300 text-sm flex items-center gap-2">
                   <FaChartLine size={12} />
-                  {mockData.userProfile?.country} • {mockData.userProfile?.followers?.total} followers
+                  {currentData.userProfile?.country} • {currentData.userProfile?.followers?.total} followers
                 </p>
               </div>
             </div>
             <div className="text-right">
               <div className="text-green-400 text-sm font-medium flex items-center gap-2 justify-end">
                 <FaCrown size={14} />
-                {mockData.userProfile?.product === 'premium' ? 'Premium' : 'Free'}
+                {currentData.userProfile?.product === 'premium' ? 'Premium' : 'Free'}
               </div>
             </div>
           </div>
@@ -113,7 +134,7 @@ export default function ImprovedDashboard() {
           {/* Left Column - Primary Charts */}
           <div className="xl:col-span-2 space-y-8">
 
-            {/* Top Tracks - Redesigned */}
+            {/* Top Tracks */}
             <div className="bg-[#1a1a1a] rounded-xl border border-gray-800 overflow-hidden">
               <div className="p-6 border-b border-gray-800">
                 <div className="flex items-center gap-3">
@@ -127,7 +148,7 @@ export default function ImprovedDashboard() {
 
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {mockData.topTracks.slice(0, 6).map((track, index) => (
+                  {currentData.topTracks.slice(0, 6).map((track, index) => (
                     <div key={track.id} className="flex items-center gap-4 p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all group">
                       <div className="w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-sm">
                         {index + 1}
@@ -137,15 +158,28 @@ export default function ImprovedDashboard() {
                         alt={track.name}
                         width={48}
                         height={48}
-                        className="w-12 h-12 rounded-lg object-cover"
+                        className="w-12 h-12 rounded object-cover"
                         unoptimized
                       />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-white truncate">{track.name}</h4>
                         <p className="text-gray-400 text-sm truncate">{track.artist}</p>
                       </div>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <FaPlay className="text-[#1DB954] cursor-pointer" />
+                      <div className="flex items-center gap-2">
+                        {track.external_urls?.spotify && (
+                          <a
+                            href={track.external_urls.spotify}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#1DB954] hover:text-green-400 transition-colors"
+                            title="Open in Spotify"
+                          >
+                            <FaExternalLinkAlt size={14} />
+                          </a>
+                        )}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <FaPlay className="text-[#1DB954] cursor-pointer" size={14} />
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -159,7 +193,7 @@ export default function ImprovedDashboard() {
               </div>
             </div>
 
-            {/* Top Artists - Redesigned */}
+            {/* Top Artists */}
             <div className="bg-[#1a1a1a] rounded-xl border border-gray-800 overflow-hidden">
               <div className="p-6 border-b border-gray-800">
                 <div className="flex items-center gap-3">
@@ -173,7 +207,7 @@ export default function ImprovedDashboard() {
 
               <div className="p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mockData.topArtists.slice(0, 6).map((artist, index) => (
+                  {currentData.topArtists.slice(0, 6).map((artist, index) => (
                     <div key={artist.id} className="text-center p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all group">
                       <div className="relative">
                         <Image
@@ -189,9 +223,21 @@ export default function ImprovedDashboard() {
                         </div>
                       </div>
                       <h4 className="font-semibold text-white text-sm mb-1">{artist.name}</h4>
-                      <p className="text-gray-400 text-xs">
+                      <p className="text-gray-400 text-xs mb-2">
                         {artist.genres.slice(0, 2).join(', ')}
                       </p>
+                      {artist.external_urls?.spotify && (
+                        <a
+                          href={artist.external_urls.spotify}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[#1DB954] hover:text-green-400 transition-colors text-xs"
+                          title="Open in Spotify"
+                        >
+                          <FaExternalLinkAlt size={10} />
+                          <span>Open</span>
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -212,19 +258,19 @@ export default function ImprovedDashboard() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
                   <span className="text-gray-300 text-sm">Mainstream Taste</span>
-                  <span className="text-white font-bold">{mockData.musicIntelligence.mainstreamTaste}%</span>
+                  <span className="text-white font-bold">{currentData.musicIntelligence.mainstreamTaste}%</span>
                 </div>
                 <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
                   <span className="text-gray-300 text-sm">Artist Diversity</span>
-                  <span className="text-white font-bold">{mockData.musicIntelligence.artistDiversity}</span>
+                  <span className="text-white font-bold">{currentData.musicIntelligence.artistDiversity}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
                   <span className="text-gray-300 text-sm">Vintage Collector</span>
-                  <span className="text-white font-bold">{mockData.musicIntelligence.vintageCollector}%</span>
+                  <span className="text-white font-bold">{currentData.musicIntelligence.vintageCollector}%</span>
                 </div>
                 <div className="flex justify-between items-center p-3 rounded-lg bg-black/20">
                   <span className="text-gray-300 text-sm">Underground Taste</span>
-                  <span className="text-white font-bold">{mockData.musicIntelligence.undergroundTaste}%</span>
+                  <span className="text-white font-bold">{currentData.musicIntelligence.undergroundTaste}%</span>
                 </div>
               </div>
             </div>
@@ -234,11 +280,11 @@ export default function ImprovedDashboard() {
               <div className="flex items-center gap-3 mb-6">
                 <FaPalette className="text-[#1DB954] text-2xl" />
                 <h2 className="text-xl font-bold text-white">Music DNA</h2>
-                <span className="text-gray-400 text-sm ml-auto">{mockData.topGenres.length} genres</span>
+                <span className="text-gray-400 text-sm ml-auto">{currentData.topGenres.length} genres</span>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {mockData.topGenres.map((genre, index) => (
+                {currentData.topGenres.map((genre, index) => (
                   <span
                     key={genre}
                     className="px-3 py-2 rounded-full text-sm font-medium"
@@ -264,17 +310,17 @@ export default function ImprovedDashboard() {
                 <div className="flex items-center gap-3">
                   <FaHeart className="text-red-500" />
                   <span className="text-gray-300">Unique Albums</span>
-                  <span className="text-white font-bold ml-auto">{mockData.musicIntelligence.uniqueAlbumsCount}</span>
+                  <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.uniqueAlbumsCount}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <FaCalendarAlt className="text-blue-500" />
                   <span className="text-gray-300">Recent Music</span>
-                  <span className="text-white font-bold ml-auto">{mockData.musicIntelligence.recentMusicLover}%</span>
+                  <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.recentMusicLover}%</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <FaUsers className="text-purple-500" />
                   <span className="text-gray-300">Artist Diversity</span>
-                  <span className="text-white font-bold ml-auto">{mockData.musicIntelligence.artistDiversity}</span>
+                  <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.artistDiversity}</span>
                 </div>
               </div>
             </div>
