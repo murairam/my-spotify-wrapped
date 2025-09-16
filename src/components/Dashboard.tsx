@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { FaMusic, FaMicrophone, FaPalette, FaBrain, FaChartLine, FaUsers, FaCrown, FaUser, FaPlay, FaHeart, FaClock, FaCalendarAlt, FaSignOutAlt, FaExternalLinkAlt } from 'react-icons/fa';
 import { getDataForTimeRange, MockSpotifyData } from '@/lib/mockData';
+import AIIntelligenceSection from './ai/AIIntelligenceSection';
 
 
 const TIME_RANGES = [
@@ -343,6 +344,14 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
               </div>
             </div>
           </div>
+        </div>
+
+        {/* AI Intelligence Section - Full Width Below Main Dashboard */}
+        <div className="mt-16 pt-8 border-t border-gray-800">
+          <AIIntelligenceSection
+            spotifyData={currentData}
+            className="w-full"
+          />
         </div>
 
         {/* Footer Attribution */}
