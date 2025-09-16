@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { FaMusic, FaChevronDown, FaChevronUp, FaSpotify } from 'react-icons/fa';
 
 interface AIArtistDiscoveryProps {
-  newArtists?: string;
+  newArtists?: unknown;
   className?: string;
 }
 
@@ -44,46 +44,60 @@ export default function AIArtistDiscovery({ newArtists, className = '' }: AIArti
     song?: string;
   }
 
-  const parseArtistRecommendations = (text: string): ArtistRecommendation[] => {
-    const lines = text.split('\n').filter(line => line.trim().length > 0);
-    const recommendations: ArtistRecommendation[] = [];
 
-    let currentRec: ArtistRecommendation | null = null;
-
-    lines.forEach(line => {
-      const trimmed = line.trim();
-
-      // Check if it's a numbered item (new recommendation)
-      const numberMatch = trimmed.match(/^\d+\.\s*(.+)/);
-      if (numberMatch) {
-        if (currentRec && currentRec.artist) {
-          recommendations.push(currentRec);
-        }
-        currentRec = { artist: numberMatch[1], reason: '' };
-      } else if (currentRec && (trimmed.startsWith('-') || trimmed.startsWith('•'))) {
-        // Additional details about current recommendation
-        const detail = trimmed.replace(/^[-•]\s*/, '');
-        if (detail.toLowerCase().includes('song:') || detail.toLowerCase().includes('track:')) {
-          currentRec.song = detail.replace(/.*(?:song|track):\s*/i, '');
-        } else if (detail.toLowerCase().includes('genre:')) {
-          currentRec.genre = detail.replace(/.*genre:\s*/i, '');
-        } else {
-          currentRec.reason += (currentRec.reason ? ' ' : '') + detail;
-        }
-      } else if (currentRec && currentRec.artist && !trimmed.match(/^\d+/)) {
-        // Continuation of reason
-        currentRec.reason += (currentRec.reason ? ' ' : '') + trimmed;
-      }
-    });
-
-    // Add the last recommendation
-
-    if (currentRec) {
-      recommendations.push(currentRec);
+  // Robustly parse structured data or stringified JSON or plain text
+  function parseArtistRecommendations(data: unknown): ArtistRecommendation[] {
+    if (Array.isArray(data)) {
+      return (data as ArtistRecommendation[]).slice(0, 4);
     }
-
-    return recommendations.slice(0, 4); // Limit to 4 recommendations
-  };
+    if (typeof data === 'object' && data !== null) {
+      // Might be { recommendations: [...] } or similar
+      const maybe = data as { recommendations?: ArtistRecommendation[] };
+      if (Array.isArray(maybe.recommendations)) return maybe.recommendations.slice(0, 4);
+    }
+    if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed.slice(0, 4) as ArtistRecommendation[];
+          if (typeof parsed === 'object' && parsed !== null) {
+            const parsedRecord = parsed as Record<string, unknown>;
+            if (Array.isArray(parsedRecord.recommendations)) return (parsedRecord.recommendations as ArtistRecommendation[]).slice(0, 4);
+        }
+      } catch {
+        // Not JSON, treat as plain text
+      }
+      // Fallback: old text format
+      const lines = data.split('\n').filter(line => line.trim().length > 0);
+      const recommendations: ArtistRecommendation[] = [];
+      let currentRec: ArtistRecommendation | null = null;
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        const numberMatch = trimmed.match(/^\d+\.\s*(.+)/);
+        if (numberMatch) {
+          if (currentRec && currentRec.artist) {
+            recommendations.push(currentRec);
+          }
+          currentRec = { artist: numberMatch[1], reason: '' };
+        } else if (currentRec && (trimmed.startsWith('-') || trimmed.startsWith('•'))) {
+          const detail = trimmed.replace(/^[-•]\s*/, '');
+          if (detail.toLowerCase().includes('song:') || detail.toLowerCase().includes('track:')) {
+            currentRec.song = detail.replace(/.*(?:song|track):\s*/i, '');
+          } else if (detail.toLowerCase().includes('genre:')) {
+            currentRec.genre = detail.replace(/.*genre:\s*/i, '');
+          } else {
+            currentRec.reason += (currentRec.reason ? ' ' : '') + detail;
+          }
+        } else if (currentRec && currentRec.artist && !trimmed.match(/^\d+/)) {
+          currentRec.reason += (currentRec.reason ? ' ' : '') + trimmed;
+        }
+      });
+      if (currentRec) {
+        recommendations.push(currentRec);
+      }
+      return recommendations.slice(0, 4);
+    }
+    return [];
+  }
 
   const recommendations = parseArtistRecommendations(newArtists);
 
@@ -147,7 +161,7 @@ export default function AIArtistDiscovery({ newArtists, className = '' }: AIArti
           ) : (
             <div className="text-gray-300 prose prose-invert max-w-none">
               <p className="text-sm leading-relaxed whitespace-pre-line">
-                {newArtists}
+                {typeof newArtists === 'string' ? newArtists : JSON.stringify(newArtists, null, 2)}
               </p>
             </div>
           )}

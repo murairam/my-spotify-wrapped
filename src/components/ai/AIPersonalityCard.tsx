@@ -1,5 +1,79 @@
-// src/components/ai/AIPersonalityCard.tsx
+
 'use client';
+
+// Helper component to extract and display music personality
+interface UserProfileSummary {
+  musicPersonality?: string[];
+  discoveryStyle?: string[];
+  socialProfile?: {
+    likelyTraits?: string[];
+    possibleDemographics?: {
+      ageRange?: string;
+      urbanity?: string;
+      digitalBehavior?: string;
+    };
+  };
+}
+
+function MusicPersonalitySection({ summary }: { summary: string }) {
+  // Try to parse summary as JSON and extract musicPersonality, discoveryStyle, socialProfile
+  let personality: UserProfileSummary | null = null;
+  try {
+    const parsed = JSON.parse(summary || '{}');
+    if (parsed && parsed.metadata && parsed.metadata.userProfileSummary) {
+      personality = parsed.metadata.userProfileSummary as UserProfileSummary;
+    }
+  } catch {
+    // Not JSON, treat as plain text
+  }
+  if (personality) {
+    return (
+      <div>
+        {personality.musicPersonality && (
+          <div className="mb-3">
+            <h4 className="text-white font-semibold mb-1">Music Personality</h4>
+            <ul className="list-disc ml-6 text-gray-200">
+              {personality.musicPersonality.map((trait, i) => (
+                <li key={i}>{trait}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {personality.discoveryStyle && (
+          <div className="mb-3">
+            <h4 className="text-white font-semibold mb-1">Discovery Style</h4>
+            <ul className="list-disc ml-6 text-gray-200">
+              {personality.discoveryStyle.map((style, i) => (
+                <li key={i}>{style}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {personality.socialProfile && (
+          <div className="mb-3">
+            <h4 className="text-white font-semibold mb-1">Social Profile</h4>
+            {personality.socialProfile.likelyTraits && (
+              <ul className="list-disc ml-6 text-gray-200">
+                {personality.socialProfile.likelyTraits.map((trait, i) => (
+                  <li key={i}>{trait}</li>
+                ))}
+              </ul>
+            )}
+            {personality.socialProfile.possibleDemographics && (
+              <div className="mt-2 text-gray-400 text-xs">
+                <div>Age Range: {personality.socialProfile.possibleDemographics.ageRange}</div>
+                <div>Urbanity: {personality.socialProfile.possibleDemographics.urbanity}</div>
+                <div>Digital Behavior: {personality.socialProfile.possibleDemographics.digitalBehavior}</div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+  // Fallback: show summary as plain text
+  return <p className="text-gray-200 leading-relaxed whitespace-pre-line">{summary}</p>;
+}
 
 import React, { useState } from 'react';
 import { FaUser, FaChevronDown, FaChevronUp, FaHeart } from 'react-icons/fa';
@@ -9,6 +83,7 @@ interface AIPersonalityCardProps {
     summary: string;
     enhanced?: {
       funFacts?: string[];
+      userProfileSummary?: unknown;
     };
     confidence: number;
   };
@@ -39,12 +114,16 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
 
       {/* Content */}
       <div className="p-6">
-        {/* Main analysis */}
+
+        {/* Main analysis: prefer structured userProfileSummary in enhanced, otherwise parse summary */}
         <div className="prose prose-invert max-w-none mb-6">
-          <p className="text-gray-200 leading-relaxed whitespace-pre-line">
-            {analysis.summary}
-          </p>
+          {analysis.enhanced?.userProfileSummary ? (
+            <MusicPersonalitySection summary={JSON.stringify({ metadata: { userProfileSummary: analysis.enhanced.userProfileSummary } })} />
+          ) : (
+            <MusicPersonalitySection summary={analysis.summary} />
+          )}
         </div>
+
 
         {/* Fun Facts */}
         {analysis.enhanced?.funFacts && analysis.enhanced.funFacts.length > 0 && (

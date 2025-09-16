@@ -10,6 +10,7 @@ interface AIAnalysisRequest {
     includeNewArtists: boolean;
     includePlaylistSuggestions: boolean;
     includeMoodAnalysis: boolean;
+    includeDebug?: boolean;
   };
 }
 
@@ -26,13 +27,18 @@ interface AIAnalysis {
   summary: string;
   enhanced: {
     concerts: ConcertRecommendation[];
-    newArtists: string;
-    moodAnalysis: string;
-    playlists: string;
+    newArtists?: unknown;
+    moodAnalysis?: unknown;
+    playlists?: unknown;
     funFacts: string[];
   };
   confidence: number;
   timestamp: string;
+  // Development-only debug info returned by the API
+  debug?: {
+    aiText?: string;
+    aiJson?: unknown;
+  };
 }
 
 function useAIAnalysis() {

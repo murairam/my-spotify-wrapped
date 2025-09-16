@@ -31,7 +31,9 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
         includeConcerts: true,
         includeNewArtists: true,
         includePlaylistSuggestions: true,
-        includeMoodAnalysis: true
+        includeMoodAnalysis: true,
+        // request debug output from server for easier troubleshooting
+        includeDebug: true
       }
     });
   };
@@ -124,15 +126,72 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
 
       {/* AI Analysis Results */}
       {analysis && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <AIPersonalityCard analysis={analysis} />
-          <AIConcertFinder
-            concerts={analysis.enhanced?.concerts || []}
-            userLocation={userLocation}
-          />
-          <AIArtistDiscovery newArtists={analysis.enhanced?.newArtists} />
-          <AIPlaylistGenerator playlists={analysis.enhanced?.playlists} />
-          <AIMoodAnalysis moodAnalysis={analysis.enhanced?.moodAnalysis} className="lg:col-span-2" />
+        (() => {
+          // Ensure enhanced fields are passed as strings (components expect string | undefined)
+          const raw = analysis.enhanced || {};
+          const newArtistsProp = raw.newArtists === undefined
+            ? undefined
+            : typeof raw.newArtists === 'string'
+              ? raw.newArtists
+              : JSON.stringify(raw.newArtists);
+
+          const playlistsProp = raw.playlists === undefined
+            ? undefined
+            : typeof raw.playlists === 'string'
+              ? raw.playlists
+              : JSON.stringify(raw.playlists);
+
+          const moodAnalysisProp = raw.moodAnalysis === undefined
+            ? undefined
+            : typeof raw.moodAnalysis === 'string'
+              ? raw.moodAnalysis
+              : JSON.stringify(raw.moodAnalysis);
+
+          return (
+            <div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <AIPersonalityCard analysis={analysis} />
+                <AIConcertFinder
+                  concerts={analysis.enhanced?.concerts || []}
+                  userLocation={userLocation}
+                />
+                <AIArtistDiscovery newArtists={newArtistsProp} />
+                <AIPlaylistGenerator playlists={playlistsProp} />
+                <AIMoodAnalysis moodAnalysis={moodAnalysisProp} className="lg:col-span-2" />
+              </div>
+
+              {/* Debug panel to inspect raw AI output */}
+              {analysis.debug && (
+                <DebugPanel debug={analysis.debug} />
+              )}
+            </div>
+          );
+        })()
+      )}
+    </div>
+  );
+}
+
+function DebugPanel({ debug }: { debug: { aiText?: string; aiJson?: unknown } }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-6 p-4 bg-black/20 border border-gray-800 rounded-lg">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm text-white font-semibold">Dev: AI Debug Output</h4>
+        <button className="text-xs text-gray-400" onClick={() => setOpen(!open)}>
+          {open ? 'Hide' : 'Show'}
+        </button>
+      </div>
+      {open && (
+        <div className="mt-3 text-sm text-gray-200 space-y-3">
+          <div>
+            <h5 className="text-xs text-gray-400 mb-1">aiText</h5>
+            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-48 text-xs whitespace-pre-wrap">{debug.aiText}</pre>
+          </div>
+          <div>
+            <h5 className="text-xs text-gray-400 mb-1">aiJson</h5>
+            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-64 text-xs">{JSON.stringify(debug.aiJson, null, 2)}</pre>
+          </div>
         </div>
       )}
     </div>

@@ -1,7 +1,19 @@
 // src/app/api/mistral/analyze/route.ts - FIXED VERSION
+
 import { NextRequest, NextResponse } from "next/server";
 import { Mistral } from "@mistralai/mistralai";
 import type { SpotifyData, AIAnalysisRequest, ConcertRecommendation } from '@/types/spotify';
+
+// --- Add missing createPersonalityPrompt function ---
+function createPersonalityPrompt(spotifyData: SpotifyData): string {
+  // Compose a summary of the user's music personality for the AI prompt
+  const topArtists = spotifyData.topArtists?.slice(0, 5).map(a => a.name).join(", ") || "unknown artists";
+  const topGenres = spotifyData.topGenres?.slice(0, 5).join(", ") || "various genres";
+  // No moodProfile in MusicIntelligence, so fallback to a generic string
+  const mood = "varied moods";
+  const summary = `The user listens to artists like ${topArtists}, enjoys genres such as ${topGenres}, and their musical mood is described as ${mood}.`;
+  return `Analyze the following Spotify user data and provide insights about their music personality, discovery style, and social profile.\n${summary}`;
+}
 
 const mistral = new Mistral({
   apiKey: process.env.MISTRAL_API_KEY!,
@@ -29,121 +41,264 @@ export async function POST(request: NextRequest) {
     console.log("🤖 Analyzing Spotify data with Mistral AI...");
 
     // Create a comprehensive prompt based on your data structure
-    const prompt = createPersonalityPrompt(spotifyData);
 
-    const chatResponse = await mistral.chat.complete({
-      model: "mistral-large-latest",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert music psychologist who creates engaging, personalized analyses of listening habits. Write in the style of Spotify Wrapped - fun, insightful, and positive. Be creative with observations about personality traits revealed through music choices."
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      maxTokens: 600,
-      temperature: 0.8,
-    });
+      // Create a comprehensive prompt for Mistral
+      const prompt = createPersonalityPrompt(spotifyData);
 
-    const analysis = chatResponse.choices?.[0]?.message?.content || "Unable to generate analysis";
+  // Compose a multi-part prompt to get all required fields as structured JSON arrays/objects
+  const multiPrompt = `\n\n${prompt}\n\n---\nNow, in JSON, provide:\n{\n  "newArtists": [\n    { "artist": "string", "reason": "string", "genre": "string", "song": "string" },\n    ... (5 total)\n  ],\n  "playlists": [\n    { "name": "string", "description": "string", "occasion": "string", "songs": ["string", ...] },\n    ... (3 total)\n  ],\n  "moodAnalysis": {\n    "primaryMood": "string",\n    "emotionalDescription": "string",\n    "listeningContext": "string",\n    "seasonalTrend": "string"\n  }\n}\n\nReturn only valid JSON, no explanations.`;
 
-    // Generate additional insights
-    const insights = generateInsights(spotifyData);
+          const chatResponse = await mistral.chat.complete({
+            model: "mistral-large-latest",
+            messages: [
+              {
+                role: "system",
+                content: "You are an expert music psychologist and playlist curator. Always answer in JSON when asked."
+              },
+              {
+                role: "user",
+                content: multiPrompt,
+              },
+            ],
+            maxTokens: 1200,
+            temperature: 0.8,
+          });
 
-    // Generate concert recommendations if location provided
-    let concerts: ConcertRecommendation[] = [];
-    if (preferences?.includeConcerts && userLocation) {
-      concerts = await findConcertRecommendations(spotifyData.topArtists || [], userLocation);
-    }
 
-    console.log("✅ Successfully generated AI analysis");
+          const aiTextRaw = chatResponse.choices?.[0]?.message?.content;
+          const aiText = typeof aiTextRaw === 'string' ? aiTextRaw : '';
+          let aiJson: unknown = {};
+          try {
+            // Robust JSON extraction: find first top-level JSON object by balancing braces
+            const extractJsonFromText = (text: string): unknown | undefined => {
+              const startIdx = text.indexOf('{');
+              if (startIdx === -1) return undefined;
+              let inString = false;
+              let escape = false;
+              let depth = 0;
+              for (let i = startIdx; i < text.length; i++) {
+                const ch = text[i];
+                if (escape) { escape = false; continue; }
+                if (ch === '\\') { escape = true; continue; }
+                if (ch === '"') { inString = !inString; continue; }
+                if (inString) continue;
+                if (ch === '{') depth++;
+                else if (ch === '}') {
+                  depth--;
+                  if (depth === 0) {
+                    const candidate = text.slice(startIdx, i + 1);
+                    try {
+                      return JSON.parse(candidate);
+                    } catch {
+                      // try a forgiving cleanup: remove trailing commas before ] or }
+                      try {
+                        const cleaned = candidate.replace(/,\s*([}\]])/g, '$1');
+                        return JSON.parse(cleaned);
+                      } catch {
+                        return undefined;
+                      }
+                    }
+                  }
+                }
+              }
+              // Fallback: regex attempt
+              const match = text.match(/\{[\s\S]*\}/);
+              if (match) {
+                try {
+                  return JSON.parse(match[0]);
+                } catch {
+                  try {
+                    const cleaned = match[0].replace(/,\s*([}\]])/g, '$1');
+                    return JSON.parse(cleaned);
+                  } catch { return undefined; }
+                }
+              }
+              return undefined;
+            };
 
-    return NextResponse.json({
-      success: true,
-      analysis: {
-        summary: analysis,
-        enhanced: {
-          ...insights,
-          concerts: concerts
-        },
-        confidence: calculateConfidenceScore(spotifyData),
-        timestamp: new Date().toISOString()
-      }
-    });
+            if (typeof aiText === 'string') {
+              const parsed = extractJsonFromText(aiText);
+              if (parsed !== undefined) aiJson = parsed;
+            }
+          } catch (e) {
+            console.warn("Could not parse AI JSON response", e, aiText);
+          }
 
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error("❌ Error calling Mistral API:", error);
+          // Generate additional insights (legacy fields)
+          const insights = generateInsights(spotifyData);
 
-    // Handle specific error types
-    if (errorMessage.includes('API key')) {
-      return NextResponse.json(
-        { error: "Invalid Mistral API key. Please check your configuration." },
-        { status: 401 }
-      );
-    }
+          // Generate concert recommendations if location provided
+          let concerts: ConcertRecommendation[] = [];
+          if (preferences?.includeConcerts && userLocation) {
+            concerts = await findConcertRecommendations(spotifyData.topArtists || [], userLocation);
+          }
 
-    if (errorMessage.includes('rate limit')) {
-      return NextResponse.json(
-        { error: "Rate limit exceeded. Please try again later." },
-        { status: 429 }
-      );
-    }
+          console.log("✅ Successfully generated AI analysis");
 
-    return NextResponse.json(
-      {
-        error: "Failed to generate AI analysis",
-        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-      },
-      { status: 500 }
-    );
+          // Prefer structured fields when available
+          const enhancedObj: Record<string, unknown> = {
+            ...insights,
+            concerts
+          };
+          // Heuristics: the model may return fields under different keys or nested
+          const looksLikeNewArtists = (v: unknown): boolean => {
+            return Array.isArray(v) && v.length > 0 && typeof v[0] === 'object' && Boolean((v as Array<Record<string, unknown>>)[0].artist || (v as Array<Record<string, unknown>>)[0].name || (v as Array<Record<string, unknown>>)[0].reason || (v as Array<Record<string, unknown>>)[0].genre || (v as Array<Record<string, unknown>>)[0].song);
+          };
+          const looksLikePlaylists = (v: unknown): boolean => {
+            return Array.isArray(v) && v.length > 0 && typeof v[0] === 'object' && Boolean((v as Array<Record<string, unknown>>)[0].name || (v as Array<Record<string, unknown>>)[0].songs || (v as Array<Record<string, unknown>>)[0].description || (v as Array<Record<string, unknown>>)[0].occasion);
+          };
+          const looksLikeMoodAnalysis = (v: unknown): boolean => {
+            return v !== null && typeof v === 'object' && Boolean((v as Record<string, unknown>).primaryMood || (v as Record<string, unknown>).mood || (v as Record<string, unknown>).emotionalDescription || (v as Record<string, unknown>).listeningContext);
+          };
+
+          const looksLikeMusicPersonality = (v: unknown): boolean => {
+            return v !== null && typeof v === 'object' && Boolean((v as Record<string, unknown>).coreTraits || (v as Record<string, unknown>).archetype || (v as Record<string, unknown>).description || (v as Record<string, unknown>).musicPersonality);
+          };
+
+          const looksLikeDiscoveryStyle = (v: unknown): boolean => {
+            return v !== null && typeof v === 'object' && Boolean((v as Record<string, unknown>).primaryMethods || (v as Record<string, unknown>).primarySources || (v as Record<string, unknown>).discoveryStyle);
+          };
+
+          const looksLikeSocialProfile = (v: unknown): boolean => {
+            return v !== null && typeof v === 'object' && Boolean((v as Record<string, unknown>).likelyPlatforms || (v as Record<string, unknown>).sharingBehavior || (v as Record<string, unknown>).socialProfile);
+          };
+
+          const findMatchingValue = (obj: unknown, predicate: (x: unknown) => boolean): unknown => {
+            if (predicate(obj)) return obj;
+            if (!obj || typeof obj !== 'object') return undefined;
+            const record = obj as Record<string, unknown>;
+            for (const key of Object.keys(record)) {
+              try {
+                const val = record[key];
+                if (predicate(val)) return val;
+                if (val && typeof val === 'object') {
+                  const found: unknown = findMatchingValue(val, predicate);
+                  if (found !== undefined) return found;
+                }
+              } catch {}
+            }
+            return undefined;
+          };
+
+          if (aiJson && typeof aiJson === 'object' && 'newArtists' in aiJson) {
+            enhancedObj.newArtists = (aiJson as Record<string, unknown>).newArtists;
+          } else {
+            const found = findMatchingValue(aiJson, looksLikeNewArtists);
+            if (found !== undefined) enhancedObj.newArtists = found;
+          }
+
+          if (aiJson && typeof aiJson === 'object' && 'playlists' in aiJson) {
+            enhancedObj.playlists = (aiJson as Record<string, unknown>).playlists;
+          } else {
+            const found = findMatchingValue(aiJson, looksLikePlaylists);
+            if (found !== undefined) enhancedObj.playlists = found;
+          }
+
+          if (aiJson && typeof aiJson === 'object' && 'moodAnalysis' in aiJson) {
+            enhancedObj.moodAnalysis = (aiJson as Record<string, unknown>).moodAnalysis;
+          } else {
+            const found = findMatchingValue(aiJson, looksLikeMoodAnalysis);
+            if (found !== undefined) enhancedObj.moodAnalysis = found;
+          }
+
+          // Try to attach musicPersonality / discoveryStyle / socialProfile when available
+          if (aiJson && typeof aiJson === 'object' && 'musicPersonality' in aiJson) {
+            enhancedObj.musicPersonality = (aiJson as Record<string, unknown>).musicPersonality;
+          } else {
+            const found = findMatchingValue(aiJson, looksLikeMusicPersonality);
+            if (found !== undefined) enhancedObj.musicPersonality = found;
+          }
+
+          if (aiJson && typeof aiJson === 'object' && 'discoveryStyle' in aiJson) {
+            enhancedObj.discoveryStyle = (aiJson as Record<string, unknown>).discoveryStyle;
+          } else {
+            const found = findMatchingValue(aiJson, looksLikeDiscoveryStyle);
+            if (found !== undefined) enhancedObj.discoveryStyle = found;
+          }
+
+          if (aiJson && typeof aiJson === 'object' && 'socialProfile' in aiJson) {
+            enhancedObj.socialProfile = (aiJson as Record<string, unknown>).socialProfile;
+          } else {
+            const found = findMatchingValue(aiJson, looksLikeSocialProfile);
+            if (found !== undefined) enhancedObj.socialProfile = found;
+          }
+
+          // Debugging: log AI outputs (development only)
+          if (process.env.NODE_ENV === 'development') {
+            console.debug('Mistral AI raw text:', aiText);
+            console.debug('Mistral AI parsed json:', aiJson);
+            console.debug('Enhanced object to return:', enhancedObj);
+          }
+
+          // If the AI returned a structured user profile under any of a few likely keys, prefer that
+          let summaryOut = '';
+          const candidateProfile = aiJson && typeof aiJson === 'object'
+            ? ((aiJson as Record<string, unknown>).userProfileSummary ?? (aiJson as Record<string, unknown>).personality ?? (aiJson as Record<string, unknown>).musicPersonality ?? (aiJson as Record<string, unknown>).summary)
+            : undefined;
+          if (candidateProfile) {
+            try {
+              summaryOut = JSON.stringify({ metadata: { userProfileSummary: candidateProfile } });
+            } catch {
+              summaryOut = '';
+            }
+          } else {
+            // Avoid returning the full AI text blob as the summary - keep it empty so components use enhanced fields.
+            summaryOut = '';
+          }
+
+          const baseResponse: Record<string, unknown> = {
+            success: true,
+            analysis: {
+              summary: summaryOut,
+              enhanced: enhancedObj,
+              confidence: calculateConfidenceScore(spotifyData),
+              timestamp: new Date().toISOString()
+            }
+          };
+
+          // Mirror musicPersonality into userProfileSummary for backwards compatibility with the personality card
+          try {
+            if (enhancedObj.musicPersonality && !(enhancedObj as Record<string, unknown>).userProfileSummary) {
+              (enhancedObj as Record<string, unknown>).userProfileSummary = enhancedObj.musicPersonality;
+            }
+          } catch {}
+
+          // Attach debug output when in development OR when the client explicitly requested debug in preferences
+          if (process.env.NODE_ENV === 'development' || (preferences && (preferences as Record<string, unknown>).includeDebug)) {
+            baseResponse.debug = {
+              aiText,
+              aiJson
+            };
+          }
+
+          return NextResponse.json(baseResponse);
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error("❌ Error calling Mistral API:", error);
+
+          // Handle specific error types
+          if (typeof errorMessage === 'string' && errorMessage.includes('API key')) {
+            return NextResponse.json(
+              { error: "Invalid Mistral API key. Please check your configuration." },
+              { status: 401 }
+            );
+          }
+
+          if (typeof errorMessage === 'string' && errorMessage.includes('rate limit')) {
+            return NextResponse.json(
+              { error: "Rate limit exceeded. Please try again later." },
+              { status: 429 }
+            );
+          }
+
+          return NextResponse.json(
+            {
+              error: "Failed to generate AI analysis",
+              details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+            },
+            { status: 500 }
+          );
   }
-}
-
-function createPersonalityPrompt(data: SpotifyData): string {
-  // Extract data safely with fallbacks
-  const tracks = data.topTracks?.slice(0, 10).map(t =>
-    `"${t.name}" by ${t.artist || t.artists?.[0]?.name || 'Unknown'}`
-  ).join(", ") || "Various tracks";
-
-  const artists = data.topArtists?.slice(0, 8).map(a => a.name).join(", ") || "Various artists";
-  const genres = data.topGenres?.slice(0, 8).join(", ") || "Mixed genres";
-
-  // Music intelligence insights
-  const intelligence = data.musicIntelligence;
-  const mainstreamScore = intelligence?.mainstreamTaste || 50;
-  const recentLover = intelligence?.recentMusicLover || 50;
-
-  // User profile context
-  const userName = data.userProfile?.display_name || "music lover";
-  const timeContext = data.timeRange?.includes('short') ? 'last 4 weeks' :
-                     data.timeRange?.includes('medium') ? 'last 6 months' : 'all time';
-
-  return `
-Create a fun, engaging 400-word personality analysis for ${userName} based on their Spotify data from ${timeContext}:
-
-MUSIC PROFILE:
-• Favorite Songs: ${tracks}
-• Top Artists: ${artists}
-• Genres: ${genres}
-• Mainstream vs Underground: ${mainstreamScore}% mainstream taste
-• Recent Music Preference: ${recentLover}% recent releases
-• Unique Artists: ${intelligence?.uniqueArtistsCount || 'Unknown'}
-• Average Song Popularity: ${data.stats?.averagePopularity || 'Unknown'}/100
-
-Write like Spotify Wrapped with:
-- Second person voice ("You're the type of person who...")
-- Creative personality insights based on their music choices
-- Fun observations about their taste evolution and preferences
-- Cultural references and music scene comparisons
-- Positive, engaging tone with some humor
-- Insights about their mood preferences and lifestyle
-- A memorable closing line about their musical identity
-
-Focus on what their music reveals about their character, social preferences, emotional needs, and how they discover new music.
-  `.trim();
 }
 
 function generateInsights(data: SpotifyData) {

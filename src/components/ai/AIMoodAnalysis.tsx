@@ -35,37 +35,70 @@ export default function AIMoodAnalysis({ moodAnalysis, className = '' }: AIMoodA
   }
 
   // Extract mood insights from the analysis
-  const extractMoodInsights = (text: string) => {
-    const insights = {
+
+  // Robustly parse stringified JSON or plain text
+  function extractMoodInsights(text: string) {
+    if (typeof text === 'object' && text !== null) {
+      // Already a structured object
+      return text as {
+        primaryMood: string;
+        emotionalDescription: string;
+        listeningContext: string;
+        seasonalTrend: string;
+      };
+    }
+    let parsed: unknown = null;
+    if (typeof text === 'string') {
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        // Not JSON, treat as plain text
+      }
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        (parsed as { primaryMood?: string }).primaryMood
+      ) {
+        return parsed as {
+          primaryMood: string;
+          emotionalDescription: string;
+          listeningContext: string;
+          seasonalTrend: string;
+        };
+      }
+      // Fallback: extract from plain text
+      const insights = {
+        primaryMood: '',
+        emotionalDescription: '',
+        listeningContext: '',
+        seasonalTrend: ''
+      };
+      const sentences = text.split('.').map(s => s.trim()).filter(s => s.length > 0);
+      sentences.forEach(sentence => {
+        const lower = sentence.toLowerCase();
+        if (lower.includes('mood') || lower.includes('emotional')) {
+          if (!insights.primaryMood) {
+            insights.primaryMood = sentence;
+          } else {
+            insights.emotionalDescription += (insights.emotionalDescription ? ' ' : '') + sentence + '.';
+          }
+        } else if (lower.includes('listen') || lower.includes('music for')) {
+          insights.listeningContext += (insights.listeningContext ? ' ' : '') + sentence + '.';
+        } else if (lower.includes('season') || lower.includes('time') || lower.includes('energy')) {
+          insights.seasonalTrend += (insights.seasonalTrend ? ' ' : '') + sentence + '.';
+        } else if (!insights.emotionalDescription) {
+          insights.emotionalDescription += (insights.emotionalDescription ? ' ' : '') + sentence + '.';
+        }
+      });
+      return insights;
+    }
+    return {
       primaryMood: '',
       emotionalDescription: '',
       listeningContext: '',
       seasonalTrend: ''
     };
-
-    const sentences = text.split('.').map(s => s.trim()).filter(s => s.length > 0);
-
-    // Look for mood-related keywords
-    sentences.forEach(sentence => {
-      const lower = sentence.toLowerCase();
-
-      if (lower.includes('mood') || lower.includes('emotional')) {
-        if (!insights.primaryMood) {
-          insights.primaryMood = sentence;
-        } else {
-          insights.emotionalDescription += (insights.emotionalDescription ? ' ' : '') + sentence + '.';
-        }
-      } else if (lower.includes('listen') || lower.includes('music for')) {
-        insights.listeningContext += (insights.listeningContext ? ' ' : '') + sentence + '.';
-      } else if (lower.includes('season') || lower.includes('time') || lower.includes('energy')) {
-        insights.seasonalTrend += (insights.seasonalTrend ? ' ' : '') + sentence + '.';
-      } else if (!insights.emotionalDescription) {
-        insights.emotionalDescription += (insights.emotionalDescription ? ' ' : '') + sentence + '.';
-      }
-    });
-
-    return insights;
-  };
+  }
 
   const moodInsights = extractMoodInsights(moodAnalysis);
 

@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { FaListUl, FaChevronDown, FaChevronUp, FaClock, FaPlay } from 'react-icons/fa';
 
 interface AIPlaylistGeneratorProps {
-  playlists?: string;
+  playlists?: unknown;
   className?: string;
 }
 
@@ -44,54 +44,62 @@ export default function AIPlaylistGenerator({ playlists, className = '' }: AIPla
     songs: string[];
   }
 
-  const parsePlaylistSuggestions = (text: string): PlaylistSuggestion[] => {
-    const lines = text.split('\n').filter(line => line.trim().length > 0);
-    const suggestions: PlaylistSuggestion[] = [];
 
-    let currentPlaylist: PlaylistSuggestion | null = null;
-
-    lines.forEach(line => {
-      const trimmed = line.trim();
-
-      // Check if it's a numbered playlist
-      const numberMatch = trimmed.match(/^\d+\.\s*(.+)/);
-      if (numberMatch) {
-        if (currentPlaylist && currentPlaylist.name) {
-          suggestions.push(currentPlaylist);
-        }
-        currentPlaylist = {
-          name: numberMatch[1].replace(/[""\"]/g, ''),
-          description: '',
-          occasion: '',
-          songs: []
-        };
-      } else if (currentPlaylist && (trimmed.startsWith('-') || trimmed.startsWith('•'))) {
-        const detail = trimmed.replace(/^[-•]\s*/, '');
-        if (detail.toLowerCase().includes('mood:') || detail.toLowerCase().includes('occasion:')) {
-          currentPlaylist.occasion = detail.replace(/.*(?:mood|occasion):\s*/i, '');
-        } else if (detail.toLowerCase().includes('songs:') || detail.toLowerCase().includes('tracks:')) {
-          // Skip the "songs:" label
-        } else if (detail.includes(' - ') || detail.includes(' by ')) {
-          currentPlaylist.songs.push(detail);
-        } else {
-          currentPlaylist.description += (currentPlaylist.description ? ' ' : '') + detail;
-        }
-      } else if (currentPlaylist && currentPlaylist.name && !trimmed.match(/^\d+/)) {
-        if (trimmed.includes(' - ') || trimmed.includes(' by ')) {
-          currentPlaylist.songs.push(trimmed);
-        } else {
-          currentPlaylist.description += (currentPlaylist.description ? ' ' : '') + trimmed;
-        }
-      }
-    });
-
-
-    if (currentPlaylist) {
-      suggestions.push(currentPlaylist);
+  // Robustly parse stringified JSON or plain text
+  function parsePlaylistSuggestions(data: unknown): PlaylistSuggestion[] {
+    if (Array.isArray(data)) {
+      return data.slice(0, 3) as PlaylistSuggestion[];
     }
-
-    return suggestions.slice(0, 3);
-  };
+    if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) return parsed.slice(0, 3);
+      } catch {
+        // Not JSON, treat as plain text
+      }
+      // Fallback: old text format
+      const lines = data.split('\n').filter((line: string) => line.trim().length > 0);
+      const suggestions: PlaylistSuggestion[] = [];
+      let currentPlaylist: PlaylistSuggestion | null = null;
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        const numberMatch = trimmed.match(/^\d+\.\s*(.+)/);
+        if (numberMatch) {
+          if (currentPlaylist && currentPlaylist.name) {
+            suggestions.push(currentPlaylist);
+          }
+          currentPlaylist = {
+            name: numberMatch[1].replace(/["\"]/g, ''),
+            description: '',
+            occasion: '',
+            songs: []
+          };
+        } else if (currentPlaylist && (trimmed.startsWith('-') || trimmed.startsWith('•'))) {
+          const detail = trimmed.replace(/^[-•]\s*/, '');
+          if (detail.toLowerCase().includes('mood:') || detail.toLowerCase().includes('occasion:')) {
+            currentPlaylist.occasion = detail.replace(/.*(?:mood|occasion):\s*/i, '');
+          } else if (detail.toLowerCase().includes('songs:') || detail.toLowerCase().includes('tracks:')) {
+            // Skip the "songs:" label
+          } else if (detail.includes(' - ') || detail.includes(' by ')) {
+            currentPlaylist.songs.push(detail);
+          } else {
+            currentPlaylist.description += (currentPlaylist.description ? ' ' : '') + detail;
+          }
+        } else if (currentPlaylist && currentPlaylist.name && !trimmed.match(/^\d+/)) {
+          if (trimmed.includes(' - ') || trimmed.includes(' by ')) {
+            currentPlaylist.songs.push(trimmed);
+          } else {
+            currentPlaylist.description += (currentPlaylist.description ? ' ' : '') + trimmed;
+          }
+        }
+      });
+      if (currentPlaylist) {
+        suggestions.push(currentPlaylist);
+      }
+      return suggestions.slice(0, 3);
+    }
+    return [];
+  }
 
   const playlistSuggestions = parsePlaylistSuggestions(playlists);
 
@@ -187,7 +195,7 @@ export default function AIPlaylistGenerator({ playlists, className = '' }: AIPla
           ) : (
             <div className="text-gray-300 prose prose-invert max-w-none">
               <p className="text-sm leading-relaxed whitespace-pre-line">
-                {playlists}
+                {typeof playlists === 'string' ? playlists : JSON.stringify(playlists, null, 2)}
               </p>
             </div>
           )}
