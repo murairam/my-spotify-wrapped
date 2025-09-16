@@ -1,4 +1,4 @@
-// src/hooks/useAIAnalysis.ts - FIXED VERSION
+// src/hooks/useAIAnalysis.ts - FIXED VERSION WITH DEBUGGING
 import { useState, useCallback } from 'react';
 import type { SpotifyData } from '@/types/spotify';
 
@@ -52,6 +52,7 @@ function useAIAnalysis() {
 
     try {
       console.log('🤖 Starting AI analysis...');
+      console.log('🤖 Request:', request);
 
       const response = await fetch('/api/mistral/analyze', {
         method: 'POST',
@@ -68,9 +69,20 @@ function useAIAnalysis() {
 
       const result: { success: boolean; analysis: AIAnalysis; error?: string } = await response.json();
 
+      // CRITICAL DEBUG LOGGING
+      console.log("🔍 DEBUG: Full API response:", result);
+      console.log("🔍 DEBUG: Analysis object:", result.analysis);
+      console.log("🔍 DEBUG: Enhanced object:", result.analysis?.enhanced);
+      console.log("🔍 DEBUG: Debug property exists:", !!result.analysis?.debug);
+      console.log("🔍 DEBUG: Debug content:", result.analysis?.debug);
+      console.log("🔍 DEBUG: newArtists:", result.analysis?.enhanced?.newArtists);
+      console.log("🔍 DEBUG: playlists:", result.analysis?.enhanced?.playlists);
+      console.log("🔍 DEBUG: moodAnalysis:", result.analysis?.enhanced?.moodAnalysis);
+
       if (result.success && result.analysis) {
         setAnalysis(result.analysis);
-        console.log('✅ AI analysis completed');
+        console.log('✅ AI analysis completed successfully');
+        console.log('✅ Analysis set in state:', result.analysis);
       } else {
         throw new Error(result.error || 'Analysis failed');
       }
@@ -89,7 +101,6 @@ function useAIAnalysis() {
     setAnalysis(null);
     setError(null);
   }, []);
-
 
   return {
     analysis,

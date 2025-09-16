@@ -1,4 +1,4 @@
-// src/components/ai/AIIntelligenceSection.tsx
+// src/components/ai/AIIntelligenceSection.tsx - DEBUG VERSION
 'use client';
 
 import React, { useState } from 'react';
@@ -8,7 +8,6 @@ import AIConcertFinder from './AIConcertFinder';
 import AIArtistDiscovery from './AIArtistDiscovery';
 import AIPlaylistGenerator from './AIPlaylistGenerator';
 import AIMoodAnalysis from './AIMoodAnalysis';
-// Add this import at the top with your other imports:
 import type { SpotifyData } from '@/types/spotify';
 import useAIAnalysis from '@/hooks/useAIAnalysis';
 
@@ -32,11 +31,23 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
         includeNewArtists: true,
         includePlaylistSuggestions: true,
         includeMoodAnalysis: true,
-        // request debug output from server for easier troubleshooting
+        // FORCE debug output for troubleshooting
         includeDebug: true
       }
     });
   };
+
+  // EXTRA DEBUG LOGGING IN RENDER
+  React.useEffect(() => {
+    if (analysis) {
+      console.log("🔍 RENDER DEBUG: Analysis in component:", analysis);
+      console.log("🔍 RENDER DEBUG: Enhanced data:", analysis.enhanced);
+      console.log("🔍 RENDER DEBUG: Debug property:", analysis.debug);
+      console.log("🔍 RENDER DEBUG: newArtists:", analysis.enhanced?.newArtists);
+      console.log("🔍 RENDER DEBUG: playlists:", analysis.enhanced?.playlists);
+      console.log("🔍 RENDER DEBUG: moodAnalysis:", analysis.enhanced?.moodAnalysis);
+    }
+  }, [analysis]);
 
   return (
     <div className={`space-y-8 ${className}`}>
@@ -126,58 +137,73 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
 
       {/* AI Analysis Results */}
       {analysis && (
-        (() => {
-          // Ensure enhanced fields are passed as strings (components expect string | undefined)
-          const raw = analysis.enhanced || {};
-          const newArtistsProp = raw.newArtists === undefined
-            ? undefined
-            : typeof raw.newArtists === 'string'
-              ? raw.newArtists
-              : JSON.stringify(raw.newArtists);
+        <div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <AIPersonalityCard analysis={analysis} />
+            <AIConcertFinder
+              concerts={analysis.enhanced?.concerts || []}
+              userLocation={userLocation}
+            />
+            <AIArtistDiscovery
+              newArtists={
+                analysis.enhanced?.newArtists === undefined
+                  ? undefined
+                  : typeof analysis.enhanced.newArtists === 'string'
+                    ? analysis.enhanced.newArtists
+                    : JSON.stringify(analysis.enhanced.newArtists)
+              }
+            />
+            <AIPlaylistGenerator
+              playlists={
+                analysis.enhanced?.playlists === undefined
+                  ? undefined
+                  : typeof analysis.enhanced.playlists === 'string'
+                    ? analysis.enhanced.playlists
+                    : JSON.stringify(analysis.enhanced.playlists)
+              }
+            />
+            <AIMoodAnalysis
+              moodAnalysis={
+                analysis.enhanced?.moodAnalysis === undefined
+                  ? undefined
+                  : typeof analysis.enhanced.moodAnalysis === 'string'
+                    ? analysis.enhanced.moodAnalysis
+                    : JSON.stringify(analysis.enhanced.moodAnalysis)
+              }
+              className="lg:col-span-2"
+            />
+          </div>
 
-          const playlistsProp = raw.playlists === undefined
-            ? undefined
-            : typeof raw.playlists === 'string'
-              ? raw.playlists
-              : JSON.stringify(raw.playlists);
-
-          const moodAnalysisProp = raw.moodAnalysis === undefined
-            ? undefined
-            : typeof raw.moodAnalysis === 'string'
-              ? raw.moodAnalysis
-              : JSON.stringify(raw.moodAnalysis);
-
-          return (
-            <div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <AIPersonalityCard analysis={analysis} />
-                <AIConcertFinder
-                  concerts={analysis.enhanced?.concerts || []}
-                  userLocation={userLocation}
-                />
-                <AIArtistDiscovery newArtists={newArtistsProp} />
-                <AIPlaylistGenerator playlists={playlistsProp} />
-                <AIMoodAnalysis moodAnalysis={moodAnalysisProp} className="lg:col-span-2" />
-              </div>
-
-              {/* Debug panel to inspect raw AI output */}
-              {analysis.debug && (
-                <DebugPanel debug={analysis.debug} />
-              )}
-            </div>
-          );
-        })()
+          {/* ALWAYS SHOW DEBUG PANEL FOR TROUBLESHOOTING */}
+          <DebugPanel
+            analysis={analysis}
+            debug={analysis.debug}
+          />
+        </div>
       )}
     </div>
   );
 }
 
-function DebugPanel({ debug }: { debug: { aiText?: string; aiJson?: unknown } }) {
-  const [open, setOpen] = useState(false);
+function DebugPanel({ analysis, debug }: {
+  analysis: {
+    summary: string;
+    enhanced: Record<string, unknown>;
+    confidence: number;
+    timestamp: string;
+    debug?: {
+      aiText?: string;
+      aiJson?: unknown;
+    };
+  };
+  debug?: { aiText?: string; aiJson?: unknown }
+}) {
+  const [open, setOpen] = useState(true); // Start open for debugging
+
   return (
     <div className="mt-6 p-4 bg-black/20 border border-gray-800 rounded-lg">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm text-white font-semibold">Dev: AI Debug Output</h4>
+        <h4 className="text-sm text-white font-semibold">🔍 Debug Panel (Always Visible for Troubleshooting)</h4>
         <button className="text-xs text-gray-400" onClick={() => setOpen(!open)}>
           {open ? 'Hide' : 'Show'}
         </button>
@@ -185,13 +211,40 @@ function DebugPanel({ debug }: { debug: { aiText?: string; aiJson?: unknown } })
       {open && (
         <div className="mt-3 text-sm text-gray-200 space-y-3">
           <div>
-            <h5 className="text-xs text-gray-400 mb-1">aiText</h5>
-            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-48 text-xs whitespace-pre-wrap">{debug.aiText}</pre>
+            <h5 className="text-xs text-yellow-400 mb-1">Analysis Object Keys:</h5>
+            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-32 text-xs">
+              {JSON.stringify(Object.keys(analysis || {}), null, 2)}
+            </pre>
           </div>
+
           <div>
-            <h5 className="text-xs text-gray-400 mb-1">aiJson</h5>
-            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-64 text-xs">{JSON.stringify(debug.aiJson, null, 2)}</pre>
+            <h5 className="text-xs text-yellow-400 mb-1">Enhanced Object:</h5>
+            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-48 text-xs">
+              {JSON.stringify(analysis?.enhanced, null, 2)}
+            </pre>
           </div>
+
+          {debug ? (
+            <>
+              <div>
+                <h5 className="text-xs text-green-400 mb-1">AI Raw Text (First 500 chars):</h5>
+                <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-48 text-xs whitespace-pre-wrap">
+                  {typeof debug.aiText === 'string' ? debug.aiText.substring(0, 500) + '...' : 'No AI text'}
+                </pre>
+              </div>
+              <div>
+                <h5 className="text-xs text-green-400 mb-1">AI Parsed JSON:</h5>
+                <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-64 text-xs">
+                  {JSON.stringify(debug.aiJson, null, 2)}
+                </pre>
+              </div>
+            </>
+          ) : (
+            <div>
+              <h5 className="text-xs text-red-400 mb-1">❌ No Debug Data Available</h5>
+              <p className="text-xs text-gray-400">The API response didn&apos;t include debug information.</p>
+            </div>
+          )}
         </div>
       )}
     </div>
