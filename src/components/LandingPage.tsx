@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { FaSpotify, FaEye, FaArrowRight, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
 import Dashboard from './Dashboard';
+import AIIntelligenceSection from './ai/AIIntelligenceSection';
+import ConcertFinderSection from './concerts/ConcertFinderSection';
+import type { SpotifyData } from '@/types/spotify';
 import { getDataForTimeRange, MockSpotifyData } from '../lib/mockData';
 
 export function LandingPage() {
@@ -232,6 +235,13 @@ return (
           Your data is processed securely and never stored permanently.
         </p>
       </div>
+      {/* Show AI and Concert Finder preview when spotifyData (or demo data) is present */}
+      {spotifyData && (
+        <div className="mt-10 space-y-8">
+          <AIIntelligenceSection spotifyData={spotifyData as unknown as SpotifyData} className="w-full" />
+          <ConcertFinderSection spotifyData={spotifyData as unknown as SpotifyData} className="w-full" />
+        </div>
+      )}
     </div>
   </div>
 );

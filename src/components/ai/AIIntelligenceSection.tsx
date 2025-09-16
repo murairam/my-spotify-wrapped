@@ -1,10 +1,9 @@
-// src/components/ai/AIIntelligenceSection.tsx - DEBUG VERSION
+// src/components/ai/AIIntelligenceSection.tsx - IMPROVED VERSION
 'use client';
 
 import React, { useState } from 'react';
-import { FaBrain, FaRocket } from 'react-icons/fa';
+import { FaBrain, FaRocket, FaMusic, FaHeart, FaMagic, FaPlay } from 'react-icons/fa';
 import AIPersonalityCard from './AIPersonalityCard';
-import AIConcertFinder from './AIConcertFinder';
 import AIArtistDiscovery from './AIArtistDiscovery';
 import AIPlaylistGenerator from './AIPlaylistGenerator';
 import AIMoodAnalysis from './AIMoodAnalysis';
@@ -17,105 +16,141 @@ interface AIIntelligenceSectionProps {
 }
 
 export default function AIIntelligenceSection({ spotifyData, className = '' }: AIIntelligenceSectionProps) {
-  const [userLocation, setUserLocation] = useState('');
   const { analysis, isLoading, error, analyzeData } = useAIAnalysis();
+  const [currentStep, setCurrentStep] = useState(0);
 
   const handleStartAnalysis = async () => {
     if (!spotifyData) return;
 
     await analyzeData({
       spotifyData,
-      userLocation: userLocation.trim() || undefined,
       preferences: {
-        includeConcerts: true,
+        includeConcerts: false, // Separate concerts from AI analysis
         includeNewArtists: true,
         includePlaylistSuggestions: true,
         includeMoodAnalysis: true,
-        // FORCE debug output for troubleshooting
         includeDebug: true
       }
     });
   };
 
-  // EXTRA DEBUG LOGGING IN RENDER
+  const analysisSteps = [
+    { icon: FaBrain, text: "Analyzing your musical DNA...", color: "from-purple-500 to-blue-500" },
+    { icon: FaMusic, text: "Finding your perfect artists...", color: "from-blue-500 to-cyan-500" },
+    { icon: FaHeart, text: "Reading your emotional patterns...", color: "from-cyan-500 to-green-500" },
+    { icon: FaMagic, text: "Crafting personalized playlists...", color: "from-green-500 to-yellow-500" }
+  ];
+
   React.useEffect(() => {
-    if (analysis) {
-      console.log("🔍 RENDER DEBUG: Analysis in component:", analysis);
-      console.log("🔍 RENDER DEBUG: Enhanced data:", analysis.enhanced);
-      console.log("🔍 RENDER DEBUG: Debug property:", analysis.debug);
-      console.log("🔍 RENDER DEBUG: newArtists:", analysis.enhanced?.newArtists);
-      console.log("🔍 RENDER DEBUG: playlists:", analysis.enhanced?.playlists);
-      console.log("🔍 RENDER DEBUG: moodAnalysis:", analysis.enhanced?.moodAnalysis);
+    if (isLoading) {
+      const interval = setInterval(() => {
+        setCurrentStep(prev => (prev + 1) % analysisSteps.length);
+      }, 2000);
+      return () => clearInterval(interval);
+    } else {
+      setCurrentStep(0);
     }
-  }, [analysis]);
+  }, [isLoading, analysisSteps.length]);
 
   return (
-    <div className={`space-y-8 ${className}`}>
-      {/* AI Intelligence Header */}
-      <div className="text-center mb-8">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-            <FaBrain className="text-white text-xl" />
+    <div className={`space-y-12 ${className}`}>
+      {/* Enhanced Header */}
+      <div className="text-center relative overflow-hidden bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-pink-900/20 rounded-3xl p-8 border border-purple-500/20">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-pink-600/5 animate-pulse" />
+        <div className="relative z-10">
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="relative">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center transform rotate-12 shadow-2xl">
+                <FaBrain className="text-white text-2xl" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                <FaMagic className="text-yellow-900 text-xs" />
+              </div>
+            </div>
+            <div className="text-left">
+              <h2 className="text-4xl font-black text-white bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                AI Music Intelligence
+              </h2>
+              <p className="text-lg text-gray-300 font-medium">
+                Unlock the secrets of your musical soul
+              </p>
+            </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">AI Music Intelligence</h2>
+          <p className="text-gray-400 text-base max-w-3xl mx-auto leading-relaxed">
+            Our advanced AI analyzes your listening patterns, emotional connections, and musical DNA to reveal
+            hidden insights about your taste and discover your next favorite artists.
+          </p>
         </div>
-        <p className="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto">
-          Discover deeper insights about your music taste with AI-powered analysis,
-          concert recommendations, and personalized discoveries.
-        </p>
       </div>
 
       {/* Analysis Trigger */}
       {!analysis && !isLoading && (
-        <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 backdrop-blur-md border border-purple-500/20 rounded-2xl p-6 text-center">
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <FaRocket className="text-white text-2xl" />
-              </div>
-              <h3 className="text-xl font-bold text-white">Ready for AI Analysis?</h3>
-              <p className="text-gray-300 text-sm max-w-md mx-auto">
-                Let our AI analyze your music taste to find concerts, discover new artists,
-                create playlists, and understand your musical personality.
-              </p>
+        <div className="bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 rounded-2xl border border-purple-500/30 overflow-hidden">
+          <div className="p-8 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-300">
+              <FaRocket className="text-white text-3xl" />
             </div>
-
-            {/* Location input for concerts */}
-            <div className="max-w-sm mx-auto">
-              <label className="block text-sm font-medium text-gray-300 mb-2 text-left">
-                Your City (for concert recommendations)
-              </label>
-              <input
-                type="text"
-                value={userLocation}
-                onChange={(e) => setUserLocation(e.target.value)}
-                placeholder="e.g., Paris, New York, Tokyo..."
-                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none text-sm"
-              />
-            </div>
+            <h3 className="text-2xl font-bold text-white mb-4">Ready to Discover Your Musical Identity?</h3>
+            <p className="text-gray-300 text-base mb-8 max-w-lg mx-auto">
+              Let our AI dive deep into your music taste to reveal patterns, discover new artists,
+              and create the perfect playlists just for you.
+            </p>
 
             <button
               onClick={handleStartAnalysis}
               disabled={!spotifyData}
-              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+              className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-2xl"
             >
-              🚀 Start AI Analysis
+              <span className="relative z-10 flex items-center gap-3">
+                <FaMagic className="text-lg" />
+                Analyze My Music DNA
+                <FaPlay className="text-sm" />
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity -z-10" />
             </button>
           </div>
         </div>
       )}
 
-      {/* Loading State */}
+      {/* Enhanced Loading State */}
       {isLoading && (
-        <div className="bg-[#1a1a1a] rounded-2xl border border-gray-800 p-8 text-center">
-          <div className="space-y-4">
-            <div className="animate-spin w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full mx-auto"></div>
-            <h3 className="text-lg font-semibold text-white">AI is analyzing your music...</h3>
-            <div className="space-y-2 text-sm text-gray-400">
-              <div>🎭 Understanding your musical personality</div>
-              <div>🎵 Finding concerts in your area</div>
-              <div>🔍 Discovering new artists for you</div>
-              <div>💭 Analyzing your listening patterns</div>
+        <div className="bg-gradient-to-br from-gray-900 to-purple-900/20 rounded-2xl border border-purple-500/30 p-8 text-center overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 animate-pulse" />
+
+          <div className="relative z-10 space-y-6">
+            {/* Animated Icon */}
+            <div className="relative mx-auto w-16 h-16">
+              <div className={`absolute inset-0 bg-gradient-to-r ${analysisSteps[currentStep].color} rounded-full animate-spin`} />
+              <div className="absolute inset-2 bg-gray-900 rounded-full flex items-center justify-center">
+                {React.createElement(analysisSteps[currentStep].icon, {
+                  className: "text-white text-xl"
+                })}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">AI is analyzing your music...</h3>
+              <p className="text-purple-300 font-medium">{analysisSteps[currentStep].text}</p>
+            </div>
+
+            {/* Progress Steps */}
+            <div className="flex justify-center space-x-4 mt-8">
+              {analysisSteps.map((step, index) => (
+                <div
+                  key={index}
+                  className={`w-3 h-3 rounded-full transition-all duration-500 ${
+                    index === currentStep
+                      ? 'bg-gradient-to-r from-purple-400 to-pink-400 scale-125'
+                      : index < currentStep
+                        ? 'bg-green-400'
+                        : 'bg-gray-600'
+                  }`}
+                />
+              ))}
+            </div>
+
+            <div className="text-xs text-gray-500 mt-4">
+              This may take up to 30 seconds...
             </div>
           </div>
         </div>
@@ -123,12 +158,15 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-900/20 border border-red-500/20 rounded-2xl p-6 text-center">
-          <h3 className="text-lg font-semibold text-red-400 mb-2">Analysis Failed</h3>
-          <p className="text-red-300 text-sm mb-4">{error}</p>
+        <div className="bg-gradient-to-br from-red-900/20 to-pink-900/20 border border-red-500/30 rounded-2xl p-8 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
+            <FaBrain className="text-red-400 text-2xl" />
+          </div>
+          <h3 className="text-xl font-bold text-red-400 mb-3">Analysis Failed</h3>
+          <p className="text-red-300 text-sm mb-6 max-w-md mx-auto">{error}</p>
           <button
             onClick={handleStartAnalysis}
-            className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+            className="px-6 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors font-medium"
           >
             Try Again
           </button>
@@ -137,13 +175,52 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
 
       {/* AI Analysis Results */}
       {analysis && (
-        <div>
+        <div className="space-y-8">
+          {/* Results Header */}
+          <div className="text-center bg-gradient-to-r from-green-900/20 to-blue-900/20 rounded-2xl p-6 border border-green-500/20">
+            <div className="w-12 h-12 mx-auto mb-3 bg-green-500 rounded-full flex items-center justify-center">
+              <FaMagic className="text-white text-lg" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">Your Musical DNA Decoded</h3>
+            <p className="text-gray-300">Based on your unique listening patterns and preferences</p>
+          </div>
+
+          {/* Enhanced Results Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <AIPersonalityCard analysis={analysis} />
-            <AIConcertFinder
-              concerts={analysis.enhanced?.concerts || []}
-              userLocation={userLocation}
-            />
+            {(() => {
+              // Safely extract optional personality fields from analysis.enhanced
+              const enhancedRaw = analysis.enhanced as unknown;
+              const getString = (key: string, fallback: string) => {
+                try {
+                  if (enhancedRaw && typeof enhancedRaw === 'object' && key in (enhancedRaw as Record<string, unknown>)) {
+                    const val = (enhancedRaw as Record<string, unknown>)[key];
+                    if (typeof val === 'string' && val.trim().length > 0) return val;
+                  }
+                } catch {
+                  // ignore
+                }
+                return fallback;
+              };
+
+              const musicPersonality = getString('musicPersonality', getString('userProfileSummary', 'Your unique musical identity reflects a diverse and evolving taste.'));
+              const discoveryStyle = getString('discoveryStyle', 'You have an adventurous approach to finding new music.');
+              const socialProfile = getString('socialProfile', 'Your musical social patterns show thoughtful curation and sharing.');
+
+              return (
+                <AIPersonalityCard
+                  analysis={{
+                    ...analysis,
+                    enhanced: {
+                      ...analysis.enhanced,
+                      musicPersonality,
+                      discoveryStyle,
+                      socialProfile
+                    }
+                  }}
+                />
+              );
+            })()}
+
             <AIArtistDiscovery
               newArtists={
                 analysis.enhanced?.newArtists === undefined
@@ -153,6 +230,7 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
                     : JSON.stringify(analysis.enhanced.newArtists)
               }
             />
+
             <AIPlaylistGenerator
               playlists={
                 analysis.enhanced?.playlists === undefined
@@ -162,89 +240,57 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
                     : JSON.stringify(analysis.enhanced.playlists)
               }
             />
-            <AIMoodAnalysis
-              moodAnalysis={
-                analysis.enhanced?.moodAnalysis === undefined
-                  ? undefined
-                  : typeof analysis.enhanced.moodAnalysis === 'string'
-                    ? analysis.enhanced.moodAnalysis
-                    : JSON.stringify(analysis.enhanced.moodAnalysis)
-              }
-              className="lg:col-span-2"
-            />
+
+            <div className="lg:col-span-2">
+              <AIMoodAnalysis
+                moodAnalysis={
+                  analysis.enhanced?.moodAnalysis === undefined
+                    ? undefined
+                    : typeof analysis.enhanced.moodAnalysis === 'string'
+                      ? analysis.enhanced.moodAnalysis
+                      : JSON.stringify(analysis.enhanced.moodAnalysis)
+                }
+              />
+            </div>
           </div>
 
-          {/* ALWAYS SHOW DEBUG PANEL FOR TROUBLESHOOTING */}
-          <DebugPanel
-            analysis={analysis}
-            debug={analysis.debug}
-          />
+          {/* Debug Panel - Only show in development */}
+          {process.env.NODE_ENV === 'development' && analysis.debug && (
+            <DebugPanel debug={analysis.debug} />
+          )}
         </div>
       )}
     </div>
   );
 }
 
-function DebugPanel({ analysis, debug }: {
-  analysis: {
-    summary: string;
-    enhanced: Record<string, unknown>;
-    confidence: number;
-    timestamp: string;
-    debug?: {
-      aiText?: string;
-      aiJson?: unknown;
-    };
-  };
-  debug?: { aiText?: string; aiJson?: unknown }
-}) {
-  const [open, setOpen] = useState(true); // Start open for debugging
-
+function DebugPanel({ debug }: { debug: { aiText?: string; aiJson?: unknown } }) {
+  const [open, setOpen] = useState(false);
   return (
-    <div className="mt-6 p-4 bg-black/20 border border-gray-800 rounded-lg">
+    <div className="mt-8 p-4 bg-black/30 border border-gray-700 rounded-lg">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm text-white font-semibold">🔍 Debug Panel (Always Visible for Troubleshooting)</h4>
-        <button className="text-xs text-gray-400" onClick={() => setOpen(!open)}>
-          {open ? 'Hide' : 'Show'}
+        <h4 className="text-sm text-white font-semibold">🔧 Developer Debug Panel</h4>
+        <button
+          className="text-xs text-gray-400 hover:text-white transition-colors"
+          onClick={() => setOpen(!open)}
+        >
+          {open ? 'Hide' : 'Show'} Debug Data
         </button>
       </div>
       {open && (
-        <div className="mt-3 text-sm text-gray-200 space-y-3">
+        <div className="mt-4 text-sm text-gray-200 space-y-4">
           <div>
-            <h5 className="text-xs text-yellow-400 mb-1">Analysis Object Keys:</h5>
-            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-32 text-xs">
-              {JSON.stringify(Object.keys(analysis || {}), null, 2)}
+            <h5 className="text-xs text-yellow-400 mb-2">AI Raw Response (First 500 chars):</h5>
+            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-40 text-xs whitespace-pre-wrap border border-gray-600">
+              {typeof debug.aiText === 'string' ? debug.aiText.substring(0, 500) + '...' : 'No AI text available'}
             </pre>
           </div>
-
           <div>
-            <h5 className="text-xs text-yellow-400 mb-1">Enhanced Object:</h5>
-            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-48 text-xs">
-              {JSON.stringify(analysis?.enhanced, null, 2)}
+            <h5 className="text-xs text-green-400 mb-2">Parsed JSON Structure:</h5>
+            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-60 text-xs border border-gray-600">
+              {JSON.stringify(debug.aiJson, null, 2)}
             </pre>
           </div>
-
-          {debug ? (
-            <>
-              <div>
-                <h5 className="text-xs text-green-400 mb-1">AI Raw Text (First 500 chars):</h5>
-                <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-48 text-xs whitespace-pre-wrap">
-                  {typeof debug.aiText === 'string' ? debug.aiText.substring(0, 500) + '...' : 'No AI text'}
-                </pre>
-              </div>
-              <div>
-                <h5 className="text-xs text-green-400 mb-1">AI Parsed JSON:</h5>
-                <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-64 text-xs">
-                  {JSON.stringify(debug.aiJson, null, 2)}
-                </pre>
-              </div>
-            </>
-          ) : (
-            <div>
-              <h5 className="text-xs text-red-400 mb-1">❌ No Debug Data Available</h5>
-              <p className="text-xs text-gray-400">The API response didn&apos;t include debug information.</p>
-            </div>
-          )}
         </div>
       )}
     </div>
