@@ -8,7 +8,7 @@ import { getDataForTimeRange, MockSpotifyData } from '@/lib/mockData';
 const TIME_RANGES = [
   { key: 'short_term', label: 'Last 4 Weeks' },
   { key: 'medium_term', label: 'Last 6 Months' },
-  { key: 'long_term', label: 'All Time' }
+  { key: 'long_term', label: 'Last Year' } // Spotify's 'long_term' is ~1 year of data
 ] as const;
 type TimeRangeKey = typeof TIME_RANGES[number]['key'];
 
