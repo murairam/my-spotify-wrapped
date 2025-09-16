@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSpotifySessionGuard } from '@/hooks/useSpotifyData';
 import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { FaMusic, FaMicrophone, FaPalette, FaBrain, FaChartLine, FaUsers, FaCrown, FaUser, FaPlay, FaHeart, FaClock, FaCalendarAlt, FaSignOutAlt, FaExternalLinkAlt } from 'react-icons/fa';
@@ -22,6 +23,8 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeRange = 'short_term', onTimeRangeChange }: DashboardProps) {
+  // Guard: sign out if session has refresh error
+  useSpotifySessionGuard();
   const [currentData, setCurrentData] = useState<MockSpotifyData | null>(null);
 
   useEffect(() => {

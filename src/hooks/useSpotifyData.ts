@@ -1,3 +1,17 @@
+import { useSession, signOut } from 'next-auth/react';
+/**
+ * Custom hook that signs out the user if the session has a refresh token error
+ * Use this in your top-level component to force sign-out on token refresh failure
+ */
+import type { Session } from 'next-auth';
+export function useSpotifySessionGuard() {
+  const { data: session, status } = useSession() as { data: (Session & { error?: string }) | null, status: string };
+  if (session && session.error === 'RefreshAccessTokenError') {
+    // Optionally, show a toast or UI message here before sign out
+    signOut({ callbackUrl: '/' });
+  }
+  return { session, status };
+}
 
 /**
  * Custom hooks for Spotify data fetching with React Query
@@ -153,11 +167,11 @@ export function debounce<T extends (...args: unknown[]) => unknown>(func: T, del
 /**
  * Fetches Spotify data from the API with comprehensive error handling and performance logging
  */
-async function fetchSpotifyData(): Promise<SpotifyData> {
+async function fetchSpotifyData(timeRange: string = 'short_term'): Promise<SpotifyData> {
   const startTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
 
   try {
-    const response = await fetch('/api/spotify/top-items', {
+    const response = await fetch(`/api/spotify/top-items?time_range=${timeRange}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -187,11 +201,9 @@ async function fetchSpotifyData(): Promise<SpotifyData> {
         const errorBody = await response.json() as { message?: string; error?: string; suggestions?: string[] };
         errorData.message = errorBody.message || errorBody.error || response.statusText;
         errorData.error = errorBody.error;
-        errorData.suggestions = errorBody.suggestions;
       } catch {
-        errorData.message = response.statusText;
+        // ignore JSON parse error, use default errorData
       }
-
       throw errorData;
     }
 
@@ -223,19 +235,14 @@ async function fetchSpotifyData(): Promise<SpotifyData> {
  */
 async function fetchTopTracks(timeRange: string = 'short_term'): Promise<SpotifyTrack[]> {
   const startTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
-
   try {
     const response = await fetch(`/api/spotify/top-items?type=tracks&time_range=${timeRange}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
     });
-
     if (!response.ok) {
       throw new Error(`Failed to fetch top tracks: ${response.statusText}`);
     }
-
     const data = await response.json() as { topTracks: SpotifyTrack[] };
     const endTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
     if (process.env.NODE_ENV === 'development') {
@@ -321,10 +328,13 @@ async function fetchParallelSpotifyData(timeRange: string = 'short_term'): Promi
 /**
  * Custom hook for Spotify data with React Query and performance optimizations
  */
-export function useSpotifyData(options?: Partial<UseQueryOptions<SpotifyData, SpotifyError>>) {
+export function useSpotifyData(timeRange: string = 'short_term', options?: Partial<UseQueryOptions<SpotifyData, SpotifyError>>) {
   return useQuery<SpotifyData, SpotifyError>({
-    queryKey: ['spotify-data'],
-    queryFn: fetchSpotifyData,
+    queryKey: ['spotify-data', timeRange],
+    queryFn: async ({ queryKey }) => {
+      const [, range] = queryKey as [string, string];
+      return fetchSpotifyData(range || 'short_term');
+    },
 
     // Caching configuration - optimized for performance
     staleTime: 5 * 60 * 1000, // 5 minutes - data is considered fresh for 5 minutes
@@ -391,7 +401,8 @@ export function useDebouncedSpotifyData(
 ) {
   const debouncedRefetchRef = useRef<() => void>();
 
-  const query = useSpotifyData(options);
+  // Default to short_term for debounced hook, can be extended to accept timeRange
+  const query = useSpotifyData('short_term', options);
 
   // Create debounced refetch function
   const debouncedRefetch = useMemo(

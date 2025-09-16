@@ -13,6 +13,10 @@ export default function SpotifyLogin() {
 
 function InnerSpotifyLogin() {
   const { data: session } = useSession();
+  const handleSignOut = async () => {
+    await signOut({ redirect: true, callbackUrl: '/' });
+    localStorage.clear(); // Clear all client-side data
+  };
   if (!session) {
     return (
       <div>
@@ -24,7 +28,7 @@ function InnerSpotifyLogin() {
   return (
     <div>
       <p>Signed in as {session.user?.email}</p>
-      <button onClick={() => signOut()}>Sign out</button>
+      <button onClick={handleSignOut}>Sign out</button>
     </div>
   );
 }

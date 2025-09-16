@@ -26,13 +26,10 @@ interface SpotifyApiArtist {
 export const dynamic = 'force-dynamic';
 
 
-
-
-
 export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
-  const singleTimeRange = searchParams.get('time_range');
+  const timeRange = searchParams.get('time_range') || 'short_term';
   const limit = parseInt(searchParams.get('limit') || '50');
   try {
     const session = await getServerSession(authOptions);
@@ -45,14 +42,14 @@ export async function GET(request: Request) {
     const spotifyApi = new SpotifyWebApi();
     spotifyApi.setAccessToken(session.accessToken as string);
 
-    // If specific time range requested, return only that
-    if (singleTimeRange) {
-      const [userProfile, topTracks, topArtists] = await Promise.all([
-        spotifyApi.getMe(),
-        spotifyApi.getMyTopTracks({ limit, time_range: singleTimeRange as 'short_term' | 'medium_term' | 'long_term' }),
-        spotifyApi.getMyTopArtists({ limit, time_range: singleTimeRange as 'short_term' | 'medium_term' | 'long_term' })
-      ]);
-      const formatTrackData = (tracks: { body: { items: SpotifyApiTrack[] } }, timeRange: string) => tracks.body.items.slice(0, limit).map((track: SpotifyApiTrack, index: number) => ({
+    // Always fetch data for the requested time_range
+    const [userProfile, topTracks, topArtists] = await Promise.all([
+      spotifyApi.getMe(),
+      spotifyApi.getMyTopTracks({ limit, time_range: timeRange as 'short_term' | 'medium_term' | 'long_term' }),
+      spotifyApi.getMyTopArtists({ limit, time_range: timeRange as 'short_term' | 'medium_term' | 'long_term' })
+    ]);
+    const formatTrackData = (tracks: { body: { items: SpotifyApiTrack[] } }, timeRange: string) =>
+      tracks.body.items.slice(0, limit).map((track: SpotifyApiTrack, index: number) => ({
         id: track.id,
         name: track.name,
         artist: track.artists[0].name,
@@ -68,7 +65,8 @@ export async function GET(request: Request) {
         rank: index + 1,
         timeRange
       }));
-      const formatArtistData = (artists: { body: { items: SpotifyApiArtist[] } }, timeRange: string) => artists.body.items.slice(0, limit).map((artist: SpotifyApiArtist, index: number) => ({
+    const formatArtistData = (artists: { body: { items: SpotifyApiArtist[] } }, timeRange: string) =>
+      artists.body.items.slice(0, limit).map((artist: SpotifyApiArtist, index: number) => ({
         id: artist.id,
         name: artist.name,
         genres: artist.genres,
@@ -79,129 +77,22 @@ export async function GET(request: Request) {
         rank: index + 1,
         timeRange
       }));
-      // Calculate discoveryMetrics for this time range
-      const tracks = formatTrackData(topTracks, singleTimeRange);
-      // Mainstream taste: average popularity of top tracks (0-100)
-      const mainstreamTaste = tracks.length > 0 ? Math.round(tracks.reduce((sum, t) => sum + (t.popularity || 0), 0) / tracks.length) : 0;
-      // Artist diversity: unique artists in top tracks
-      const uniqueArtists = new Set(tracks.map(t => t.artist)).size;
-      // Vintage collector: % of tracks released before 2010
-      const vintageCount = tracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) < '2010').length;
-      const vintageCollector = tracks.length > 0 ? Math.round((vintageCount / tracks.length) * 100) : 0;
-      // Underground taste: % of tracks with popularity < 40
-      const undergroundCount = tracks.filter(t => (t.popularity || 0) < 40).length;
-      const undergroundTaste = tracks.length > 0 ? Math.round((undergroundCount / tracks.length) * 100) : 0;
-      // Recent music lover: % of tracks released after 2020
-      const recentCount = tracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) >= '2020').length;
-      const recentMusicLover = tracks.length > 0 ? Math.round((recentCount / tracks.length) * 100) : 0;
-      // Unique albums
-      const uniqueAlbums = new Set(tracks.map(t => t.album?.name)).size;
-      // Oldest and newest track year
-      const years = tracks
-        .map(t => t.album && t.album.release_date ? parseInt(t.album.release_date.slice(0,4)) : undefined)
-        .filter((y): y is number => typeof y === 'number' && !isNaN(y));
-      const oldestTrackYear = years.length > 0 ? Math.min(...years) : undefined;
-      const newestTrackYear = years.length > 0 ? Math.max(...years) : undefined;
-      const discoveryMetrics = {
-        mainstreamTaste,
-        artistDiversity: uniqueArtists,
-        vintageCollector,
-        undergroundTaste,
-        recentMusicLover,
-        uniqueArtistsCount: uniqueArtists,
-        uniqueAlbumsCount: uniqueAlbums,
-        oldestTrackYear,
-        newestTrackYear
-      };
-      return NextResponse.json({
-        userProfile: userProfile.body,
-        topTracks: tracks.slice(0, 10),
-        topArtists: formatArtistData(topArtists, singleTimeRange).slice(0, 10),
-        discoveryMetrics
-      });
-    }
-
-    // Default: fetch ALL time ranges (main change)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Loading comprehensive data for all time ranges...');
-    }
-    const [userProfile, recentlyPlayed, ...allTimeRangeData] = await Promise.all([
-      spotifyApi.getMe(),
-      spotifyApi.getMyRecentlyPlayedTracks({ limit: 50 }),
-      spotifyApi.getMyTopTracks({ limit: 50, time_range: 'short_term' }),
-      spotifyApi.getMyTopArtists({ limit: 50, time_range: 'short_term' }),
-      spotifyApi.getMyTopTracks({ limit: 50, time_range: 'medium_term' }),
-      spotifyApi.getMyTopArtists({ limit: 50, time_range: 'medium_term' }),
-      spotifyApi.getMyTopTracks({ limit: 50, time_range: 'long_term' }),
-      spotifyApi.getMyTopArtists({ limit: 50, time_range: 'long_term' })
-    ]);
-    const [shortTracks, shortArtists, mediumTracks, mediumArtists, longTracks, longArtists] = allTimeRangeData;
-
-    // Check for sufficient data across all time ranges
-    const hasShortTermData = shortTracks.body.items.length > 0 || shortArtists.body.items.length > 0;
-    const hasMediumTermData = mediumTracks.body.items.length > 0 || mediumArtists.body.items.length > 0;
-    const hasLongTermData = longTracks.body.items.length > 0 || longArtists.body.items.length > 0;
-    if (!hasShortTermData && !hasMediumTermData && !hasLongTermData) {
-      return NextResponse.json({ error: "insufficient_data" });
-    }
-
-  const formatTrackData = (tracks: { body: { items: SpotifyApiTrack[] } }, timeRange: string) => tracks.body.items.slice(0, 50).map((track: SpotifyApiTrack, index: number) => ({
-      id: track.id,
-      name: track.name,
-      artist: track.artists[0].name,
-      artists: track.artists,
-      album: {
-        name: track.album.name,
-        release_date: track.album.release_date,
-        images: track.album.images
-      },
-      popularity: track.popularity,
-  external_urls: { spotify: track.external_urls?.spotify },
-      images: track.album.images,
-      rank: index + 1,
-      timeRange
-    }));
-  const formatArtistData = (artists: { body: { items: SpotifyApiArtist[] } }, timeRange: string) => artists.body.items.slice(0, 50).map((artist: SpotifyApiArtist, index: number) => ({
-      id: artist.id,
-      name: artist.name,
-      genres: artist.genres,
-      popularity: artist.popularity,
-      images: artist.images,
-  external_urls: { spotify: artist.external_urls?.spotify },
-      followers: artist.followers,
-      rank: index + 1,
-      timeRange
-    }));
-
-    // Calculate discoveryMetrics
-    const allTracks = [
-      ...formatTrackData(shortTracks, 'short_term'),
-      ...formatTrackData(mediumTracks, 'medium_term'),
-      ...formatTrackData(longTracks, 'long_term')
-    ];
-
-    // Mainstream taste: average popularity of top tracks (0-100)
-    const mainstreamTaste = allTracks.length > 0 ? Math.round(allTracks.reduce((sum, t) => sum + (t.popularity || 0), 0) / allTracks.length) : 0;
-    // Artist diversity: unique artists in top tracks
-    const uniqueArtists = new Set(allTracks.map(t => t.artist)).size;
-    // Vintage collector: % of tracks released before 2010
-    const vintageCount = allTracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) < '2010').length;
-    const vintageCollector = allTracks.length > 0 ? Math.round((vintageCount / allTracks.length) * 100) : 0;
-    // Underground taste: % of tracks with popularity < 40
-    const undergroundCount = allTracks.filter(t => (t.popularity || 0) < 40).length;
-    const undergroundTaste = allTracks.length > 0 ? Math.round((undergroundCount / allTracks.length) * 100) : 0;
-    // Recent music lover: % of tracks released after 2020
-    const recentCount = allTracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) >= '2020').length;
-    const recentMusicLover = allTracks.length > 0 ? Math.round((recentCount / allTracks.length) * 100) : 0;
-    // Unique albums
-    const uniqueAlbums = new Set(allTracks.map(t => t.album?.name)).size;
-    // Oldest and newest track year
-    const years = allTracks
+    // Calculate discoveryMetrics for this time range
+    const tracks = formatTrackData(topTracks, timeRange);
+    const mainstreamTaste = tracks.length > 0 ? Math.round(tracks.reduce((sum, t) => sum + (t.popularity || 0), 0) / tracks.length) : 0;
+    const uniqueArtists = new Set(tracks.map(t => t.artist)).size;
+    const vintageCount = tracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) < '2010').length;
+    const vintageCollector = tracks.length > 0 ? Math.round((vintageCount / tracks.length) * 100) : 0;
+    const undergroundCount = tracks.filter(t => (t.popularity || 0) < 40).length;
+    const undergroundTaste = tracks.length > 0 ? Math.round((undergroundCount / tracks.length) * 100) : 0;
+    const recentCount = tracks.filter(t => t.album && t.album.release_date && t.album.release_date.slice(0,4) >= '2020').length;
+    const recentMusicLover = tracks.length > 0 ? Math.round((recentCount / tracks.length) * 100) : 0;
+    const uniqueAlbums = new Set(tracks.map(t => t.album?.name)).size;
+    const years = tracks
       .map(t => t.album && t.album.release_date ? parseInt(t.album.release_date.slice(0,4)) : undefined)
       .filter((y): y is number => typeof y === 'number' && !isNaN(y));
     const oldestTrackYear = years.length > 0 ? Math.min(...years) : undefined;
     const newestTrackYear = years.length > 0 ? Math.max(...years) : undefined;
-
     const discoveryMetrics = {
       mainstreamTaste,
       artistDiversity: uniqueArtists,
@@ -213,44 +104,13 @@ export async function GET(request: Request) {
       oldestTrackYear,
       newestTrackYear
     };
-
-    // Social metrics
-    const followedArtistsCount = userProfile.body?.followers?.total || 0;
-    const playlistsOwned = 0; // Not available in this API, set to 0 or fetch elsewhere
-    const accountType = userProfile.body?.product || '';
-    const socialMetrics = {
-      followedArtistsCount,
-      playlistsOwned,
-      accountType
-    };
-
     return NextResponse.json({
-      topTracksByTimeRange: {
-        short_term: formatTrackData(shortTracks, 'short_term'),
-        medium_term: formatTrackData(mediumTracks, 'medium_term'),
-        long_term: formatTrackData(longTracks, 'long_term')
-      },
-      topArtistsByTimeRange: {
-        short_term: formatArtistData(shortArtists, 'short_term'),
-        medium_term: formatArtistData(mediumArtists, 'medium_term'),
-        long_term: formatArtistData(longArtists, 'long_term')
-      },
-      // Legacy format for backward compatibility (use short_term as default)
-      topTracks: formatTrackData(shortTracks, 'short_term').slice(0, 10),
-      topArtists: formatArtistData(shortArtists, 'short_term').slice(0, 10),
       userProfile: userProfile.body,
-      recentTracks: recentlyPlayed && recentlyPlayed.body?.items ? recentlyPlayed.body.items.slice(0, 20).map((item: { track: SpotifyApiTrack; played_at: string; context?: unknown }) => ({
-        track: item.track,
-        played_at: item.played_at,
-        context: item.context
-      })) : [],
+      topTracks: tracks.slice(0, 10),
+      topArtists: formatArtistData(topArtists, timeRange).slice(0, 10),
       discoveryMetrics,
-      socialMetrics
     });
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error("Error fetching comprehensive Spotify data:", error);
-    }
     return NextResponse.json({ error: "Failed to fetch Spotify data", details: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
   }
 }
