@@ -2,7 +2,8 @@
 'use client';
 
 import React from 'react';
-import { FaUser, FaHeart, FaCompass, FaUsers, FaChartLine } from 'react-icons/fa';
+import Image from 'next/image';
+import { FaHeart, FaCompass, FaUsers, FaChartLine } from 'react-icons/fa';
 
 interface AIPersonalityCardProps {
   analysis: {
@@ -28,13 +29,13 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
   const funFacts = enhanced.funFacts || [];
 
   return (
-    <div className={`bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl border border-purple-500/30 overflow-hidden ${className}`}>
+    <div className={`bg-gradient-to-br from-[#0f1724]/30 to-[#071233]/30 rounded-xl border border-[#2b2f4a]/20 overflow-hidden ${className}`}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-b border-purple-500/20 p-6">
+      <div className="bg-gradient-to-r from-[#5B21B6]/10 to-[#7C3AED]/10 border-b border-[#6d28d9]/10 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-              <FaUser className="text-white text-lg" />
+            <div className="w-10 h-10 rounded-lg overflow-hidden bg-transparent flex items-center justify-center">
+              <Image src="/mistral-logo-color-white.png" alt="Mistral" width={40} height={40} className="w-10 h-10" unoptimized />
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Your Musical Personality</h3>
@@ -104,9 +105,10 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-3 bg-black/20 border-t border-purple-500/20">
-        <p className="text-xs text-gray-500 text-center">
-          Powered by Mistral AI • Musical Personality Analysis
+      <div className="px-6 py-3 bg-black/10 border-t border-[#6d28d9]/10">
+        <p className="text-xs text-gray-400 text-center flex items-center justify-center gap-2">
+          <Image src="/mistral-logo-color-white.png" alt="Mistral" width={16} height={16} className="inline-block" unoptimized />
+          <span>Powered by Mistral AI • Musical Personality Analysis</span>
         </p>
       </div>
     </div>

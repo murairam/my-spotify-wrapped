@@ -1,13 +1,14 @@
 
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useSession, signIn } from 'next-auth/react';
 import { FaSpotify, FaEye, FaArrowRight, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
 import Dashboard from './Dashboard';
 import AIIntelligenceSection from './ai/AIIntelligenceSection';
 import ConcertFinderSection from './concerts/ConcertFinderSection';
 import type { SpotifyData } from '@/types/spotify';
-import { getDataForTimeRange, MockSpotifyData } from '../lib/mockData';
+import { getDataForTimeRange, MockSpotifyData, convertMockToSpotifyData } from '../lib/mockData';
 
 export function LandingPage() {
 
@@ -235,11 +236,18 @@ return (
           Your data is processed securely and never stored permanently.
         </p>
       </div>
+      <div className="mt-6 p-4 bg-gray-800/20 rounded-lg border border-gray-700 flex items-center gap-3 justify-center text-gray-300 text-sm">
+  <Image src="/mistral-logo-color-white.png" alt="Mistral" width={32} height={32} className="w-8 h-8" unoptimized />
+        <div>
+          <div className="font-semibold text-white">AI Analysis powered by Mistral</div>
+          <div className="text-gray-400 text-xs">We use Mistral AI to generate personalized music insights and recommendations.</div>
+        </div>
+      </div>
       {/* Show AI and Concert Finder preview when spotifyData (or demo data) is present */}
       {spotifyData && (
         <div className="mt-10 space-y-8">
-          <AIIntelligenceSection spotifyData={spotifyData as unknown as SpotifyData} className="w-full" />
-          <ConcertFinderSection spotifyData={spotifyData as unknown as SpotifyData} className="w-full" />
+          <AIIntelligenceSection spotifyData={(spotifyData && authMethod === 'mock') ? (convertMockToSpotifyData(spotifyData) as unknown as SpotifyData) : (spotifyData as unknown as SpotifyData)} className="w-full" />
+          <ConcertFinderSection spotifyData={(spotifyData && authMethod === 'mock') ? (convertMockToSpotifyData(spotifyData) as unknown as SpotifyData) : (spotifyData as unknown as SpotifyData)} className="w-full" />
         </div>
       )}
     </div>

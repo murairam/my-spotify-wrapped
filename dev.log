@@ -1,0 +1,168 @@
+
+> my-spotify-wrapped@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.32
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1140ms
+ ✓ Compiled /api/mistral/analyze in 339ms (469 modules)
+🤖 Analyzing Spotify data with Mistral AI...
+📡 Calling Mistral API...
+🤖 Mistral raw response length: 3612
+🤖 Mistral raw response: ```json
+{
+  "newArtists": [
+    {
+      "artist": "Cocteau Twins",
+      "genre": "Dream Pop",
+      "song": "Heaven or Las Vegas",
+      "reason": "Cocteau Twins are pioneers of the dream pop genre, known for their ethereal soundscapes and ethereal vocals. Their music aligns well with your preference for dream pop and indie genres."
+    },
+    {
+      "artist": "Deftones",
+      "genre": "Alternative Rock",
+      "song": "Change (In the House of Flies)",
+      "reason": "Deftones blend dreamy t...
+⚠️ Full response not JSON, trying to extract JSON block...
+⚠️ JSON code block parsing failed, trying to extract and clean JSON object...
+✅ Successfully extracted and parsed JSON object after aggressive cleaning
+✅ Successfully generated AI analysis
+✅ Assigned newArtists: 5 items
+✅ Assigned playlists: 3 items
+✅ Assigned moodAnalysis
+🔍 Enhanced object keys: [
+  'musicPersonality',
+  'discoveryStyle',
+  'socialProfile',
+  'recommendations',
+  'funFacts',
+  'concerts',
+  'newArtists',
+  'playlists',
+  'moodAnalysis'
+]
+🔍 newArtists present: true
+🔍 playlists present: true
+🔍 moodAnalysis present: true
+ POST /api/mistral/analyze 200 in 6083ms
+🤖 Analyzing Spotify data with Mistral AI...
+📡 Calling Mistral API...
+🤖 Mistral raw response length: 3756
+🤖 Mistral raw response: ```json
+{
+  "newArtists": [
+    {
+      "artist": "SOPHIE",
+      "genre": "Hyperpop",
+      "song": "Faceshopping",
+      "reason": "SOPHIE is a pioneer in the hyperpop genre, known for her innovative production and futuristic sound. Her track 'Faceshopping' is a great example of her work and aligns well with your interest in hyperpop."
+    },
+    {
+      "artist": "Charli XCX",
+      "genre": "Hyperpop",
+      "song": "Vroom Vroom",
+      "reason": "Charli XCX is a versatile artist who has emb...
+⚠️ Full response not JSON, trying to extract JSON block...
+⚠️ JSON code block parsing failed, trying to extract and clean JSON object...
+✅ Successfully extracted and parsed JSON object after aggressive cleaning
+✅ Successfully generated AI analysis
+✅ Assigned newArtists: 5 items
+✅ Assigned playlists: 3 items
+✅ Assigned moodAnalysis
+🔍 Enhanced object keys: [
+  'musicPersonality',
+  'discoveryStyle',
+  'socialProfile',
+  'recommendations',
+  'funFacts',
+  'concerts',
+  'newArtists',
+  'playlists',
+  'moodAnalysis'
+]
+🔍 newArtists present: true
+🔍 playlists present: true
+🔍 moodAnalysis present: true
+ POST /api/mistral/analyze 200 in 11292ms
+ ✓ Compiled /api/auth/[...nextauth] in 391ms (349 modules)
+JWT callback - Account: undefined
+JWT callback - Token before: {
+  name: '1197958546',
+  email: 'marimiilpalu@gmail.com',
+  picture: 'https://i.scdn.co/image/ab6775700000ee85a0e0e2c17b7afe5b13202718',
+  sub: '1197958546',
+  accessToken: 'BQDCZ3fIjRjrpgkLrIjl8E4b4hKkdh4Vn5SO_6Ym4vztNYu6jQ6kB7cec7rf1wdvl8Pipr-wj50Y9vjIG2lzCVr-K6eL1kUhe1HtyK9VmLkDgimgTlqPxvqScOUCXCWeSryjYB31eNzQsgb91ZrzoGZ1hNJzca_ZGxUuzlDyc5CTnIJVPE6vryghFkncxyQLsNaBrrm_fmAEP_Wdl6YBcSfGKOAoueJVWMkQbqRtYAyl28EC_bHSMpTcQizXU-SMBlNIXvl_M-oUPLI',
+  refreshToken: 'AQCU-CX6LvJoEVF4dPB7XprZfOZclgLPq6jNH3ox6YemGq173YjbGUL6Ck5Urtlx71YlaMFYejzlZu0B-DOPUa-K37YjuwRK-DFfVpR8lqH8g8Qgb3lUUohDBhdBqUtBWO4',
+  expiresAt: 1758053461.538,
+  iat: 1758050922,
+  exp: 1760642922,
+  jti: '53c7a66a-9c79-4843-846d-693484890bea'
+}
+JWT callback - Token still valid
+Session callback - Token: {
+  name: '1197958546',
+  email: 'marimiilpalu@gmail.com',
+  picture: 'https://i.scdn.co/image/ab6775700000ee85a0e0e2c17b7afe5b13202718',
+  sub: '1197958546',
+  accessToken: 'BQDCZ3fIjRjrpgkLrIjl8E4b4hKkdh4Vn5SO_6Ym4vztNYu6jQ6kB7cec7rf1wdvl8Pipr-wj50Y9vjIG2lzCVr-K6eL1kUhe1HtyK9VmLkDgimgTlqPxvqScOUCXCWeSryjYB31eNzQsgb91ZrzoGZ1hNJzca_ZGxUuzlDyc5CTnIJVPE6vryghFkncxyQLsNaBrrm_fmAEP_Wdl6YBcSfGKOAoueJVWMkQbqRtYAyl28EC_bHSMpTcQizXU-SMBlNIXvl_M-oUPLI',
+  refreshToken: 'AQCU-CX6LvJoEVF4dPB7XprZfOZclgLPq6jNH3ox6YemGq173YjbGUL6Ck5Urtlx71YlaMFYejzlZu0B-DOPUa-K37YjuwRK-DFfVpR8lqH8g8Qgb3lUUohDBhdBqUtBWO4',
+  expiresAt: 1758053461.538,
+  iat: 1758050922,
+  exp: 1760642922,
+  jti: '53c7a66a-9c79-4843-846d-693484890bea'
+}
+Session callback - Session: {
+  user: {
+    name: '1197958546',
+    email: 'marimiilpalu@gmail.com',
+    image: 'https://i.scdn.co/image/ab6775700000ee85a0e0e2c17b7afe5b13202718'
+  },
+  expires: '2025-10-16T19:39:29.197Z',
+  accessToken: 'BQDCZ3fIjRjrpgkLrIjl8E4b4hKkdh4Vn5SO_6Ym4vztNYu6jQ6kB7cec7rf1wdvl8Pipr-wj50Y9vjIG2lzCVr-K6eL1kUhe1HtyK9VmLkDgimgTlqPxvqScOUCXCWeSryjYB31eNzQsgb91ZrzoGZ1hNJzca_ZGxUuzlDyc5CTnIJVPE6vryghFkncxyQLsNaBrrm_fmAEP_Wdl6YBcSfGKOAoueJVWMkQbqRtYAyl28EC_bHSMpTcQizXU-SMBlNIXvl_M-oUPLI',
+  refreshToken: 'AQCU-CX6LvJoEVF4dPB7XprZfOZclgLPq6jNH3ox6YemGq173YjbGUL6Ck5Urtlx71YlaMFYejzlZu0B-DOPUa-K37YjuwRK-DFfVpR8lqH8g8Qgb3lUUohDBhdBqUtBWO4',
+  error: undefined
+}
+ GET /api/auth/session 200 in 1074ms
+ ✓ Compiled /api/spotify/top-items in 122ms (538 modules)
+JWT callback - Account: undefined
+JWT callback - Token before: {
+  name: '1197958546',
+  email: 'marimiilpalu@gmail.com',
+  picture: 'https://i.scdn.co/image/ab6775700000ee85a0e0e2c17b7afe5b13202718',
+  sub: '1197958546',
+  accessToken: 'BQDCZ3fIjRjrpgkLrIjl8E4b4hKkdh4Vn5SO_6Ym4vztNYu6jQ6kB7cec7rf1wdvl8Pipr-wj50Y9vjIG2lzCVr-K6eL1kUhe1HtyK9VmLkDgimgTlqPxvqScOUCXCWeSryjYB31eNzQsgb91ZrzoGZ1hNJzca_ZGxUuzlDyc5CTnIJVPE6vryghFkncxyQLsNaBrrm_fmAEP_Wdl6YBcSfGKOAoueJVWMkQbqRtYAyl28EC_bHSMpTcQizXU-SMBlNIXvl_M-oUPLI',
+  refreshToken: 'AQCU-CX6LvJoEVF4dPB7XprZfOZclgLPq6jNH3ox6YemGq173YjbGUL6Ck5Urtlx71YlaMFYejzlZu0B-DOPUa-K37YjuwRK-DFfVpR8lqH8g8Qgb3lUUohDBhdBqUtBWO4',
+  expiresAt: 1758053461.538,
+  iat: 1758051569,
+  exp: 1760643569,
+  jti: '0d238519-3155-4496-a700-9119578f4583'
+}
+JWT callback - Token still valid
+Session callback - Token: {
+  name: '1197958546',
+  email: 'marimiilpalu@gmail.com',
+  picture: 'https://i.scdn.co/image/ab6775700000ee85a0e0e2c17b7afe5b13202718',
+  sub: '1197958546',
+  accessToken: 'BQDCZ3fIjRjrpgkLrIjl8E4b4hKkdh4Vn5SO_6Ym4vztNYu6jQ6kB7cec7rf1wdvl8Pipr-wj50Y9vjIG2lzCVr-K6eL1kUhe1HtyK9VmLkDgimgTlqPxvqScOUCXCWeSryjYB31eNzQsgb91ZrzoGZ1hNJzca_ZGxUuzlDyc5CTnIJVPE6vryghFkncxyQLsNaBrrm_fmAEP_Wdl6YBcSfGKOAoueJVWMkQbqRtYAyl28EC_bHSMpTcQizXU-SMBlNIXvl_M-oUPLI',
+  refreshToken: 'AQCU-CX6LvJoEVF4dPB7XprZfOZclgLPq6jNH3ox6YemGq173YjbGUL6Ck5Urtlx71YlaMFYejzlZu0B-DOPUa-K37YjuwRK-DFfVpR8lqH8g8Qgb3lUUohDBhdBqUtBWO4',
+  expiresAt: 1758053461.538,
+  iat: 1758051569,
+  exp: 1760643569,
+  jti: '0d238519-3155-4496-a700-9119578f4583'
+}
+Session callback - Session: {
+  user: {
+    name: '1197958546',
+    email: 'marimiilpalu@gmail.com',
+    image: 'https://i.scdn.co/image/ab6775700000ee85a0e0e2c17b7afe5b13202718'
+  },
+  expires: '2025-10-16T19:39:29.436Z',
+  accessToken: 'BQDCZ3fIjRjrpgkLrIjl8E4b4hKkdh4Vn5SO_6Ym4vztNYu6jQ6kB7cec7rf1wdvl8Pipr-wj50Y9vjIG2lzCVr-K6eL1kUhe1HtyK9VmLkDgimgTlqPxvqScOUCXCWeSryjYB31eNzQsgb91ZrzoGZ1hNJzca_ZGxUuzlDyc5CTnIJVPE6vryghFkncxyQLsNaBrrm_fmAEP_Wdl6YBcSfGKOAoueJVWMkQbqRtYAyl28EC_bHSMpTcQizXU-SMBlNIXvl_M-oUPLI',
+  refreshToken: 'AQCU-CX6LvJoEVF4dPB7XprZfOZclgLPq6jNH3ox6YemGq173YjbGUL6Ck5Urtlx71YlaMFYejzlZu0B-DOPUa-K37YjuwRK-DFfVpR8lqH8g8Qgb3lUUohDBhdBqUtBWO4',
+  error: undefined
+}
+ GET /api/spotify/top-items?time_range=long_term 200 in 677ms
+[?25h

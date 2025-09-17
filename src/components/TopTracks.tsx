@@ -55,7 +55,7 @@ export default function TopTracks({
   const currentTracks = topTracksByTimeRange?.[timeRange as keyof TracksData] || topTracks || [];
 
   return (
-    <div className={`bg-[#191414] p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-800 shadow-xl ${className}`}>
+    <div className={`bg-gradient-to-b from-[#0f1112] to-[#121212] p-4 sm:p-6 lg:p-8 rounded-xl border border-gray-800 shadow-2xl ${className}`}>
       {/* Header with centralized time range label */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
         <div className="flex items-center">
@@ -67,7 +67,7 @@ export default function TopTracks({
         <span className="text-gray-400 text-sm">
           {timeRange === 'short_term' && 'Last 4 Weeks'}
           {timeRange === 'medium_term' && 'Last 6 Months'}
-          {timeRange === 'long_term' && 'All Time'}
+          {timeRange === 'long_term' && 'Last Year'}
         </span>
       </div>
 
@@ -79,31 +79,30 @@ export default function TopTracks({
             <ItemSkeleton key={`track-skeleton-${index}`} />
           ))
         ) : (
-          currentTracks.slice(0, 5).map((track, index) => (
+          currentTracks.slice(0, 10).map((track, index) => (
             <div
               key={track.id}
-              className="flex items-center space-x-3 sm:space-x-4 p-3 rounded-lg bg-black/20 hover:bg-black/40 transition-all"
+              className={`flex items-center space-x-3 sm:space-x-4 p-3 rounded-lg transition-all ${index < 3 ? 'bg-gradient-to-r from-[#122214] to-[#07120a] shadow-lg transform hover:scale-[1.02] md:p-6' : 'bg-black/20 hover:bg-black/40'}`}
             >
               {/* Rank number */}
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
+              <div className={`${index < 3 ? 'w-10 h-10 sm:w-14 sm:h-14 text-xl' : 'w-6 h-6 sm:w-8 sm:h-8 text-xs'} bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}>
                 {index + 1}
               </div>
 
               {/* Track artwork */}
               {track.images?.[2] && (
-                // Using <img> for artwork images as next/image is not suitable for dynamic external URLs or artwork sizes.
                 <Image
                   src={track.images[2].url}
                   alt={track.name}
-                  width={48}
-                  height={48}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover flex-shrink-0"
+                  width={index < 3 ? 96 : 56}
+                  height={index < 3 ? 96 : 56}
+                  className={`${index < 3 ? 'w-24 h-24' : 'w-12 h-12 sm:w-14 sm:h-14'} rounded-lg object-cover flex-shrink-0 shadow-lg`}
                 />
               )}
 
               {/* Track info and Spotify link */}
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-white text-sm sm:text-lg">
+                <div className={`${index < 3 ? 'font-bold text-xl' : 'font-semibold text-white text-sm sm:text-lg'}`}>
                   <div className="truncate">{track.name}</div>
                   {track.external_urls?.spotify && (
                     <a
@@ -112,15 +111,13 @@ export default function TopTracks({
                       rel="noopener noreferrer"
                       className="inline-flex items-center px-2 sm:px-3 py-1 bg-[#1DB954] hover:bg-[#1ed760] text-white text-xs font-medium rounded-full transition-colors mt-1 sm:mt-0 sm:ml-2 min-h-[32px] sm:min-h-[28px] touch-manipulation"
                     >
-                      {/* Replaced emoji with FaMusic for Spotify design compliance */}
                       <FaMusic className="mr-1" />
                       <span className="hidden sm:inline">Open in Spotify</span>
                       <span className="sm:hidden">Spotify</span>
                     </a>
                   )}
                 </div>
-                {/* Fixed contrast for accessibility (Spotify guideline compliance) */}
-                <div className="text-gray-200 text-sm truncate">{track.artist}</div>
+                <div className={`${index < 3 ? 'text-gray-200 text-sm' : 'text-gray-200 text-sm truncate'}`}>{track.artist}</div>
               </div>
 
               {/* Popularity bar */}

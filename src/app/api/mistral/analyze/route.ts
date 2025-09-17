@@ -31,17 +31,29 @@ interface AIAnalysis {
 
 // Enhanced prompt creation function
 function createPersonalityPrompt(spotifyData: SpotifyData): string {
-  const topArtists = spotifyData.topArtists?.slice(0, 5).map(a => a.name).join(", ") || "unknown artists";
-  const topGenres = spotifyData.topGenres?.slice(0, 5).join(", ") || "various genres";
-  const topTracks = spotifyData.topTracks?.slice(0, 3).map(t => `${t.name} by ${t.artists?.[0]?.name || 'Unknown'}`).join(", ") || "various tracks";
+  // Build a compact, explicit data payload for the model to consume
+  const dataPayload = {
+    topArtists: (spotifyData.topArtists || []).slice(0, 10).map(a => ({
+      name: a.name,
+      genres: a.genres || [],
+      popularity: a.popularity,
+      followers: a.followers
+    })),
+    topTracks: (spotifyData.topTracks || []).slice(0, 20).map(t => ({
+      name: t.name,
+      artists: (t.artists || []).map(ar => ar.name),
+      popularity: t.popularity,
+      duration_ms: t.duration_ms,
+      preview_url: t.preview_url || null,
+      album: t.album?.name || null
+    })),
+    topGenres: spotifyData.topGenres || [],
+    stats: spotifyData.stats || {}
+  };
 
-  return `Analyze this Spotify user's music taste:
+  return `Below is a JSON data payload describing a Spotify user's listening profile. Use this data as the authoritative source when generating analysis, artist discoveries, and playlist suggestions. Do NOT invent data.
 
-Top Artists: ${topArtists}
-Top Genres: ${topGenres}
-Top Tracks: ${topTracks}
-
-Based on this data, provide a comprehensive music analysis.`;
+DATA_JSON:\n${JSON.stringify(dataPayload, null, 2)}\n\n`;
 }
 
 // Concert recommendation functions (simplified for this fix)
@@ -144,38 +156,28 @@ export async function POST(request: NextRequest) {
 
     console.log("🤖 Analyzing Spotify data with Mistral AI...");
 
-    // Create structured prompt for better AI responses
+    // Create structured prompt for better AI responses (embed authoritative Spotify data)
     const basePrompt = createPersonalityPrompt(spotifyData);
 
     const structuredPrompt = `${basePrompt}
 
-Please provide a JSON response with the following structure:
+INSTRUCTIONS:
+- Use the DATA_JSON above as the authoritative source. Do NOT invent or hallucinate new track/artist data.
+- Return ONLY valid JSON (no explanation outside the JSON).
+- Provide exactly 5 new artist suggestions and 3 playlists.
+- Each playlist should contain 8-12 songs listed in the format "Song Title - Artist Name". Where possible include the artist's primary genre and a one-line reason for the selection.
+- For each new artist, include: artist name, primary genre, one recommended song (preferably from their topTracks), and a 1-2 sentence reason why this artist suits the user.
+- For playlists, include: name, short description (1-2 sentences), occasion, song list (8-12 items), and an optional array of seed artists from the user's topArtists used to construct the playlist.
+- Also produce a "moodAnalysis" object with: primaryMood, emotionalDescription, listeningContext, and seasonalTrend.
+
+RESPONSE_SCHEMA:
 {
-  "newArtists": [
-    {
-      "artist": "Artist Name",
-      "reason": "Why this artist matches the user's taste",
-      "genre": "Primary genre",
-      "song": "Recommended song to start with"
-    }
-  ],
-  "playlists": [
-    {
-      "name": "Playlist Name",
-      "description": "What makes this playlist special",
-      "occasion": "When to listen to this playlist",
-      "songs": ["Song 1", "Song 2", "Song 3", "Song 4", "Song 5"]
-    }
-  ],
-  "moodAnalysis": {
-    "primaryMood": "Main emotional tone of their music",
-    "emotionalDescription": "Detailed analysis of their emotional music patterns",
-    "listeningContext": "When and how they likely listen to music",
-    "seasonalTrend": "Energy levels and seasonal patterns"
-  }
+  "newArtists": [{ "artist": "", "genre": "", "song": "", "reason": "" }],
+  "playlists": [{ "name": "", "description": "", "occasion": "", "songs": ["Song - Artist"], "seedArtists": ["Artist Name"] }],
+  "moodAnalysis": { "primaryMood": "", "emotionalDescription": "", "listeningContext": "", "seasonalTrend": "" }
 }
 
-Provide exactly 5 new artists, 3 playlists, and comprehensive mood analysis. Return only valid JSON.`;
+Return only the JSON that matches RESPONSE_SCHEMA.`;
 
     let aiText = '';
     let aiJson: unknown = null;
@@ -184,19 +186,13 @@ Provide exactly 5 new artists, 3 playlists, and comprehensive mood analysis. Ret
       console.log("📡 Calling Mistral API...");
 
       const chatResponse = await mistral.chat.complete({
-        model: "mistral-small-latest", // Using smaller model to avoid capacity issues
+        model: "mistral-small-latest",
         messages: [
-          {
-            role: "system",
-            content: "You are an expert music analyst and curator. Always respond with valid JSON when requested."
-          },
-          {
-            role: "user",
-            content: structuredPrompt
-          }
+          { role: "system", content: "You are an expert music analyst and curator. Always respond with valid JSON matching the RESPONSE_SCHEMA when requested." },
+          { role: "user", content: structuredPrompt }
         ],
-        temperature: 0.7,
-        maxTokens: 1500, // Reduced token limit
+        temperature: 0.6,
+        maxTokens: 2000
       });
 
       const content = chatResponse.choices?.[0]?.message?.content;

@@ -10,6 +10,8 @@ interface SpotifyApiTrack {
   album: { name: string; release_date: string; images: Array<{ url: string }> };
   popularity: number;
   external_urls?: { spotify?: string };
+  preview_url?: string | null;
+  duration_ms?: number;
 }
 
 interface SpotifyApiArtist {
@@ -43,10 +45,12 @@ export async function GET(request: Request) {
     spotifyApi.setAccessToken(session.accessToken as string);
 
     // Always fetch data for the requested time_range
-    const [userProfile, topTracks, topArtists] = await Promise.all([
+    const [userProfile, topTracks, topArtists, recentlyPlayed] = await Promise.all([
       spotifyApi.getMe(),
       spotifyApi.getMyTopTracks({ limit, time_range: timeRange as 'short_term' | 'medium_term' | 'long_term' }),
-      spotifyApi.getMyTopArtists({ limit, time_range: timeRange as 'short_term' | 'medium_term' | 'long_term' })
+      spotifyApi.getMyTopArtists({ limit, time_range: timeRange as 'short_term' | 'medium_term' | 'long_term' }),
+  // Fetch recently played separately; limit to 20 by default
+  spotifyApi.getMyRecentlyPlayedTracks({ limit: 20 })
     ]);
     const formatTrackData = (tracks: { body: { items: SpotifyApiTrack[] } }, timeRange: string) =>
       tracks.body.items.slice(0, limit).map((track: SpotifyApiTrack, index: number) => ({
@@ -104,11 +108,32 @@ export async function GET(request: Request) {
       oldestTrackYear,
       newestTrackYear
     };
+    // Map recently played items into the expected client shape
+    type RecentlyPlayedItem = {
+      track: SpotifyApiTrack;
+      played_at: string;
+    };
+
+  const recentTracks: Array<{ track: Partial<SpotifyApiTrack> & { artist?: string; images?: Array<{ url: string }>; album?: { name?: string; release_date?: string; images?: Array<{ url: string }> } }; played_at: string }> =
+      (recentlyPlayed?.body?.items || []).slice(0, 20).map((item: RecentlyPlayedItem) => {
+        const t = item.track;
+        return {
+          track: {
+            ...t,
+            artist: t.artists && t.artists[0] ? t.artists[0].name : undefined,
+            images: t.album?.images || [],
+            preview_url: t.preview_url ?? null
+          },
+          played_at: item.played_at
+        };
+      });
+
     return NextResponse.json({
       userProfile: userProfile.body,
       topTracks: tracks.slice(0, 10),
       topArtists: formatArtistData(topArtists, timeRange).slice(0, 10),
       discoveryMetrics,
+      recentTracks
     });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch Spotify data", details: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });

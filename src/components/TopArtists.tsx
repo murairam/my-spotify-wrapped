@@ -80,7 +80,7 @@ export default function TopArtists({
           currentArtists.slice(0, 5).map((artist, index) => (
             <div
               key={artist.id}
-              className="flex items-center space-x-3 sm:space-x-4 p-3 rounded-lg bg-black/20 hover:bg-black/40 transition-all"
+              className={`flex items-center space-x-3 sm:space-x-4 p-3 rounded-lg transition-all ${index < 3 ? 'bg-gradient-to-r from-[#081833] to-[#021025] shadow-xl border border-[#0f3b1f]/10' : 'bg-black/20 hover:bg-black/40'}`}
             >
               {/* Rank number */}
               <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
@@ -89,13 +89,12 @@ export default function TopArtists({
 
               {/* Artist profile image */}
               {artist.images?.[2] && (
-                // Using <img> for avatar images as next/image is not suitable for dynamic external URLs or avatar sizes.
                 <Image
                   src={artist.images[2].url}
                   alt={artist.name}
-                  width={48}
-                  height={48}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
+                  width={index < 3 ? 96 : 56}
+                  height={index < 3 ? 96 : 56}
+                  className={`${index < 3 ? 'w-20 h-20' : 'w-10 h-10 sm:w-12 sm:h-12'} rounded-full object-cover flex-shrink-0 shadow-md`}
                 />
               )}
 

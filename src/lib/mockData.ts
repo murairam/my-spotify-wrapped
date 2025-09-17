@@ -545,7 +545,48 @@ const mockDataSets = {
   }
 };
 
+import type { SpotifyData } from '@/types/spotify';
+
 export const getDataForTimeRange = (timeRange: 'short_term' | 'medium_term' | 'long_term'): MockSpotifyData => {
   return mockDataSets[timeRange];
+};
+
+// Convert the mock data shape into the SpotifyData shape expected by AI and server logic
+export const convertMockToSpotifyData = (mock: MockSpotifyData): SpotifyData => {
+  const topTracks = mock.topTracks.map(t => ({
+    id: t.id,
+    name: t.name,
+    artist: t.artist,
+    artists: [{ name: t.artist }],
+    popularity: t.popularity,
+    images: t.images,
+    external_urls: t.external_urls,
+    album: { name: t.name, release_date: '', images: t.images }
+  }));
+
+  const topArtists = mock.topArtists.map(a => ({
+    id: a.id,
+    name: a.name,
+    genres: a.genres,
+    popularity: a.popularity,
+    images: a.images,
+    external_urls: a.external_urls,
+  }));
+
+  const spotifyUser = {
+    display_name: mock.userProfile.display_name,
+    country: mock.userProfile.country,
+    followers: mock.userProfile.followers,
+    product: mock.userProfile.product
+  };
+
+  return {
+    topTracks,
+    topArtists,
+    topGenres: mock.topGenres,
+    musicIntelligence: mock.musicIntelligence,
+    userProfile: spotifyUser,
+    timeRange: ''
+  } as SpotifyData;
 };
 

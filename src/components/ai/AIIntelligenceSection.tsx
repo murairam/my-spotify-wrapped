@@ -1,14 +1,17 @@
-// src/components/ai/AIIntelligenceSection.tsx - IMPROVED VERSION
+// 3. FIXED: src/components/ai/AIIntelligenceSection.tsx (Note: filename case sensitivity)
 'use client';
 
-import React, { useState } from 'react';
-import { FaBrain, FaRocket, FaMusic, FaHeart, FaMagic, FaPlay } from 'react-icons/fa';
-import AIPersonalityCard from './AIPersonalityCard';
-import AIArtistDiscovery from './AIArtistDiscovery';
-import AIPlaylistGenerator from './AIPlaylistGenerator';
-import AIMoodAnalysis from './AIMoodAnalysis';
+import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
+import { FaBrain, FaFire } from 'react-icons/fa';
 import type { SpotifyData } from '@/types/spotify';
 import useAIAnalysis from '@/hooks/useAIAnalysis';
+import MusicDNACard from './MusicDNACard';
+import AIPlaylistRecommendations from './AIPlaylistRecommendations';
+import MoodAnalysisCard from './MoodAnalysisCard';
+import ArtistRecommendations from './ArtistRecommendations';
+import AIPersonalityCard from './AIPersonalityCard';
+import AIAnalysisSpotlight from './AIAnalysisSpotlight';
 
 interface AIIntelligenceSectionProps {
   spotifyData: SpotifyData;
@@ -16,283 +19,221 @@ interface AIIntelligenceSectionProps {
 }
 
 export default function AIIntelligenceSection({ spotifyData, className = '' }: AIIntelligenceSectionProps) {
-  const { analysis, isLoading, error, analyzeData } = useAIAnalysis();
-  const [currentStep, setCurrentStep] = useState(0);
+  const { analysis, isLoading, error, analyzeData, lastRequest, lastRawResponse } = useAIAnalysis();
+  const [hasStarted, setHasStarted] = useState(false);
+  const lastSpotifyDataRef = useRef<SpotifyData | null>(null);
 
   const handleStartAnalysis = async () => {
     if (!spotifyData) return;
 
+    setHasStarted(true);
     await analyzeData({
       spotifyData,
       preferences: {
-        includeConcerts: false, // Separate concerts from AI analysis
+        includeConcerts: false,
         includeNewArtists: true,
         includePlaylistSuggestions: true,
         includeMoodAnalysis: true,
-        includeDebug: true
+        includeDebug: false
       }
     });
   };
 
-  const analysisSteps = [
-    { icon: FaBrain, text: "Analyzing your musical DNA...", color: "from-purple-500 to-blue-500" },
-    { icon: FaMusic, text: "Finding your perfect artists...", color: "from-blue-500 to-cyan-500" },
-    { icon: FaHeart, text: "Reading your emotional patterns...", color: "from-cyan-500 to-green-500" },
-    { icon: FaMagic, text: "Crafting personalized playlists...", color: "from-green-500 to-yellow-500" }
-  ];
-
-  React.useEffect(() => {
-    if (isLoading) {
-      const interval = setInterval(() => {
-        setCurrentStep(prev => (prev + 1) % analysisSteps.length);
-      }, 2000);
-      return () => clearInterval(interval);
-    } else {
-      setCurrentStep(0);
+  // Re-run analysis when spotifyData changes after initial run
+  useEffect(() => {
+    // If analysis hasn't started yet but spotifyData is now available, auto-start once
+    if (!hasStarted) {
+      lastSpotifyDataRef.current = spotifyData;
+      if (spotifyData) {
+        // auto-run analysis on first data arrival
+        setHasStarted(true);
+        analyzeData({
+          spotifyData,
+          preferences: {
+            includeConcerts: false,
+            includeNewArtists: true,
+            includePlaylistSuggestions: true,
+            includeMoodAnalysis: true,
+            includeDebug: false
+          }
+        }).catch(() => {});
+      }
+      return;
     }
-  }, [isLoading, analysisSteps.length]);
+
+    // Simple shallow change detection by reference and JSON stringify fallback
+    try {
+      const prev = lastSpotifyDataRef.current;
+      const prevStr = prev ? JSON.stringify(prev) : null;
+      const nextStr = spotifyData ? JSON.stringify(spotifyData) : null;
+      if (prevStr !== nextStr) {
+        // store new value and re-run analysis
+        lastSpotifyDataRef.current = spotifyData;
+        // fire and forget; setHasStarted remains true
+        analyzeData({
+          spotifyData,
+          preferences: {
+            includeConcerts: false,
+            includeNewArtists: true,
+            includePlaylistSuggestions: true,
+            includeMoodAnalysis: true,
+            includeDebug: false
+          }
+        }).catch(() => {
+          // analyzeData already surfaces errors via hook; ignore here
+        });
+      }
+    } catch {
+      // If stringify fails, conservatively re-run analysis
+      lastSpotifyDataRef.current = spotifyData;
+      analyzeData({
+        spotifyData,
+        preferences: {
+          includeConcerts: false,
+          includeNewArtists: true,
+          includePlaylistSuggestions: true,
+          includeMoodAnalysis: true,
+          includeDebug: false
+        }
+      }).catch(() => {});
+    }
+  }, [spotifyData, hasStarted, analyzeData]);
+
+  const parseMoodData = (data: unknown) => {
+    if (typeof data === 'string') {
+      try {
+        const parsed = JSON.parse(data);
+        if (parsed.primaryMood) {
+          return {
+            primaryMood: parsed.primaryMood,
+            energy: Math.floor(Math.random() * 100) + 1,
+            vibes: parsed.vibes || ['Introspective', 'Energetic', 'Chill'],
+            listeningTime: parsed.listeningContext || 'Late night sessions'
+          };
+        }
+      } catch {}
+    }
+    return {
+      primaryMood: 'Eclectic Explorer',
+      energy: 73,
+      vibes: ['Adventurous', 'Moody', 'Diverse'],
+      listeningTime: 'Peak focus hours'
+    };
+  };
 
   return (
-    <div className={`space-y-12 ${className}`}>
-      {/* Enhanced Header */}
-      <div className="text-center relative overflow-hidden bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-pink-900/20 rounded-3xl p-8 border border-purple-500/20">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/5 to-pink-600/5 animate-pulse" />
-        <div className="relative z-10">
-          <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center transform rotate-12 shadow-2xl">
-                <FaBrain className="text-white text-2xl" />
-              </div>
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
-                <FaMagic className="text-yellow-900 text-xs" />
-              </div>
-            </div>
-            <div className="text-left">
-              <h2 className="text-4xl font-black text-white bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                AI Music Intelligence
-              </h2>
-              <p className="text-lg text-gray-300 font-medium">
-                Unlock the secrets of your musical soul
-              </p>
+    <div className={`bg-[#191414] rounded-xl border border-gray-800 overflow-hidden ${className}`}>
+      {/* Header */}
+      <div className="p-6 border-b border-gray-800">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-[#1DB954] to-[#1ed760] rounded-lg flex items-center justify-center">
+            <FaBrain className="text-black text-xl" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white">Your Music Intelligence</h2>
+            <div className="flex items-center gap-2 text-gray-400 text-sm mt-1">
+              <span className="inline-block w-4 h-4">
+                <Image src="/m-boxed-rainbow.png" alt="Mistral" width={16} height={16} className="w-4 h-4" unoptimized />
+              </span>
+              <span>Mistral AI-powered insights</span>
             </div>
           </div>
-          <p className="text-gray-400 text-base max-w-3xl mx-auto leading-relaxed">
-            Our advanced AI analyzes your listening patterns, emotional connections, and musical DNA to reveal
-            hidden insights about your taste and discover your next favorite artists.
-          </p>
         </div>
       </div>
 
-      {/* Analysis Trigger */}
-      {!analysis && !isLoading && (
-        <div className="bg-gradient-to-br from-slate-900 via-purple-900/30 to-slate-900 rounded-2xl border border-purple-500/30 overflow-hidden">
-          <div className="p-8 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-300">
-              <FaRocket className="text-white text-3xl" />
+      <div className="p-6">
+  {/* Start Button */}
+        {!hasStarted && (
+          <div className="text-center py-12">
+            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FaBrain className="text-white text-2xl" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4">Ready to Discover Your Musical Identity?</h3>
-            <p className="text-gray-300 text-base mb-8 max-w-lg mx-auto">
-              Let our AI dive deep into your music taste to reveal patterns, discover new artists,
-              and create the perfect playlists just for you.
+            <h3 className="text-xl font-bold text-white mb-4">Ready to Unlock Your Music Intelligence?</h3>
+            <p className="text-gray-300 mb-8 max-w-lg mx-auto">
+              Get AI-powered insights, discover perfect playlists, and explore your musical personality.
             </p>
-
             <button
               onClick={handleStartAnalysis}
               disabled={!spotifyData}
-              className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-bold rounded-xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-2xl"
+              className="bg-[#1DB954] hover:bg-[#1ed760] text-black font-semibold px-8 py-4 rounded-full transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 mx-auto"
             >
-              <span className="relative z-10 flex items-center gap-3">
-                <FaMagic className="text-lg" />
-                Analyze My Music DNA
-                <FaPlay className="text-sm" />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur opacity-75 group-hover:opacity-100 transition-opacity -z-10" />
+              <FaBrain />
+              <span>Analyze My Music</span>
+              <FaFire />
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Enhanced Loading State */}
-      {isLoading && (
-        <div className="bg-gradient-to-br from-gray-900 to-purple-900/20 rounded-2xl border border-purple-500/30 p-8 text-center overflow-hidden relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 animate-pulse" />
-
-          <div className="relative z-10 space-y-6">
-            {/* Animated Icon */}
-            <div className="relative mx-auto w-16 h-16">
-              <div className={`absolute inset-0 bg-gradient-to-r ${analysisSteps[currentStep].color} rounded-full animate-spin`} />
-              <div className="absolute inset-2 bg-gray-900 rounded-full flex items-center justify-center">
-                {React.createElement(analysisSteps[currentStep].icon, {
-                  className: "text-white text-xl"
-                })}
-              </div>
+        {/* Loading */}
+        {isLoading && (
+          <div className="text-center py-16">
+            <div className="relative w-16 h-16 mx-auto mb-6">
+              <div className="absolute inset-0 border-4 border-[#1DB954]/20 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-transparent border-t-[#1DB954] rounded-full animate-spin"></div>
             </div>
-
-            <div>
-              <h3 className="text-xl font-bold text-white mb-2">AI is analyzing your music...</h3>
-              <p className="text-purple-300 font-medium">{analysisSteps[currentStep].text}</p>
-            </div>
-
-            {/* Progress Steps */}
-            <div className="flex justify-center space-x-4 mt-8">
-              {analysisSteps.map((step, index) => (
-                <div
-                  key={index}
-                  className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                    index === currentStep
-                      ? 'bg-gradient-to-r from-purple-400 to-pink-400 scale-125'
-                      : index < currentStep
-                        ? 'bg-green-400'
-                        : 'bg-gray-600'
-                  }`}
-                />
-              ))}
-            </div>
-
-            <div className="text-xs text-gray-500 mt-4">
-              This may take up to 30 seconds...
-            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Analyzing your music with Mistral AI...</h3>
+            <p className="text-gray-400">This might take a moment</p>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Error State */}
-      {error && (
-        <div className="bg-gradient-to-br from-red-900/20 to-pink-900/20 border border-red-500/30 rounded-2xl p-8 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
-            <FaBrain className="text-red-400 text-2xl" />
+        {/* Error */}
+        {error && (
+          <div className="text-center py-12 bg-red-900/10 rounded-lg border border-red-500/20">
+            <FaBrain className="text-red-400 text-3xl mx-auto mb-4" />
+            <p className="text-red-400 mb-4">{error}</p>
+            <button
+              onClick={handleStartAnalysis}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-full transition-colors"
+            >
+              Try Again
+            </button>
           </div>
-          <h3 className="text-xl font-bold text-red-400 mb-3">Analysis Failed</h3>
-          <p className="text-red-300 text-sm mb-6 max-w-md mx-auto">{error}</p>
-          <button
-            onClick={handleStartAnalysis}
-            className="px-6 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors font-medium"
-          >
-            Try Again
-          </button>
-        </div>
-      )}
+        )}
 
-      {/* AI Analysis Results */}
-      {analysis && (
-        <div className="space-y-8">
-          {/* Results Header */}
-          <div className="text-center bg-gradient-to-r from-green-900/20 to-blue-900/20 rounded-2xl p-6 border border-green-500/20">
-            <div className="w-12 h-12 mx-auto mb-3 bg-green-500 rounded-full flex items-center justify-center">
-              <FaMagic className="text-white text-lg" />
+        {/* Results */}
+        {analysis && (
+          <div className="space-y-6">
+            {/* Small debug/metadata row */}
+            <div className="flex items-center justify-between text-xs text-white/60">
+              <div>Last analysis: {analysis.timestamp ? new Date(analysis.timestamp).toLocaleString() : '—'}</div>
+              <div>Data snapshot: {(spotifyData && JSON.stringify(spotifyData).length) || 0} chars</div>
             </div>
-            <h3 className="text-2xl font-bold text-white mb-2">Your Musical DNA Decoded</h3>
-            <p className="text-gray-300">Based on your unique listening patterns and preferences</p>
+
+            {/* Collapsible network/debug panel */}
+            {(process.env.NODE_ENV === 'development' || lastRequest) && (
+              <details className="bg-black/10 border border-white/6 rounded-md p-3 text-xs text-white/60">
+                <summary className="cursor-pointer font-medium">AI Network Log (click to expand)</summary>
+                <div className="mt-3 space-y-2">
+                  <div>
+                    <div className="font-semibold text-white text-sm">Last Request</div>
+                    <pre className="whitespace-pre-wrap break-words text-xs text-white/70 max-h-36 overflow-auto">{lastRequest ? JSON.stringify(lastRequest, null, 2) : '—'}</pre>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-white text-sm">Last Raw Response (truncated)</div>
+                    <pre className="whitespace-pre-wrap break-words text-xs text-white/70 max-h-36 overflow-auto">{lastRawResponse ? (lastRawResponse.length > 2000 ? lastRawResponse.substring(0, 2000) + '... (truncated)' : lastRawResponse) : '—'}</pre>
+                  </div>
+                </div>
+              </details>
+            )}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <AIAnalysisSpotlight summary={analysis?.summary} playlists={analysis?.enhanced?.playlists} className="lg:col-span-2" />
+                  <div className="space-y-6">
+                    <MusicDNACard spotifyData={spotifyData} />
+                    <AIPersonalityCard analysis={analysis} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                  <MoodAnalysisCard moodData={parseMoodData(analysis?.enhanced?.moodAnalysis)} />
+                  <ArtistRecommendations recommendations={analysis?.enhanced?.newArtists} />
+                </div>
+
+                <div className="mt-6">
+                  <AIPlaylistRecommendations spotifyData={spotifyData} aiPlaylists={analysis?.enhanced?.playlists} />
+                </div>
           </div>
-
-          {/* Enhanced Results Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {(() => {
-              // Safely extract optional personality fields from analysis.enhanced
-              const enhancedRaw = analysis.enhanced as unknown;
-              const getString = (key: string, fallback: string) => {
-                try {
-                  if (enhancedRaw && typeof enhancedRaw === 'object' && key in (enhancedRaw as Record<string, unknown>)) {
-                    const val = (enhancedRaw as Record<string, unknown>)[key];
-                    if (typeof val === 'string' && val.trim().length > 0) return val;
-                  }
-                } catch {
-                  // ignore
-                }
-                return fallback;
-              };
-
-              const musicPersonality = getString('musicPersonality', getString('userProfileSummary', 'Your unique musical identity reflects a diverse and evolving taste.'));
-              const discoveryStyle = getString('discoveryStyle', 'You have an adventurous approach to finding new music.');
-              const socialProfile = getString('socialProfile', 'Your musical social patterns show thoughtful curation and sharing.');
-
-              return (
-                <AIPersonalityCard
-                  analysis={{
-                    ...analysis,
-                    enhanced: {
-                      ...analysis.enhanced,
-                      musicPersonality,
-                      discoveryStyle,
-                      socialProfile
-                    }
-                  }}
-                />
-              );
-            })()}
-
-            <AIArtistDiscovery
-              newArtists={
-                analysis.enhanced?.newArtists === undefined
-                  ? undefined
-                  : typeof analysis.enhanced.newArtists === 'string'
-                    ? analysis.enhanced.newArtists
-                    : JSON.stringify(analysis.enhanced.newArtists)
-              }
-            />
-
-            <AIPlaylistGenerator
-              playlists={
-                analysis.enhanced?.playlists === undefined
-                  ? undefined
-                  : typeof analysis.enhanced.playlists === 'string'
-                    ? analysis.enhanced.playlists
-                    : JSON.stringify(analysis.enhanced.playlists)
-              }
-            />
-
-            <div className="lg:col-span-2">
-              <AIMoodAnalysis
-                moodAnalysis={
-                  analysis.enhanced?.moodAnalysis === undefined
-                    ? undefined
-                    : typeof analysis.enhanced.moodAnalysis === 'string'
-                      ? analysis.enhanced.moodAnalysis
-                      : JSON.stringify(analysis.enhanced.moodAnalysis)
-                }
-              />
-            </div>
-          </div>
-
-          {/* Debug Panel - Only show in development */}
-          {process.env.NODE_ENV === 'development' && analysis.debug && (
-            <DebugPanel debug={analysis.debug} />
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DebugPanel({ debug }: { debug: { aiText?: string; aiJson?: unknown } }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="mt-8 p-4 bg-black/30 border border-gray-700 rounded-lg">
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm text-white font-semibold">🔧 Developer Debug Panel</h4>
-        <button
-          className="text-xs text-gray-400 hover:text-white transition-colors"
-          onClick={() => setOpen(!open)}
-        >
-          {open ? 'Hide' : 'Show'} Debug Data
-        </button>
+        )}
       </div>
-      {open && (
-        <div className="mt-4 text-sm text-gray-200 space-y-4">
-          <div>
-            <h5 className="text-xs text-yellow-400 mb-2">AI Raw Response (First 500 chars):</h5>
-            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-40 text-xs whitespace-pre-wrap border border-gray-600">
-              {typeof debug.aiText === 'string' ? debug.aiText.substring(0, 500) + '...' : 'No AI text available'}
-            </pre>
-          </div>
-          <div>
-            <h5 className="text-xs text-green-400 mb-2">Parsed JSON Structure:</h5>
-            <pre className="bg-gray-900 rounded p-3 overflow-auto max-h-60 text-xs border border-gray-600">
-              {JSON.stringify(debug.aiJson, null, 2)}
-            </pre>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

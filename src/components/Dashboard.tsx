@@ -3,8 +3,12 @@ import { useSpotifySessionGuard } from '@/hooks/useSpotifyData';
 import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { FaMusic, FaMicrophone, FaPalette, FaBrain, FaChartLine, FaUsers, FaCrown, FaUser, FaPlay, FaHeart, FaClock, FaCalendarAlt, FaSignOutAlt, FaExternalLinkAlt } from 'react-icons/fa';
-import { getDataForTimeRange, MockSpotifyData } from '@/lib/mockData';
+import { getDataForTimeRange, MockSpotifyData, convertMockToSpotifyData } from '@/lib/mockData';
+import type { SpotifyData } from '@/types/spotify';
 import AIIntelligenceSection from './ai/AIIntelligenceSection';
+import RecentlyPlayedTimeline from './RecentlyPlayedTimeline';
+import type { SpotifyData as HookSpotifyData } from '@/hooks/useSpotifyData';
+import { useSpotifyData } from '@/hooks/useSpotifyData';
 
 
 const TIME_RANGES = [
@@ -27,13 +31,26 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
   useSpotifySessionGuard();
   const [currentData, setCurrentData] = useState<MockSpotifyData | null>(null);
 
+  // Use React Query hook to fetch spotify data and expose loading state when not in demo mode
+  const { data: hookData, isLoading: hookLoading } = useSpotifyData(timeRange);
+
   useEffect(() => {
     if (isDemo && onTimeRangeChange) {
       setCurrentData(getDataForTimeRange(timeRange));
-    } else if (spotifyData) {
-      setCurrentData(spotifyData);
+      return;
     }
-  }, [timeRange, isDemo, spotifyData, onTimeRangeChange]);
+
+    // Prefer explicit spotifyData prop when provided (e.g., server-side prop hydration)
+    if (spotifyData) {
+      setCurrentData(spotifyData as unknown as MockSpotifyData);
+      return;
+    }
+
+    // Otherwise use hook data from useSpotifyData
+    if (hookData) {
+      setCurrentData(hookData as unknown as MockSpotifyData);
+    }
+  }, [timeRange, isDemo, spotifyData, onTimeRangeChange, hookData]);
 
   const handleLogout = () => {
     if (isDemo && onLogout) {
@@ -52,6 +69,9 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
       </div>
     );
   }
+
+  // Convert mock data to SpotifyData when in demo mode so AI gets expected shape
+  const spotifyDataForAI = isDemo && currentData ? (convertMockToSpotifyData(currentData) as unknown as SpotifyData) : (currentData as unknown as SpotifyData);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#191414] via-[#1a1a1a] to-[#121212] text-white">
@@ -155,22 +175,27 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
 
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {currentData.topTracks.slice(0, 6).map((track, index) => (
-                    <div key={track.id} className="flex items-center gap-4 p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all group">
-                      <div className="w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {currentData.topTracks.slice(0, 10).map((track, index) => (
+                    <div
+                      key={track.id}
+                      className={`flex items-center gap-4 p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all group ${index < 3 ? 'md:p-6' : ''}`}
+                    >
+                      <div className={`${index < 3 ? 'w-12 h-12 text-lg' : 'w-10 h-10 text-sm'} bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}>
                         {index + 1}
                       </div>
                       <Image
                         src={track.images[0]?.url}
                         alt={track.name}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 rounded object-cover"
+                        width={index < 3 ? 64 : 48}
+                        height={index < 3 ? 64 : 48}
+                        className={`${index < 3 ? 'w-16 h-16' : 'w-12 h-12'} rounded object-cover`}
                         unoptimized
                       />
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-white truncate">{track.name}</h4>
-                        <p className="text-gray-400 text-sm truncate">{track.artist}</p>
+                        <h4 className={`${index < 3 ? 'font-bold text-lg' : 'font-semibold text-white'} truncate text-white`}>
+                          {track.name}
+                        </h4>
+                        <p className={`${index < 3 ? 'text-gray-200 text-sm' : 'text-gray-400 text-sm'} truncate`}>{track.artist}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         {track.external_urls?.spotify && (
@@ -214,25 +239,23 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
 
               <div className="p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {currentData.topArtists.slice(0, 6).map((artist, index) => (
-                    <div key={artist.id} className="text-center p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all group">
+                  {currentData.topArtists.slice(0, 10).map((artist, index) => (
+                    <div key={artist.id} className={`text-center p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all group ${index < 3 ? 'md:p-6' : ''}`}>
                       <div className="relative">
                         <Image
                           src={artist.images[0]?.url}
                           alt={artist.name}
-                          width={80}
-                          height={80}
-                          className="w-20 h-20 rounded-full mx-auto mb-3 object-cover"
+                          width={index < 3 ? 112 : 80}
+                          height={index < 3 ? 112 : 80}
+                          className={`${index < 3 ? 'w-28 h-28' : 'w-20 h-20'} rounded-full mx-auto mb-3 object-cover`}
                           unoptimized
                         />
-                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold text-xs">
+                        <div className={`absolute -top-2 -right-2 ${index < 3 ? 'w-10 h-10 text-sm' : 'w-8 h-8 text-xs'} bg-[#1DB954] rounded-full flex items-center justify-center text-white font-bold`}>
                           {index + 1}
                         </div>
                       </div>
-                      <h4 className="font-semibold text-white text-sm mb-1">{artist.name}</h4>
-                      <p className="text-gray-400 text-xs mb-2">
-                        {artist.genres.slice(0, 2).join(', ')}
-                      </p>
+                      <h4 className={`${index < 3 ? 'font-bold text-lg' : 'font-semibold text-sm'} text-white mb-1`}>{artist.name}</h4>
+                      <p className={`${index < 3 ? 'text-gray-200 text-sm' : 'text-gray-400 text-xs'} mb-2`}>{artist.genres.slice(0, 2).join(', ')}</p>
                       {artist.external_urls?.spotify && (
                         <a
                           href={artist.external_urls.spotify}
@@ -349,10 +372,18 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
           </div>
         </div>
 
+        {/* Recently Played (placed before AI section) */}
+        <div className="mt-12">
+          <RecentlyPlayedTimeline
+            recentTracks={(currentData as unknown as HookSpotifyData)?.recentTracks || null}
+            isLoading={hookLoading}
+          />
+        </div>
+
         {/* AI Intelligence Section - Full Width Below Main Dashboard */}
-        <div className="mt-16 pt-8 border-t border-gray-800">
+        <div className="mt-16 pt-8 border-t border-gray-800 space-y-8">
           <AIIntelligenceSection
-            spotifyData={currentData}
+            spotifyData={spotifyDataForAI}
             className="w-full"
           />
         </div>
@@ -363,6 +394,8 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
               <span className="flex items-center justify-center gap-1">
                 Data provided by
                 <Image src="/spotify-logo.svg" alt="Spotify" width={24} height={24} className="inline align-middle h-6 w-auto mx-1" unoptimized />
+                Web API and
+                <Image src="/mistral-logo-color-white.png" alt="Mistral" width={24} height={24} className="inline align-middle h-6 w-auto mx-1" unoptimized />
                 Web API
               </span>
           </div>

@@ -6,6 +6,9 @@ export interface SpotifyTrack {
   popularity: number;
   images?: Array<{ url: string }>;
   external_urls?: { spotify?: string };
+  // Optional fields present on some Spotify track objects
+  duration_ms?: number;
+  preview_url?: string | null;
   album?: {
     name: string;
     release_date: string;
@@ -20,7 +23,7 @@ export interface SpotifyArtist {
   images?: Array<{ url: string }>;
   external_urls?: { spotify?: string };
   popularity?: number;
-  followers?: { total: number };
+  followers?: { total: number } | number;
 }
 
 export interface MusicIntelligence {

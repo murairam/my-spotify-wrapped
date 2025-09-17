@@ -45,6 +45,8 @@ function useAIAnalysis() {
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastRequest, setLastRequest] = useState<AIAnalysisRequest | null>(null);
+  const [lastRawResponse, setLastRawResponse] = useState<string | null>(null);
 
   const analyzeData = useCallback(async (request: AIAnalysisRequest) => {
     setIsLoading(true);
@@ -67,7 +69,9 @@ function useAIAnalysis() {
         throw new Error(errorData.error || `Analysis failed: ${response.status}`);
       }
 
-      const result: { success: boolean; analysis: AIAnalysis; error?: string } = await response.json();
+  const text = await response.text();
+  setLastRawResponse(text);
+  const result: { success: boolean; analysis: AIAnalysis; error?: string } = JSON.parse(text);
 
       // CRITICAL DEBUG LOGGING
       console.log("🔍 DEBUG: Full API response:", result);
@@ -81,6 +85,7 @@ function useAIAnalysis() {
 
       if (result.success && result.analysis) {
         setAnalysis(result.analysis);
+        setLastRequest(request);
         console.log('✅ AI analysis completed successfully');
         console.log('✅ Analysis set in state:', result.analysis);
       } else {
@@ -106,6 +111,8 @@ function useAIAnalysis() {
     analysis,
     isLoading,
     error,
+    lastRequest,
+    lastRawResponse,
     analyzeData,
     clearAnalysis,
   };

@@ -1,8 +1,9 @@
-// src/components/concerts/ConcertFinderSection.tsx - NEW SEPARATE COMPONENT
+// src/components/concerts/ConcertFinderSection.tsx - SPOTIFY-STYLED VERSION
 'use client';
 
 import React, { useState } from 'react';
-import { FaMapMarkerAlt, FaSearch, FaTicketAlt, FaCalendarAlt, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaSearch, FaTicketAlt, FaCalendarAlt, FaExternalLinkAlt, FaStar } from 'react-icons/fa';
+import Image from 'next/image';
 import type { SpotifyData } from '@/types/spotify';
 
 interface ConcertRecommendation {
@@ -35,7 +36,7 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
 
     try {
       // Mock concert search - replace with real API
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       const mockConcerts: ConcertRecommendation[] = spotifyData.topArtists.slice(0, 4).map((artist, index) => ({
         artist: artist.name,
@@ -61,60 +62,67 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
     }
   };
 
+  const getMatchScoreColor = (score: number) => {
+    if (score >= 85) return 'text-green-400';
+    if (score >= 75) return 'text-yellow-400';
+    return 'text-orange-400';
+  };
+
   return (
-    <div className={`space-y-8 ${className}`}>
-      {/* Header */}
-      <div className="text-center bg-gradient-to-br from-orange-900/20 via-red-900/20 to-pink-900/20 rounded-3xl p-8 border border-orange-500/20">
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-2xl">
-            <FaTicketAlt className="text-white text-2xl" />
+    <div className={`bg-[#191414] rounded-xl border border-gray-800 overflow-hidden ${className}`}>
+      {/* Header - Spotify Style */}
+      <div className="p-6 border-b border-gray-800">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-[#1DB954] to-[#1ed760] rounded-lg flex items-center justify-center">
+            <FaTicketAlt className="text-black text-xl" />
           </div>
-          <div className="text-left">
-            <h2 className="text-4xl font-black text-white bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
-              Concert Finder
-            </h2>
-            <p className="text-lg text-gray-300 font-medium">
-              Find live shows near you
-            </p>
+          <div>
+            <h2 className="text-2xl font-bold text-white">Concert Finder</h2>
+            <div className="flex items-center gap-2 text-gray-400 text-sm mt-1">
+              <Image
+                src="https://developer.spotify.com/images/guidelines/design/logos/01_RGB/02_PNG/Spotify_Logo_RGB_Green.png"
+                alt="Spotify"
+                width={16}
+                height={16}
+                className="opacity-60"
+              />
+              <span>Based on your top artists</span>
+            </div>
           </div>
         </div>
-        <p className="text-gray-400 text-base max-w-2xl mx-auto">
-          Discover upcoming concerts from your favorite artists and similar musicians playing in your area.
-        </p>
       </div>
 
       {/* Search Interface */}
-      <div className="bg-gradient-to-br from-slate-900 to-orange-900/20 rounded-2xl border border-orange-500/30 p-6">
-        <div className="flex flex-col sm:flex-row gap-4 items-end">
+      <div className="p-6 border-b border-gray-800">
+        <div className="flex gap-4">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              <FaMapMarkerAlt className="inline mr-2" />
-              Your Location
-            </label>
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && searchConcerts()}
-              placeholder="Enter city, state, or country..."
-              className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-orange-500 focus:outline-none transition-colors"
-            />
+            <div className="relative">
+              <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && searchConcerts()}
+                placeholder="Enter your city..."
+                className="w-full pl-10 pr-4 py-3 bg-[#2a2a2a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-[#1DB954] focus:outline-none transition-colors"
+              />
+            </div>
           </div>
 
           <button
             onClick={searchConcerts}
             disabled={!location.trim() || isSearching || !spotifyData?.topArtists}
-            className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold rounded-lg transition-all duration-300 disabled:cursor-not-allowed flex items-center gap-2"
+            className="bg-[#1DB954] hover:bg-[#1ed760] disabled:bg-gray-700 text-black disabled:text-gray-400 font-semibold px-6 py-3 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isSearching ? (
               <>
-                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
                 Searching...
               </>
             ) : (
               <>
                 <FaSearch />
-                Find Concerts
+                Search Concerts
               </>
             )}
           </button>
@@ -122,79 +130,107 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
       </div>
 
       {/* Results */}
-      {hasSearched && (
-        <div className="space-y-6">
-          {concerts.length > 0 ? (
-            <>
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  Found {concerts.length} concerts in {location}
-                </h3>
-                <p className="text-gray-400">Based on your top artists</p>
-              </div>
+      <div className="p-6">
+        {hasSearched && (
+          <>
+            {concerts.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-white">
+                    Found {concerts.length} concerts in {location}
+                  </h3>
+                  <span className="text-gray-400 text-sm">Based on your listening history</span>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {concerts.map((concert, index) => (
-                  <div
-                    key={index}
-                    className="bg-gradient-to-br from-gray-900 to-orange-900/10 rounded-xl border border-gray-700 hover:border-orange-500/50 transition-colors overflow-hidden group"
-                  >
-                    <div className="p-6">
-                      {/* Artist & Match Score */}
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h4 className="text-xl font-bold text-white mb-1">{concert.artist}</h4>
-                          <p className="text-gray-400 text-sm">{concert.reason}</p>
-                        </div>
-                        <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                          {concert.matchScore}% Match
-                        </div>
-                      </div>
-
-                      {/* Event Details */}
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center gap-3 text-gray-300">
-                          <FaMapMarkerAlt className="text-orange-400" />
-                          <span className="text-sm">{concert.venue}</span>
-                        </div>
-
-                        <div className="flex items-center gap-3 text-gray-300">
-                          <FaCalendarAlt className="text-blue-400" />
-                          <span className="text-sm">{concert.date}</span>
-                        </div>
-
-                        {concert.price && (
-                          <div className="flex items-center gap-3 text-gray-300">
-                            <FaTicketAlt className="text-green-400" />
-                            <span className="text-sm">{concert.price}</span>
+                <div className="space-y-4">
+                  {concerts.map((concert, index) => (
+                    <div
+                      key={index}
+                      className="bg-[#0d1117] rounded-lg p-4 border border-gray-800 hover:border-gray-600 hover:bg-[#181818] transition-all group cursor-pointer"
+                      onClick={() => concert.ticketUrl && window.open(concert.ticketUrl, '_blank')}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-white font-semibold text-lg group-hover:text-[#1DB954] transition-colors">
+                              {concert.artist}
+                            </h4>
+                            <div className="flex items-center gap-1">
+                              <FaStar className={`text-xs ${getMatchScoreColor(concert.matchScore)}`} />
+                              <span className={`text-sm font-medium ${getMatchScoreColor(concert.matchScore)}`}>
+                                {concert.matchScore}% Match
+                              </span>
+                            </div>
                           </div>
-                        )}
-                      </div>
 
-                      {/* Action Button */}
-                      <button
-                        onClick={() => concert.ticketUrl && window.open(concert.ticketUrl, '_blank')}
-                        className="w-full bg-gradient-to-r from-orange-500/20 to-red-500/20 hover:from-orange-500 hover:to-red-500 border border-orange-500/50 hover:border-transparent text-orange-300 hover:text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-lg"
-                      >
-                        <FaExternalLinkAlt />
-                        Get Tickets
-                      </button>
+                          <div className="flex items-center gap-6 text-sm text-gray-400 mb-3">
+                            <div className="flex items-center gap-2">
+                              <FaMapMarkerAlt className="text-xs" />
+                              <span>{concert.venue}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <FaCalendarAlt className="text-xs" />
+                              <span>{concert.date}</span>
+                            </div>
+                            {concert.price && (
+                              <div className="flex items-center gap-2">
+                                <FaTicketAlt className="text-xs" />
+                                <span>{concert.price}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <p className="text-gray-400 text-sm mb-3">{concert.reason}</p>
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-[#1DB954] text-sm group-hover:text-[#1ed760] transition-colors">
+                              <FaExternalLinkAlt className="text-xs" />
+                              <span>Get Tickets</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <FaTicketAlt className="text-gray-600 text-4xl mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-400 mb-2">No concerts found in {location}</h3>
+                <p className="text-gray-500 text-sm">
+                  Try searching in a different location or check back later for new events.
+                </p>
               </div>
-            </>
-          ) : (
-            <div className="text-center py-12 bg-gray-900/50 rounded-2xl border border-gray-700">
-              <FaTicketAlt className="text-gray-600 text-4xl mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-400 mb-2">No concerts found</h3>
-              <p className="text-gray-500 text-sm">
-                Try searching in a different location or check back later for new events.
-              </p>
-            </div>
-          )}
+            )}
+          </>
+        )}
+
+        {!hasSearched && (
+          <div className="text-center py-8">
+            <p className="text-gray-400 mb-6">
+              Enter your location to find upcoming concerts from your favorite artists and similar musicians.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="px-6 py-4 border-t border-gray-800 bg-[#0d1117]">
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>Concert data may not reflect real availability</span>
+          <div className="flex items-center gap-2">
+            <Image
+              src="https://developer.spotify.com/images/guidelines/design/logos/01_RGB/02_PNG/Spotify_Logo_RGB_Green.png"
+              alt="Spotify"
+              width={14}
+              height={14}
+              className="opacity-60"
+            />
+            <span>Based on Spotify listening data</span>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

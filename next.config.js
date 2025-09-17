@@ -31,6 +31,18 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'mixed-media-images.spotifycdn.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'image-cdn-ak.spotifycdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image-cdn-fa.spotifycdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image-cdn-spotify.scdn.co',
+      },
     ],
   },
   // Fix the cross-origin warnings

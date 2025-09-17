@@ -1,6 +1,7 @@
+// RecentlyPlayedTimeline.tsx
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faSpinner, faMusic, faPlayCircle } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
@@ -16,6 +17,7 @@ interface RecentTrack {
     };
     duration_ms?: number;
     external_urls?: { spotify?: string };
+    preview_url?: string | null;
   };
   played_at: string;
 }
@@ -75,12 +77,55 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
         album: track.album?.name || 'Unknown Album',
         duration,
         timeAgo,
-        albumImage: albumImage?.url,
+  albumImage: albumImage?.url,
+  preview_url: track.preview_url ?? null,
         spotifyUrl: track.external_urls?.spotify,
         playedAt: playedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
     }).filter(Boolean);
   }, [recentTracks]);
+
+  // Playback state for preview_url
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playingPreview, setPlayingPreview] = useState<{ id: string; url: string } | null>(null);
+
+  useEffect(() => {
+    // Cleanup on unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const togglePreview = (id: string, url: string | null) => {
+    if (!url) return;
+
+    // If currently playing this same preview, pause it
+    if (playingPreview && playingPreview.id === id) {
+      audioRef.current?.pause();
+      setPlayingPreview(null);
+      return;
+    }
+
+    // Otherwise start playing the new preview
+    if (!audioRef.current) audioRef.current = new Audio();
+    if (audioRef.current.src !== url) {
+      audioRef.current.src = url;
+    }
+    audioRef.current.currentTime = 0;
+    audioRef.current.play().then(() => {
+      setPlayingPreview({ id, url });
+    }).catch(() => {
+      // ignore play failures silently (autoplay policies)
+      setPlayingPreview(null);
+    });
+
+    // When preview ends, clear state
+    audioRef.current.onended = () => setPlayingPreview(null);
+  };
 
   if (isLoading) {
     return (
@@ -119,7 +164,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
   }
 
   return (
-    <div className="backdrop-blur-lg bg-white/10 rounded-2xl border border-white/20 p-6">
+    <div className="backdrop-blur-lg bg-white/8 rounded-2xl border border-white/12 p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
           <FontAwesomeIcon icon={faClock} className="text-[#1DB954] text-xl" />
@@ -132,8 +177,35 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
 
       {/* Desktop: Horizontal scroll timeline */}
       <div className="hidden sm:block">
-        <div className="overflow-x-auto pb-4">
-          <div className="flex space-x-4 min-w-max">
+        <div className="relative">
+          <button
+            aria-hidden="true"
+            onClick={() => {
+              const scroller = document.getElementById('recent-scroller');
+              if (scroller) scroller.scrollBy({ left: -320, behavior: 'smooth' });
+            }}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-md"
+          >
+            ‹
+          </button>
+
+          <div id="recent-scroller" className="overflow-x-auto pb-4 scrollbar-hide" style={{ scrollBehavior: 'smooth' }}>
+            <div className="flex space-x-4 min-w-max" onPointerDown={(e) => {
+              const el = e.currentTarget.parentElement as HTMLElement | null;
+              if (!el) return;
+              const startX = e.clientX;
+              const scrollLeft = el.scrollLeft;
+              const onMove = (ev: PointerEvent) => {
+                const dx = ev.clientX - startX;
+                el.scrollLeft = scrollLeft - dx;
+              };
+              const onUp = () => {
+                window.removeEventListener('pointermove', onMove);
+                window.removeEventListener('pointerup', onUp);
+              };
+              window.addEventListener('pointermove', onMove);
+              window.addEventListener('pointerup', onUp);
+            }}>
             {processedTracks.map((track, index) => (
               <div
                 key={track?.uniqueKey || `desktop-${index}`}
@@ -142,20 +214,31 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
                 <div className="flex items-start space-x-3">
                   <div className="relative flex-shrink-0">
                     {track?.albumImage ? (
-                      <Image
-                        src={track.albumImage}
-                        alt={track.album}
-                        width={48}
-                        height={48}
-                        className="rounded-lg"
-                        unoptimized
-                      />
+                      <div className="relative">
+                        <Image
+                          src={track.albumImage}
+                          alt={track.album}
+                          width={48}
+                          height={48}
+                          className="rounded-lg"
+                          unoptimized
+                        />
+                        {track.preview_url && (
+                          <button
+                            onClick={() => togglePreview(track.id, track.preview_url)}
+                            aria-label={playingPreview && playingPreview.id === track.id ? 'Pause preview' : 'Play preview'}
+                            className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <FontAwesomeIcon icon={faPlayCircle} className={`text-xl ${playingPreview && playingPreview.id === track.id ? 'text-green-400' : 'text-white'}`} />
+                          </button>
+                        )}
+                      </div>
                     ) : (
                       <div className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center">
                         <FontAwesomeIcon icon={faMusic} className="text-white/50 text-lg" />
                       </div>
                     )}
-                    {track?.spotifyUrl && (
+                    {track?.spotifyUrl && !track.preview_url && (
                       <div className="absolute inset-0 bg-black/60 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <FontAwesomeIcon icon={faPlayCircle} className="text-white text-xl" />
                       </div>
@@ -177,27 +260,50 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
                 </div>
               </div>
             ))}
+            </div>
           </div>
+
+          <button
+            aria-hidden="true"
+            onClick={() => {
+              const scroller = document.getElementById('recent-scroller');
+              if (scroller) scroller.scrollBy({ left: 320, behavior: 'smooth' });
+            }}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-md"
+          >
+            ›
+          </button>
         </div>
       </div>
 
       {/* Mobile: Vertical stack */}
       <div className="sm:hidden space-y-3">
-        {processedTracks.slice(0, 10).map((track, index) => (
+              {processedTracks.slice(0, 10).map((track, index) => (
           <div
             key={track?.uniqueKey || `mobile-${index}`}
             className="flex items-center space-x-3 bg-white/5 rounded-lg p-3 hover:bg-white/10 transition-colors"
           >
             <div className="flex-shrink-0">
               {track?.albumImage ? (
-                <Image
-                  src={track.albumImage}
-                  alt={track.album}
-                  width={40}
-                  height={40}
-                  className="rounded-md"
-                  unoptimized
-                />
+                      <div className="relative">
+                        <Image
+                          src={track.albumImage}
+                          alt={track.album}
+                          width={40}
+                          height={40}
+                          className="rounded-md"
+                          unoptimized
+                        />
+                        {track.preview_url && (
+                          <button
+                            onClick={() => togglePreview(track.id, track.preview_url)}
+                            aria-label={playingPreview && playingPreview.id === track.id ? 'Pause preview' : 'Play preview'}
+                            className="absolute inset-0 bg-black/60 rounded-md flex items-center justify-center text-white"
+                          >
+                            <FontAwesomeIcon icon={faPlayCircle} className={`text-lg ${playingPreview && playingPreview.id === track.id ? 'text-green-400' : 'text-white'}`} />
+                          </button>
+                        )}
+                      </div>
               ) : (
                 <div className="w-10 h-10 bg-white/10 rounded-md flex items-center justify-center">
                   <FontAwesomeIcon icon={faMusic} className="text-white/50" />
