@@ -9,7 +9,7 @@
 
 **A sophisticated, year-round alternative to Spotify Wrapped** — providing deep, interactive insights into your music listening habits with advanced analytics, real-time data, and AI-powered recommendations.
 
-🔗 **[Live Demo on Vercel](https://my-spotify-wrapped-one.vercel.app/)** | 🎭 **[Try Demo Mode](https://my-spotify-wrapped-one.vercel.app/)** | 📖 **[Documentation](#documentation)**
+🔗 **[Try Live Demo on Vercel](https://my-spotify-wrapped-one.vercel.app/)** | 📖 **[Documentation](#documentation)**
 
 > **🚀 Deployed on Vercel**: The application is live and ready to test! You can try the **Demo Mode** with sample data, or contact me to be added as a test user for the full Spotify integration.
 
