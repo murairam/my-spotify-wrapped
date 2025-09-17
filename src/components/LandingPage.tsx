@@ -76,8 +76,33 @@ useEffect(() => {
   fetchSpotifyData();
 }, [session, timeRange]);
 
-const handleSpotifyLogin = () => {
-  signIn('spotify', { callbackUrl: '/' });
+// Handle authentication state transitions from NextAuth
+useEffect(() => {
+  if (status === 'authenticated' && session) {
+    // User successfully authenticated, show dashboard
+    setAuthMethod('spotify');
+    setAppState('dashboard');
+  } else if (status === 'unauthenticated' && appState === 'loading') {
+    // Authentication failed, show error
+    setError({
+      type: 'auth_failed',
+      message: 'Authentication Failed',
+      details: 'Unable to connect to your Spotify account. Please try again.'
+    });
+    setAppState('error');
+  }
+}, [status, session, appState]);
+
+const handleSpotifyLogin = async () => {
+  setAppState('loading');
+  setAuthMethod('spotify');
+
+  // Actually trigger NextAuth sign in - this will redirect to Spotify
+  // The callbackUrl ensures users come back to your app after auth
+  await signIn('spotify', {
+    callbackUrl: window.location.origin,
+    redirect: true
+  });
 };
 
 const handleMockData = () => {

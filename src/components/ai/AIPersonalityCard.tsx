@@ -35,7 +35,7 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg overflow-hidden bg-transparent flex items-center justify-center">
-              <Image src="/mistral-logo-color-white.png" alt="Mistral" width={40} height={40} className="w-10 h-10" unoptimized />
+              <Image src="/m-boxed-rainbow.png" alt="Mistral" width={40} height={40} className="w-10 h-10" unoptimized />
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Your Musical Personality</h3>

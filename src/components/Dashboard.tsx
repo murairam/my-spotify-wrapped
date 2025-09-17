@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { signOut } from 'next-auth/react';
 import { FaMusic, FaMicrophone, FaPalette, FaBrain, FaChartLine, FaUsers, FaCrown, FaUser, FaPlay, FaHeart, FaClock, FaCalendarAlt, FaSignOutAlt, FaExternalLinkAlt } from 'react-icons/fa';
 import { getDataForTimeRange, MockSpotifyData, convertMockToSpotifyData } from '@/lib/mockData';
+import { getRecentlyPlayedForTimeRange } from '@/lib/mockRecentlyPlayed';
 import type { SpotifyData } from '@/types/spotify';
 import AIIntelligenceSection from './ai/AIIntelligenceSection';
 import RecentlyPlayedTimeline from './RecentlyPlayedTimeline';
@@ -375,7 +376,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
         {/* Recently Played (placed before AI section) */}
         <div className="mt-12">
           <RecentlyPlayedTimeline
-            recentTracks={(currentData as unknown as HookSpotifyData)?.recentTracks || null}
+            recentTracks={isDemo ? getRecentlyPlayedForTimeRange(timeRange) : ((currentData as unknown as HookSpotifyData)?.recentTracks || null)}
             isLoading={hookLoading}
           />
         </div>

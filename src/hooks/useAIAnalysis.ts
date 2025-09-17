@@ -1,6 +1,6 @@
 // src/hooks/useAIAnalysis.ts - FIXED VERSION WITH DEBUGGING
 import { useState, useCallback } from 'react';
-import type { SpotifyData } from '@/types/spotify';
+import type { SpotifyData, AIAnalysisResponse } from '@/types/spotify';
 
 interface AIAnalysisRequest {
   spotifyData: SpotifyData;
@@ -14,32 +14,11 @@ interface AIAnalysisRequest {
   };
 }
 
-interface ConcertRecommendation {
-  artist: string;
-  venue: string;
-  city: string;
-  date: string;
-  matchScore: number;
-  reason: string;
-}
-
-interface AIAnalysis {
-  summary: string;
-  enhanced: {
-    concerts: ConcertRecommendation[];
-    newArtists?: unknown;
-    moodAnalysis?: unknown;
-    playlists?: unknown;
-    funFacts: string[];
-  };
-  confidence: number;
-  timestamp: string;
-  // Development-only debug info returned by the API
-  debug?: {
-    aiText?: string;
-    aiJson?: unknown;
-  };
-}
+// Reuse shared AIAnalysisResponse type for consistency
+type AIAnalysis = AIAnalysisResponse & {
+  // optional debug field returned by the server in development
+  debug?: { aiText?: string; aiJson?: unknown };
+};
 
 function useAIAnalysis() {
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);

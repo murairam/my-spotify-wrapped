@@ -216,19 +216,22 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
               </details>
             )}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <AIAnalysisSpotlight summary={analysis?.summary} playlists={analysis?.enhanced?.playlists} className="lg:col-span-2" />
+                  <AIAnalysisSpotlight summary={analysis?.summary} playlists={analysis?.enhanced?.playlists} analysis={analysis} className="lg:col-span-2" />
                   <div className="space-y-6">
                     <MusicDNACard spotifyData={spotifyData} />
-                    <AIPersonalityCard analysis={analysis} />
+                    {/* Moved: show current vibe (MoodAnalysisCard) here instead of Personality */}
+                    <MoodAnalysisCard moodData={parseMoodData(analysis?.enhanced?.moodAnalysis)} />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                  <MoodAnalysisCard moodData={parseMoodData(analysis?.enhanced?.moodAnalysis)} />
-                  <ArtistRecommendations recommendations={analysis?.enhanced?.newArtists} />
+                {/* Make personality card full width */}
+                <div className="mt-6">
+                  <AIPersonalityCard analysis={analysis} />
                 </div>
 
-                <div className="mt-6">
+                {/* Artists above playlists stacked vertically (one above the other) */}
+                <div className="grid grid-cols-1 gap-6 mt-6">
+                  <ArtistRecommendations recommendations={analysis?.enhanced?.newArtists} analysis={analysis} spotifyData={spotifyData} />
                   <AIPlaylistRecommendations spotifyData={spotifyData} aiPlaylists={analysis?.enhanced?.playlists} />
                 </div>
           </div>
