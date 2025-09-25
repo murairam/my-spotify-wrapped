@@ -1,0 +1,444 @@
+[
+  {
+    "id": "sta1",
+    "name": "Taylor Swift",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5ebe672b5f553298dcdccb0e676",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616100005174e672b5f553298dcdccb0e676",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f178e672b5f553298dcdccb0e676",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02"
+    }
+  },
+  {
+    "id": "sta2",
+    "name": "The Weeknd",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5eb9e528993a2820267b97f6aae",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab676161000051749e528993a2820267b97f6aae",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f1789e528993a2820267b97f6aae",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/1Xyo4u8uXC1ZmMpatF05PJ"
+    }
+  },
+  {
+    "id": "sta3",
+    "name": "Harry Styles",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5ebf7db7c8ede90a019c54590bb",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616100005174f7db7c8ede90a019c54590bb",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f178f7db7c8ede90a019c54590bb",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/6KImCVD70vtIoJWnq6nGn3"
+    }
+  },
+  {
+    "id": "sta4",
+    "name": "Dua Lipa",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5eb0c68f6c95232e716f0abee8d",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab676161000051740c68f6c95232e716f0abee8d",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f1780c68f6c95232e716f0abee8d",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/6M2wZ9GZgrQXHCFfjv46we"
+    }
+  },
+  {
+    "id": "sta5",
+    "name": "Olivia Rodrigo",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5ebe03a98785f3658f0b6461ec4",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616100005174e03a98785f3658f0b6461ec4",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f178e03a98785f3658f0b6461ec4",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/1McMsnEElThX1knmY4oliG"
+    }
+  },
+  {
+    "id": "sta6",
+    "name": "Post Malone",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5ebe17c0aa1714a03d62b5ce4e0",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616100005174e17c0aa1714a03d62b5ce4e0",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f178e17c0aa1714a03d62b5ce4e0",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/246dkjvS1zLTtiykXe5h60"
+    }
+  },
+  {
+    "id": "mta1",
+    "name": "Tones and I",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5eb8bbb776368161a8258cbca3a",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab676161000051748bbb776368161a8258cbca3a",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f1788bbb776368161a8258cbca3a",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/2NjfBq1NflQcKSeiDooVjY"
+    }
+  },
+  {
+    "id": "mta2",
+    "name": "Lil Nas X",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5eb3758a33e782b46bd7f174e1d",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab676161000051743758a33e782b46bd7f174e1d",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f1783758a33e782b46bd7f174e1d",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/7jVv8c5Fj3E9VhNjxT4snq"
+    }
+  },
+  {
+    "id": "mta3",
+    "name": "Shawn Mendes",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5eb58b4b9419486550f6fda0535",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000517458b4b9419486550f6fda0535",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f17858b4b9419486550f6fda0535",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/7n2wHs1TKAczGzO7Dd2rGr"
+    }
+  },
+  {
+    "id": "mta4",
+    "name": "Imagine Dragons",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5ebab47d8dae2b24f5afe7f9d38",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616100005174ab47d8dae2b24f5afe7f9d38",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f178ab47d8dae2b24f5afe7f9d38",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/53XhwfbYqKCa1cC15pYq2q"
+    }
+  },
+  {
+    "id": "mta5",
+    "name": "Camila Cabello",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5eb76470faf6330235edbcb90a9",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000517476470faf6330235edbcb90a9",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f17876470faf6330235edbcb90a9",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/4nDoRrQiYLoBzwC5BhVJzF"
+    }
+  },
+  {
+    "id": "mta6",
+    "name": "Mark Ronson",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5eb105cc9628c315b29d299fbb4",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616100005174105cc9628c315b29d299fbb4",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f178105cc9628c315b29d299fbb4",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/3hv9jJF3adDNsBSIQDqcjp"
+    }
+  },
+  {
+    "id": "lta1",
+    "name": "Queen",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/b040846ceba13c3e9c125d68389491094e7f2982",
+        "height": 806,
+        "width": 999
+      },
+      {
+        "url": "https://i.scdn.co/image/af2b8e57f6d7b5d43a616bd1e27ba552cd8bfd42",
+        "height": 516,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/c06971e9ff81696699b829484e3be165f4e64368",
+        "height": 161,
+        "width": 200
+      },
+      {
+        "url": "https://i.scdn.co/image/6dd0ffd270903d1884edf9058c49f58b03db893d",
+        "height": 52,
+        "width": 64
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/1dfeR4HaWDbWqFHLkxsg1d"
+    }
+  },
+  {
+    "id": "lta2",
+    "name": "The Beatles",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5ebe9348cc01ff5d55971b22433",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616100005174e9348cc01ff5d55971b22433",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f178e9348cc01ff5d55971b22433",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/3WrFJ7ztbogyGnTHbHJFl2"
+    }
+  },
+  {
+    "id": "lta3",
+    "name": "Led Zeppelin",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/207803ce008388d3427a685254f9de6a8f61dc2e",
+        "height": 600,
+        "width": 600
+      },
+      {
+        "url": "https://i.scdn.co/image/b0248a44865493e6a03832aa89854ada16ff07a8",
+        "height": 200,
+        "width": 200
+      },
+      {
+        "url": "https://i.scdn.co/image/16eb3cdae0d824b520ac17710e943a99d3ef6602",
+        "height": 64,
+        "width": 64
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/36QJpDe2go2KgaRleHCDTp"
+    }
+  },
+  {
+    "id": "lta4",
+    "name": "Eagles",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5eb0767e116a2307495e37cd7fb",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab676161000051740767e116a2307495e37cd7fb",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f1780767e116a2307495e37cd7fb",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/0ECwFtbIWEVNwjlrfc6xoL"
+    }
+  },
+  {
+    "id": "lta5",
+    "name": "Michael Jackson",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/ab6761610000e5eb997cc9a4aec335d46c9481fd",
+        "height": 640,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/ab67616100005174997cc9a4aec335d46c9481fd",
+        "height": 320,
+        "width": 320
+      },
+      {
+        "url": "https://i.scdn.co/image/ab6761610000f178997cc9a4aec335d46c9481fd",
+        "height": 160,
+        "width": 160
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/3fMbdgg4jU18AjLCKBhRSm"
+    }
+  },
+  {
+    "id": "lta6",
+    "name": "Nirvana",
+    "images": [
+      {
+        "url": "https://i.scdn.co/image/84282c28d851a700132356381fcfbadc67ff498b",
+        "height": 1057,
+        "width": 1000
+      },
+      {
+        "url": "https://i.scdn.co/image/a4e10b79a642e9891383448cbf37d7266a6883d6",
+        "height": 677,
+        "width": 640
+      },
+      {
+        "url": "https://i.scdn.co/image/42ae0f180f16e2f21c1f2212717fc436f5b95451",
+        "height": 211,
+        "width": 200
+      },
+      {
+        "url": "https://i.scdn.co/image/e797ad36d56c3fc8fa06c6fe91263a15bf8391b8",
+        "height": 68,
+        "width": 64
+      }
+    ],
+    "external_urls": {
+      "spotify": "https://open.spotify.com/artist/6olE6TJLqED3rqDCT0FyPh"
+    }
+  }
+]

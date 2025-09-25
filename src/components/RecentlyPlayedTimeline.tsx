@@ -223,14 +223,16 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
                           className="rounded-lg"
                           unoptimized
                         />
-                        {track.preview_url && (
-                          <button
-                            onClick={() => togglePreview(track.id, track.preview_url)}
-                            aria-label={playingPreview && playingPreview.id === track.id ? 'Pause preview' : 'Play preview'}
+                        {track.spotifyUrl && (
+                          <a
+                            href={track.spotifyUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Open in Spotify"
                             className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
                           >
-                            <FontAwesomeIcon icon={faPlayCircle} className={`text-xl ${playingPreview && playingPreview.id === track.id ? 'text-green-400' : 'text-white'}`} />
-                          </button>
+                            <FontAwesomeIcon icon={faPlayCircle} className="text-xl" />
+                          </a>
                         )}
                       </div>
                     ) : (
@@ -238,11 +240,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
                         <FontAwesomeIcon icon={faMusic} className="text-white/50 text-lg" />
                       </div>
                     )}
-                    {track?.spotifyUrl && !track.preview_url && (
-                      <div className="absolute inset-0 bg-black/60 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <FontAwesomeIcon icon={faPlayCircle} className="text-white text-xl" />
-                      </div>
-                    )}
+                    {/* Play button is now always a link above */}
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -254,7 +252,6 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
                     </div>
                     <div className="flex items-center justify-between mt-2 text-xs">
                       <span className="text-[#1DB954]">{track?.timeAgo}</span>
-                      <span className="text-white/50">{track?.duration}</span>
                     </div>
                   </div>
                 </div>
@@ -322,7 +319,6 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
 
             <div className="flex-shrink-0 text-right">
               <div className="text-[#1DB954] text-xs">{track?.timeAgo}</div>
-              <div className="text-white/50 text-xs">{track?.duration}</div>
             </div>
           </div>
         ))}

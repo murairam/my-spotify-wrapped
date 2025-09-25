@@ -376,7 +376,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
         {/* Recently Played (placed before AI section) */}
         <div className="mt-12">
           <RecentlyPlayedTimeline
-            recentTracks={isDemo ? getRecentlyPlayedForTimeRange(timeRange) : ((currentData as unknown as HookSpotifyData)?.recentTracks || null)}
+            recentTracks={isDemo ? getRecentlyPlayedForTimeRange() : ((currentData as unknown as HookSpotifyData)?.recentTracks || null)}
             isLoading={hookLoading}
           />
         </div>

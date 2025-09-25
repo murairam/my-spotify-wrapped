@@ -56,9 +56,9 @@ const shortTermTracks = [
     artist: 'Harry Styles',
     popularity: 95,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b2737fcead687e99583072cc217b' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e027fcead687e99583072cc217b' },
-      { url: 'https://i.scdn.co/image/ab67616d000048517fcead687e99583072cc217b' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b27377fdcfda6535601aff081b6a' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e0277fdcfda6535601aff081b6a' },
+      { url: 'https://i.scdn.co/image/ab67616d0000485177fdcfda6535601aff081b6a' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/track/6UelLqGlWMcVH1E5c4H7lY' }
   },
@@ -72,7 +72,7 @@ const shortTermTracks = [
       { url: 'https://i.scdn.co/image/ab67616d00001e028863bc11d2aa12b54f5aeb36' },
       { url: 'https://i.scdn.co/image/ab67616d000048518863bc11d2aa12b54f5aeb36' }
     ],
-    external_urls: { spotify: 'https://open.spotify.com/track/0VjIjW4GlULA2BxJDUfXuN' }
+    external_urls: { spotify: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b' }
   },
   {
     id: 'st3',
@@ -92,11 +92,11 @@ const shortTermTracks = [
     artist: 'Dua Lipa',
     popularity: 90,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b273ef968746a39516c05d3c267b' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e02ef968746a39516c05d3c267b' },
-      { url: 'https://i.scdn.co/image/ab67616d00004851ef968746a39516c05d3c267b' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b2732172b607853fa89cefa2beb4' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e022172b607853fa89cefa2beb4' },
+      { url: 'https://i.scdn.co/image/ab67616d000048512172b607853fa89cefa2beb4' }
     ],
-    external_urls: { spotify: 'https://open.spotify.com/track/463CkQjx2Zk1yXoBuierM9' }
+    external_urls: { spotify: 'https://open.spotify.com/track/5nujrmhLynf4yMoMtj8AQF' }
   },
   {
     id: 'st5',
@@ -131,9 +131,9 @@ const mediumTermTracks = [
     artist: 'Ed Sheeran',
     popularity: 94,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6851' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e02ba5db46f4b838ef6027e6851' },
-      { url: 'https://i.scdn.co/image/ab67616d00004851ba5db46f4b838ef6027e6851' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e02ba5db46f4b838ef6027e6f96' },
+      { url: 'https://i.scdn.co/image/ab67616d00004851ba5db46f4b838ef6027e6f96' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/track/7qiZfU4dY1lWllzX7mPBI3' }
   },
@@ -143,9 +143,9 @@ const mediumTermTracks = [
     artist: 'Billie Eilish',
     popularity: 91,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b273a9f6c04ba168640b48aa5795' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e02a9f6c04ba168640b48aa5795' },
-      { url: 'https://i.scdn.co/image/ab67616d00004851a9f6c04ba168640b48aa5795' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b27350a3147b4edd7701a876c6ce' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e0250a3147b4edd7701a876c6ce' },
+      { url: 'https://i.scdn.co/image/ab67616d0000485150a3147b4edd7701a876c6ce' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/track/2Fxmhks0bxGSBdJ92vM42m' }
   },
@@ -155,9 +155,9 @@ const mediumTermTracks = [
     artist: 'Post Malone',
     popularity: 89,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b273b1c4b76e23414c9f20242268' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e02b1c4b76e23414c9f20242268' },
-      { url: 'https://i.scdn.co/image/ab67616d00004851b1c4b76e23414c9f20242268' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b2739478c87599550dd73bfa7e02' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e029478c87599550dd73bfa7e02' },
+      { url: 'https://i.scdn.co/image/ab67616d000048519478c87599550dd73bfa7e02' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/track/21jGcNKet2qwijlDFuPiPb' }
   },
@@ -179,11 +179,11 @@ const mediumTermTracks = [
     artist: 'Post Malone & Swae Lee',
     popularity: 85,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b27335b18b6b95fa2222357f754d' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e0235b18b6b95fa2222357f754d' },
-      { url: 'https://i.scdn.co/image/ab67616d0000485135b18b6b95fa2222357f754d' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b273e2e352d89826aef6dbd5ff8f' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e02e2e352d89826aef6dbd5ff8f' },
+      { url: 'https://i.scdn.co/image/ab67616d00004851e2e352d89826aef6dbd5ff8f' }
     ],
-    external_urls: { spotify: 'https://open.spotify.com/track/0RiRZpuVRbi7oqRdSMwhQY' }
+    external_urls: { spotify: 'https://open.spotify.com/track/3KkXRkHbMCARz0aVfEt68P' }
   },
   {
     id: 'mt6',
@@ -191,11 +191,11 @@ const mediumTermTracks = [
     artist: 'Ariana Grande',
     popularity: 84,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b273040b2c9849d68d6eb78d75d3' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e02040b2c9849d68d6eb78d75d3' },
-      { url: 'https://i.scdn.co/image/ab67616d00004851040b2c9849d68d6eb78d75d3' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b27356ac7b86e090f307e218e9c8' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e0256ac7b86e090f307e218e9c8' },
+      { url: 'https://i.scdn.co/image/ab67616d0000485156ac7b86e090f307e218e9c8' }
     ],
-    external_urls: { spotify: 'https://open.spotify.com/track/3e9HZxeyfWwjeyPAMmWSSQ' }
+    external_urls: { spotify: 'https://open.spotify.com/track/6ocbgoVGwYJhOv1GgI9NsF' }
   }
 ];
 
@@ -206,9 +206,9 @@ const longTermTracks = [
     artist: 'Queen',
     popularity: 88,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e02ce4f1737bc8a646c8c4bd25a' },
-      { url: 'https://i.scdn.co/image/ab67616d00004851ce4f1737bc8a646c8c4bd25a' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b273e319baafd16e84f0408af2a0' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e02e319baafd16e84f0408af2a0' },
+      { url: 'https://i.scdn.co/image/ab67616d00004851e319baafd16e84f0408af2a0' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/track/4u7EnebtmKWzUH433cf5Qv' }
   },
@@ -218,9 +218,9 @@ const longTermTracks = [
     artist: 'Eagles',
     popularity: 85,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b273c5651aedd6e05dc05b734b1b' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e02c5651aedd6e05dc05b734b1b' },
-      { url: 'https://i.scdn.co/image/ab67616d00004851c5651aedd6e05dc05b734b1b' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b2734637341b9f507521afa9a778' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e024637341b9f507521afa9a778' },
+      { url: 'https://i.scdn.co/image/ab67616d000048514637341b9f507521afa9a778' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/track/40riOy7x9W7GXjyGp4pjAv' }
   },
@@ -242,11 +242,11 @@ const longTermTracks = [
     artist: 'Nirvana',
     popularity: 80,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b273267b8c91e86b6050dc820fb6' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e02267b8c91e86b6050dc820fb6' },
-      { url: 'https://i.scdn.co/image/ab67616d00004851267b8c91e86b6050dc820fb6' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b273fbc71c99f9c1296c56dd51b6' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e02fbc71c99f9c1296c56dd51b6' },
+      { url: 'https://i.scdn.co/image/ab67616d00004851fbc71c99f9c1296c56dd51b6' }
     ],
-    external_urls: { spotify: 'https://open.spotify.com/track/5ghIJDpPoe3WYdRLWHIm5F' }
+    external_urls: { spotify: 'https://open.spotify.com/track/4CeeEOM32jQcH3eN9Q2dGj' }
   },
   {
     id: 'lt5',
@@ -254,11 +254,11 @@ const longTermTracks = [
     artist: 'Michael Jackson',
     popularity: 86,
     images: [
-      { url: 'https://i.scdn.co/image/ab67616d0000b2732114f2f3a635b7f972d5a1bd' },
-      { url: 'https://i.scdn.co/image/ab67616d00001e022114f2f3a635b7f972d5a1bd' },
-      { url: 'https://i.scdn.co/image/ab67616d000048512114f2f3a635b7f972d5a1bd' }
+      { url: 'https://i.scdn.co/image/ab67616d0000b273de437d960dda1ac0a3586d97' },
+      { url: 'https://i.scdn.co/image/ab67616d00001e02de437d960dda1ac0a3586d97' },
+      { url: 'https://i.scdn.co/image/ab67616d00004851de437d960dda1ac0a3586d97' }
     ],
-    external_urls: { spotify: 'https://open.spotify.com/track/5ChkMS8OtdzJeqyybCc9R5' }
+    external_urls: { spotify: 'https://open.spotify.com/track/7J1uxwnxfQLu4APicE5Rnj' }
   },
   {
     id: 'lt6',
@@ -281,9 +281,9 @@ const shortTermArtists = [
     genres: ['pop', 'country', 'folk'],
     popularity: 100,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/9/9f/Midnights_-_Taylor_Swift.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/9/9f/Midnights_-_Taylor_Swift.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/9/9f/Midnights_-_Taylor_Swift.png' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5ebe672b5f553298dcdccb0e676' },
+      { url: 'https://i.scdn.co/image/ab67616100005174e672b5f553298dcdccb0e676' },
+      { url: 'https://i.scdn.co/image/ab6761610000f178e672b5f553298dcdccb0e676' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/06HL4z0CvFAxyc27GXpf02' }
   },
@@ -293,9 +293,9 @@ const shortTermArtists = [
     genres: ['pop', 'r&b'],
     popularity: 97,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/c/c1/The_Weeknd_-_After_Hours.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/c/c1/The_Weeknd_-_After_Hours.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/c/c1/The_Weeknd_-_After_Hours.png' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5eb9e528993a2820267b97f6aae' },
+      { url: 'https://i.scdn.co/image/ab676161000051749e528993a2820267b97f6aae' },
+      { url: 'https://i.scdn.co/image/ab6761610000f1789e528993a2820267b97f6aae' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/1Xyo4u8uXC1ZmMpatF05PJ' }
   },
@@ -305,9 +305,9 @@ const shortTermArtists = [
     genres: ['pop', 'rock'],
     popularity: 95,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/c/cd/Harry_Styles_-_Harry%27s_House.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/c/cd/Harry_Styles_-_Harry%27s_House.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/c/cd/Harry_Styles_-_Harry%27s_House.png' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5ebf7db7c8ede90a019c54590bb' },
+      { url: 'https://i.scdn.co/image/ab67616100005174f7db7c8ede90a019c54590bb' },
+      { url: 'https://i.scdn.co/image/ab6761610000f178f7db7c8ede90a019c54590bb' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/6KImCVD70vtIoJWnq6nGn3' }
   },
@@ -317,9 +317,9 @@ const shortTermArtists = [
     genres: ['pop', 'dance pop'],
     popularity: 93,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/f/f5/Dua_Lipa_-_Future_Nostalgia_%28Official_Album_Cover%29.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/f/f5/Dua_Lipa_-_Future_Nostalgia_%28Official_Album_Cover%29.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/f/f5/Dua_Lipa_-_Future_Nostalgia_%28Official_Album_Cover%29.png' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5eb0c68f6c95232e716f0abee8d' },
+      { url: 'https://i.scdn.co/image/ab676161000051740c68f6c95232e716f0abee8d' },
+      { url: 'https://i.scdn.co/image/ab6761610000f1780c68f6c95232e716f0abee8d' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/6M2wZ9GZgrQXHCFfjv46we' }
   },
@@ -329,9 +329,9 @@ const shortTermArtists = [
     genres: ['pop', 'pop rock'],
     popularity: 91,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/b/b1/Olivia_Rodrigo_-_Sour.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/b/b1/Olivia_Rodrigo_-_Sour.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/b/b1/Olivia_Rodrigo_-_Sour.png' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5ebe03a98785f3658f0b6461ec4' },
+      { url: 'https://i.scdn.co/image/ab67616100005174e03a98785f3658f0b6461ec4' },
+      { url: 'https://i.scdn.co/image/ab6761610000f178e03a98785f3658f0b6461ec4' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/1McMsnEElThX1knmY4oliG' }
   },
@@ -341,9 +341,9 @@ const shortTermArtists = [
     genres: ['pop rap', 'dfw rap'],
     popularity: 89,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/9/9a/Post_Malone_-_Hollywood%27s_Bleeding.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/9/9a/Post_Malone_-_Hollywood%27s_Bleeding.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/9/9a/Post_Malone_-_Hollywood%27s_Bleeding.png' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5ebe17c0aa1714a03d62b5ce4e0' },
+      { url: 'https://i.scdn.co/image/ab67616100005174e17c0aa1714a03d62b5ce4e0' },
+      { url: 'https://i.scdn.co/image/ab6761610000f178e17c0aa1714a03d62b5ce4e0' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/246dkjvS1zLTtiykXe5h60' }
   }
@@ -356,9 +356,9 @@ const mediumTermArtists = [
     genres: ['indie pop', 'pop'],
     popularity: 78,
     images: [
-      { url: 'https://i.scdn.co/image/ab6761610000e5eb7414cdd7b90a9e0e00f50d5b' },
-      { url: 'https://i.scdn.co/image/ab676161000051747414cdd7b90a9e0e00f50d5b' },
-      { url: 'https://i.scdn.co/image/ab6761610000f1787414cdd7b90a9e0e00f50d5b' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5eb8bbb776368161a8258cbca3a' },
+      { url: 'https://i.scdn.co/image/ab676161000051748bbb776368161a8258cbca3a' },
+      { url: 'https://i.scdn.co/image/ab6761610000f1788bbb776368161a8258cbca3a' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/2NjfBq1NflQcKSeiDooVjY' }
   },
@@ -368,9 +368,9 @@ const mediumTermArtists = [
     genres: ['pop rap', 'country rap'],
     popularity: 85,
     images: [
-      { url: 'https://i.scdn.co/image/ab6761610000e5eb71e86ec7ee5addf10b8a4bd1' },
-      { url: 'https://i.scdn.co/image/ab6761610000517471e86ec7ee5addf10b8a4bd1' },
-      { url: 'https://i.scdn.co/image/ab6761610000f17871e86ec7ee5addf10b8a4bd1' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5eb3758a33e782b46bd7f174e1d' },
+      { url: 'https://i.scdn.co/image/ab676161000051743758a33e782b46bd7f174e1d' },
+      { url: 'https://i.scdn.co/image/ab6761610000f1783758a33e782b46bd7f174e1d' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/7jVv8c5Fj3E9VhNjxT4snq' }
   },
@@ -380,9 +380,9 @@ const mediumTermArtists = [
     genres: ['pop', 'singer-songwriter'],
     popularity: 82,
     images: [
-      { url: 'https://i.scdn.co/image/ab6761610000e5ebe05d5b0a3e84b8c63671c81d' },
-      { url: 'https://i.scdn.co/image/ab67616100005174e05d5b0a3e84b8c63671c81d' },
-      { url: 'https://i.scdn.co/image/ab6761610000f178e05d5b0a3e84b8c63671c81d' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5eb58b4b9419486550f6fda0535' },
+      { url: 'https://i.scdn.co/image/ab6761610000517458b4b9419486550f6fda0535' },
+      { url: 'https://i.scdn.co/image/ab6761610000f17858b4b9419486550f6fda0535' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/7n2wHs1TKAczGzO7Dd2rGr' }
   },
@@ -392,9 +392,9 @@ const mediumTermArtists = [
     genres: ['pop rock', 'alternative rock'],
     popularity: 84,
     images: [
-      { url: 'https://i.scdn.co/image/ab6761610000e5eb920dc1f617550de8388f368e' },
-      { url: 'https://i.scdn.co/image/ab67616100005174920dc1f617550de8388f368e' },
-      { url: 'https://i.scdn.co/image/ab6761610000f178920dc1f617550de8388f368e' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5ebab47d8dae2b24f5afe7f9d38' },
+      { url: 'https://i.scdn.co/image/ab67616100005174ab47d8dae2b24f5afe7f9d38' },
+      { url: 'https://i.scdn.co/image/ab6761610000f178ab47d8dae2b24f5afe7f9d38' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/53XhwfbYqKCa1cC15pYq2q' }
   },
@@ -404,9 +404,9 @@ const mediumTermArtists = [
     genres: ['pop', 'latin pop'],
     popularity: 79,
     images: [
-      { url: 'https://i.scdn.co/image/ab6761610000e5eb5ccde7d7ccdb7cf20df0bd96' },
-      { url: 'https://i.scdn.co/image/ab676161000051745ccde7d7ccdb7cf20df0bd96' },
-      { url: 'https://i.scdn.co/image/ab6761610000f1785ccde7d7ccdb7cf20df0bd96' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5eb76470faf6330235edbcb90a9' },
+      { url: 'https://i.scdn.co/image/ab6761610000517476470faf6330235edbcb90a9' },
+      { url: 'https://i.scdn.co/image/ab6761610000f17876470faf6330235edbcb90a9' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/4nDoRrQiYLoBzwC5BhVJzF' }
   },
@@ -416,9 +416,9 @@ const mediumTermArtists = [
     genres: ['funk', 'pop', 'alternative hip hop'],
     popularity: 75,
     images: [
-      { url: 'https://i.scdn.co/image/ab6761610000e5ebe7f4a693d8ac1e56d1a81e5a' },
-      { url: 'https://i.scdn.co/image/ab67616100005174e7f4a693d8ac1e56d1a81e5a' },
-      { url: 'https://i.scdn.co/image/ab6761610000f178e7f4a693d8ac1e56d1a81e5a' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5eb105cc9628c315b29d299fbb4' },
+      { url: 'https://i.scdn.co/image/ab67616100005174105cc9628c315b29d299fbb4' },
+      { url: 'https://i.scdn.co/image/ab6761610000f178105cc9628c315b29d299fbb4' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/3hv9jJF3adDNsBSIQDqcjp' }
   }
@@ -431,9 +431,9 @@ const longTermArtists = [
     genres: ['rock', 'glam rock'],
     popularity: 87,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/9/9f/Bohemian_Rhapsody.png' }
+      { url: 'https://i.scdn.co/image/b040846ceba13c3e9c125d68389491094e7f2982' },
+      { url: 'https://i.scdn.co/image/af2b8e57f6d7b5d43a616bd1e27ba552cd8bfd42' },
+      { url: 'https://i.scdn.co/image/c06971e9ff81696699b829484e3be165f4e64368' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/1dfeR4HaWDbWqFHLkxsg1d' }
   },
@@ -443,9 +443,9 @@ const longTermArtists = [
     genres: ['rock', 'british invasion'],
     popularity: 85,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/4/42/Beatles_-_Abbey_Road.jpg' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5ebe9348cc01ff5d55971b22433' },
+      { url: 'https://i.scdn.co/image/ab67616100005174e9348cc01ff5d55971b22433' },
+      { url: 'https://i.scdn.co/image/ab6761610000f178e9348cc01ff5d55971b22433' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/3WrFJ7ztbogyGnTHbHJFl2' }
   },
@@ -455,9 +455,9 @@ const longTermArtists = [
     genres: ['rock', 'hard rock'],
     popularity: 83,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/2/26/Led_Zeppelin_-_Led_Zeppelin_IV.jpg' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/2/26/Led_Zeppelin_-_Led_Zeppelin_IV.jpg' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/2/26/Led_Zeppelin_-_Led_Zeppelin_IV.jpg' }
+      { url: 'https://i.scdn.co/image/207803ce008388d3427a685254f9de6a8f61dc2e' },
+      { url: 'https://i.scdn.co/image/b0248a44865493e6a03832aa89854ada16ff07a8' },
+      { url: 'https://i.scdn.co/image/16eb3cdae0d824b520ac17710e943a99d3ef6602' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/36QJpDe2go2KgaRleHCDTp' }
   },
@@ -467,9 +467,9 @@ const longTermArtists = [
     genres: ['rock', 'country rock'],
     popularity: 81,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/4/49/Hotel_California.jpg' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/4/49/Hotel_California.jpg' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/4/49/Hotel_California.jpg' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5eb0767e116a2307495e37cd7fb' },
+      { url: 'https://i.scdn.co/image/ab676161000051740767e116a2307495e37cd7fb' },
+      { url: 'https://i.scdn.co/image/ab6761610000f1780767e116a2307495e37cd7fb' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/0ECwFtbIWEVNwjlrfc6xoL' }
   },
@@ -479,12 +479,11 @@ const longTermArtists = [
     genres: ['pop', 'r&b'],
     popularity: 89,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png' }
+      { url: 'https://i.scdn.co/image/ab6761610000e5eb997cc9a4aec335d46c9481fd' },
+      { url: 'https://i.scdn.co/image/ab67616100005174997cc9a4aec335d46c9481fd' },
+      { url: 'https://i.scdn.co/image/ab6761610000f178997cc9a4aec335d46c9481fd' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/3fMbdgg4jU18AjLCKBhRSm' }
-
   },
   {
     id: 'lta6',
@@ -492,9 +491,9 @@ const longTermArtists = [
     genres: ['grunge', 'rock'],
     popularity: 84,
     images: [
-      { url: 'https://upload.wikimedia.org/wikipedia/en/b/b7/NirvanaNevermindalbumcover.jpg' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/b/b7/NirvanaNevermindalbumcover.jpg' },
-      { url: 'https://upload.wikimedia.org/wikipedia/en/b/b7/NirvanaNevermindalbumcover.jpg' }
+      { url: 'https://i.scdn.co/image/84282c28d851a700132356381fcfbadc67ff498b' },
+      { url: 'https://i.scdn.co/image/a4e10b79a642e9891383448cbf37d7266a6883d6' },
+      { url: 'https://i.scdn.co/image/42ae0f180f16e2f21c1f2212717fc436f5b95451' }
     ],
     external_urls: { spotify: 'https://open.spotify.com/artist/6olE6TJLqED3rqDCT0FyPh' }
   }

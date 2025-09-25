@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Anti-Hero",
+    "artist": "Taylor Swift",
+    "album": "Midnights",
+    "image": "https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5",
+    "spotify_url": "https://open.spotify.com/track/0V3wPSX9ygBnCm8psDIegu",
+    "album_url": "https://open.spotify.com/album/151w1FgRZfnKZA9FEcg9Z3"
+  },
+  {
+    "name": "Flowers",
+    "artist": "Miley Cyrus",
+    "album": "Endless Summer Vacation",
+    "image": "https://i.scdn.co/image/ab67616d0000b273cd222052a2594be29a6616b5",
+    "spotify_url": "https://open.spotify.com/track/7DSAEUvxU8FajXtRloy8M0",
+    "album_url": "https://open.spotify.com/album/5DvJgsMLbaR1HmAI6VhfcQ"
+  },
+  {
+    "name": "good 4 u",
+    "artist": "Olivia Rodrigo",
+    "album": "SOUR",
+    "image": "https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a",
+    "spotify_url": "https://open.spotify.com/track/4ZtFanR9U6ndgddUvNcjcG",
+    "album_url": "https://open.spotify.com/album/6s84u2TUpR3wdUv4NgKA2j"
+  },
+  {
+    "name": "Levitating",
+    "artist": "Dua Lipa",
+    "album": "Future Nostalgia",
+    "image": "https://i.scdn.co/image/ab67616d0000b2734bc66095f8a70bc4e6593f4f",
+    "spotify_url": "https://open.spotify.com/track/39LLxExYz6ewLAcYrzQQyP",
+    "album_url": "https://open.spotify.com/album/7fJJK56U9fHixgO0HQkhtI"
+  },
+  {
+    "name": "Watermelon Sugar",
+    "artist": "Harry Styles",
+    "album": "Fine Line",
+    "image": "https://i.scdn.co/image/ab67616d0000b27377fdcfda6535601aff081b6a",
+    "spotify_url": "https://open.spotify.com/track/6UelLqGlWMcVH1E5c4H7lY",
+    "album_url": "https://open.spotify.com/album/7xV2TzoaVc0ycW7fwBwAml"
+  },
+  {
+    "name": "Blinding Lights",
+    "artist": "The Weeknd",
+    "album": "After Hours",
+    "image": "https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36",
+    "spotify_url": "https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b",
+    "album_url": "https://open.spotify.com/album/4yP0hdKOZPNshxUOjY0cZj"
+  },
+  {
+    "name": "As It Was",
+    "artist": "Harry Styles",
+    "album": "Harry's House",
+    "image": "https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f0",
+    "spotify_url": "https://open.spotify.com/track/4Dvkj6JhhA12EX05fT7y2e",
+    "album_url": "https://open.spotify.com/album/5r36AJ6VOJtp00oxSkBZ5h"
+  },
+  {
+    "name": "Shape of You",
+    "artist": "Ed Sheeran",
+    "album": "÷ (Deluxe)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96",
+    "spotify_url": "https://open.spotify.com/track/7qiZfU4dY1lWllzX7mPBI3",
+    "album_url": "https://open.spotify.com/album/3T4tUhGYeRNVUGevb0wThu"
+  },
+  {
+    "name": "vampire",
+    "artist": "Olivia Rodrigo",
+    "album": "GUTS",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e85259a1cae29a8d91f2093d",
+    "spotify_url": "https://open.spotify.com/track/1kuGVB7EU95pJObxwvfwKS",
+    "album_url": "https://open.spotify.com/album/1xJHno7SmdVtZAtXbdbDZp"
+  },
+  {
+    "name": "Seven (feat. Latto) (Explicit Ver.)",
+    "artist": "Jung Kook, Latto",
+    "album": "GOLDEN",
+    "image": "https://i.scdn.co/image/ab67616d0000b273741fd4807f442af3f7359316",
+    "spotify_url": "https://open.spotify.com/track/2HRgqmZQC0MC7GeNuDIXHN",
+    "album_url": "https://open.spotify.com/album/5pSk3c3wVwnb2arb6ohCPU"
+  },
+  {
+    "name": "Cruel Summer",
+    "artist": "Taylor Swift",
+    "album": "Lover",
+    "image": "https://i.scdn.co/image/ab67616d0000b273e787cffec20aa2a396a61647",
+    "spotify_url": "https://open.spotify.com/track/1BxfuPKGuaTgP7aM0Bbdwr",
+    "album_url": "https://open.spotify.com/album/1NAmidJlEaVgA3MpcPFYGq"
+  },
+  {
+    "name": "Kill Bill",
+    "artist": "SZA",
+    "album": "SOS",
+    "image": "https://i.scdn.co/image/ab67616d0000b27370dbc9f47669d120ad874ec1",
+    "spotify_url": "https://open.spotify.com/track/3OHfY25tqY28d16oZczHc8",
+    "album_url": "https://open.spotify.com/album/07w0rG5TETcyihsEIZR3qG"
+  },
+  {
+    "name": "Unholy (feat. Kim Petras)",
+    "artist": "Sam Smith, Kim Petras",
+    "album": "Unholy (feat. Kim Petras)",
+    "image": "https://i.scdn.co/image/ab67616d0000b273a935e4689f15953311772cc4",
+    "spotify_url": "https://open.spotify.com/track/3nqQXoyQOWXiESFLlDF1hG",
+    "album_url": "https://open.spotify.com/album/0gX9tkL5njRax8ymWcXARi"
+  },
+  {
+    "name": "About Damn Time",
+    "artist": "Lizzo",
+    "album": "Special",
+    "image": "https://i.scdn.co/image/ab67616d0000b273fe3b1b9cb7183a94e1aafd43",
+    "spotify_url": "https://open.spotify.com/track/6HMtHNpW6YPi1hrw9tgF8P",
+    "album_url": "https://open.spotify.com/album/1NgFBv1PxMG1zhFDW1OrRr"
+  },
+  {
+    "name": "Heat Waves",
+    "artist": "Glass Animals",
+    "album": "Dreamland",
+    "image": "https://i.scdn.co/image/ab67616d0000b273712701c5e263efc8726b1464",
+    "spotify_url": "https://open.spotify.com/track/3USxtqRwSYz57Ewm6wWRMp",
+    "album_url": "https://open.spotify.com/album/5bfpRtBW7RNRdsm3tRyl3R"
+  }
+]
