@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useSession, signIn } from 'next-auth/react';
 import { FaSpotify, FaEye, FaArrowRight, FaExclamationTriangle, FaSpinner } from 'react-icons/fa';
+import Link from 'next/link';
 import Dashboard from './Dashboard';
 import AIIntelligenceSection from './ai/AIIntelligenceSection';
 import ConcertFinderSection from './concerts/ConcertFinderSection';
@@ -262,11 +263,16 @@ return (
         </p>
       </div>
       <div className="mt-6 p-4 bg-gray-800/20 rounded-lg border border-gray-700 flex items-center gap-3 justify-center text-gray-300 text-sm">
-  <Image src="/mistral-logo-color-white.png" alt="Mistral" width={32} height={32} className="w-8 h-8" unoptimized />
+  <Image src="/m-boxed-rainbow.png" alt="Mistral AI" width={24} height={24} className="w-6 h-6" unoptimized />
         <div>
           <div className="font-semibold text-white">AI Analysis powered by Mistral</div>
           <div className="text-gray-400 text-xs">We use Mistral AI to generate personalized music insights and recommendations.</div>
         </div>
+      </div>
+      <div className="mt-4 text-center">
+        <Link href="/privacy" className="text-xs text-slate-400 hover:text-slate-200">
+          Privacy Policy
+        </Link>
       </div>
       {/* Show AI and Concert Finder preview when spotifyData (or demo data) is present */}
       {spotifyData && (
@@ -279,3 +285,4 @@ return (
   </div>
 );
 }
+

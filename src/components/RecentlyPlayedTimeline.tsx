@@ -179,7 +179,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
       <div className="hidden sm:block">
         <div className="relative">
           <button
-            aria-hidden="true"
+            aria-label="Scroll left"
             onClick={() => {
               const scroller = document.getElementById('recent-scroller');
               if (scroller) scroller.scrollBy({ left: -320, behavior: 'smooth' });
@@ -228,7 +228,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
                             href={track.spotifyUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label="Open in Spotify"
+                            aria-label={`Open ${track.name} in Spotify`}
                             className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <FontAwesomeIcon icon={faPlayCircle} className="text-xl" />
@@ -261,7 +261,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
           </div>
 
           <button
-            aria-hidden="true"
+            aria-label="Scroll right"
             onClick={() => {
               const scroller = document.getElementById('recent-scroller');
               if (scroller) scroller.scrollBy({ left: 320, behavior: 'smooth' });
@@ -294,7 +294,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
                         {track.preview_url && (
                           <button
                             onClick={() => togglePreview(track.id, track.preview_url)}
-                            aria-label={playingPreview && playingPreview.id === track.id ? 'Pause preview' : 'Play preview'}
+                            aria-label={playingPreview && playingPreview.id === track.id ? `Pause preview for ${track.name}` : `Play preview for ${track.name}`}
                             className="absolute inset-0 bg-black/60 rounded-md flex items-center justify-center text-white"
                           >
                             <FontAwesomeIcon icon={faPlayCircle} className={`text-lg ${playingPreview && playingPreview.id === track.id ? 'text-green-400' : 'text-white'}`} />

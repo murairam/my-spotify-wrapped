@@ -47,11 +47,8 @@ async function refreshAccessToken(token: ExtendedToken) {
     };
   } catch (error) {
     console.log("Error refreshing access token:", error);
-
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    };
+    // Re-throw the error to invalidate the session
+    throw error;
   }
 }
 

@@ -550,6 +550,531 @@ export const mockRecentlyPlayed: MockRecentlyPlayedTrack[] = [
 // Export a function to get recently played data for different time ranges
 export const getRecentlyPlayedForTimeRange = () => {
   // For demo mode, always show the same 15 tracks
+  const mockRecentlyPlayed: MockRecentlyPlayedTrack[] = [
+    {
+      track: {
+        id: 'rp1',
+        name: 'Anti-Hero',
+        artist: 'Taylor Swift',
+        artists: [{ name: 'Taylor Swift' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/0V3wPSX9ygBnCm8psDIegu' },
+        album: {
+          name: 'Midnights',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273bb54dde68cd23e2a268ae0f5' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(0, 15) // 15 minutes ago
+    },
+    {
+      track: {
+        id: 'rp2',
+        name: 'Flowers',
+        artist: 'Miley Cyrus',
+        artists: [{ name: 'Miley Cyrus' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273cd222052a2594be29a6616b5' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/7DSAEUvxU8FajXtRloy8M0' },
+        album: {
+          name: 'Endless Summer Vacation',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273cd222052a2594be29a6616b5' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(0, 45) // 45 minutes ago
+    },
+    {
+      track: {
+        id: 'rp3',
+        name: 'good 4 u',
+        artist: 'Olivia Rodrigo',
+        artists: [{ name: 'Olivia Rodrigo' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/4ZtFanR9U6ndgddUvNcjcG' },
+        album: {
+          name: 'SOUR',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(1, 20) // 1 hour 20 minutes ago
+    },
+    {
+      track: {
+        id: 'rp4',
+        name: 'Levitating',
+        artist: 'Dua Lipa',
+        artists: [{ name: 'Dua Lipa' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b2734bc66095f8a70bc4e6593f4f' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/39LLxExYz6ewLAcYrzQQyP' },
+        album: {
+          name: 'Future Nostalgia',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b2734bc66095f8a70bc4e6593f4f' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(2, 10) // 2 hours 10 minutes ago
+    },
+    {
+      track: {
+        id: 'rp5',
+        name: 'Watermelon Sugar',
+        artist: 'Harry Styles',
+        artists: [{ name: 'Harry Styles' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b27377fdcfda6535601aff081b6a' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/6UelLqGlWMcVH1E5c4H7lY' },
+        album: {
+          name: 'Fine Line',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b27377fdcfda6535601aff081b6a' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(3, 0) // 3 hours ago
+    },
+    {
+      track: {
+        id: 'rp6',
+        name: 'Blinding Lights',
+        artist: 'The Weeknd',
+        artists: [{ name: 'The Weeknd' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b' },
+        album: {
+          name: 'After Hours',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(4, 30) // 4.5 hours ago
+    },
+    {
+      track: {
+        id: 'rp7',
+        name: 'As It Was',
+        artist: 'Harry Styles',
+        artists: [{ name: 'Harry Styles' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f0' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/4Dvkj6JhhA12EX05fT7y2e' },
+        album: {
+          name: "Harry's House",
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f0' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(5, 15) // 5.25 hours ago
+    },
+    {
+      track: {
+        id: 'rp8',
+        name: 'Shape of You',
+        artist: 'Ed Sheeran',
+        artists: [{ name: 'Ed Sheeran' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/7qiZfU4dY1lWllzX7mPBI3' },
+        album: {
+          name: '÷ (Deluxe)',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273ba5db46f4b838ef6027e6f96' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(6, 45) // 6.75 hours ago
+    },
+    {
+      track: {
+        id: 'rp9',
+        name: 'vampire',
+        artist: 'Olivia Rodrigo',
+        artists: [{ name: 'Olivia Rodrigo' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273e85259a1cae29a8d91f2093d' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/1kuGVB7EU95pJObxwvfwKS' },
+        album: {
+          name: 'GUTS',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273e85259a1cae29a8d91f2093d' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(8, 0) // 8 hours ago
+    },
+    {
+      track: {
+        id: 'rp10',
+        name: 'Seven (feat. Latto) (Explicit Ver.)',
+        artist: 'Jung Kook, Latto',
+        artists: [{ name: 'Jung Kook' }, { name: 'Latto' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273741fd4807f442af3f7359316' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/2HRgqmZQC0MC7GeNuDIXHN' },
+        album: {
+          name: 'GOLDEN',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273741fd4807f442af3f7359316' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(10, 30) // 10.5 hours ago
+    },
+    {
+      track: {
+        id: 'rp11',
+        name: 'Cruel Summer',
+        artist: 'Taylor Swift',
+        artists: [{ name: 'Taylor Swift' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273e787cffec20aa2a396a61647' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/1BxfuPKGuaTgP7aM0Bbdwr' },
+        album: {
+          name: 'Lover',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273e787cffec20aa2a396a61647' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(12, 0) // 12 hours ago
+    },
+    {
+      track: {
+        id: 'rp12',
+        name: 'Kill Bill',
+        artist: 'SZA',
+        artists: [{ name: 'SZA' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b27370dbc9f47669d120ad874ec1' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/3OHfY25tqY28d16oZczHc8' },
+        album: {
+          name: 'SOS',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b27370dbc9f47669d120ad874ec1' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(14, 20) // 14.33 hours ago
+    },
+    {
+      track: {
+        id: 'rp13',
+        name: 'Unholy (feat. Kim Petras)',
+        artist: 'Sam Smith, Kim Petras',
+        artists: [{ name: 'Sam Smith' }, { name: 'Kim Petras' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273a935e4689f15953311772cc4' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/3nqQXoyQOWXiESFLlDF1hG' },
+        album: {
+          name: 'Unholy (feat. Kim Petras)',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273a935e4689f15953311772cc4' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(16, 10) // 16.17 hours ago
+    },
+    {
+      track: {
+        id: 'rp14',
+        name: 'About Damn Time',
+        artist: 'Lizzo',
+        artists: [{ name: 'Lizzo' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273fe3b1b9cb7183a94e1aafd43' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/6HMtHNpW6YPi1hrw9tgF8P' },
+        album: {
+          name: 'Special',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273fe3b1b9cb7183a94e1aafd43' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(18, 0) // 18 hours ago
+    },
+    {
+      track: {
+        id: 'rp15',
+        name: 'Heat Waves',
+        artist: 'Glass Animals',
+        artists: [{ name: 'Glass Animals' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273712701c5e263efc8726b1464' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/3USxtqRwSYz57Ewm6wWRMp' },
+        album: {
+          name: 'Dreamland',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273712701c5e263efc8726b1464' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(20, 30) // 20.5 hours ago
+    },
+    {
+      track: {
+        id: 'rp2',
+        name: 'Flowers',
+        artist: 'Miley Cyrus',
+        artists: [{ name: 'Miley Cyrus' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273b4b73b14b1d4cb53fce81605' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/0yLdNVWF3sUm0BSFLUTxOx' },
+        album: {
+          name: 'Endless Summer Vacation',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273b4b73b14b1d4cb53fce81605' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(0, 45) // 45 minutes ago
+    },
+    {
+      track: {
+        id: 'rp3',
+        name: 'Good 4 U',
+        artist: 'Olivia Rodrigo',
+        artists: [{ name: 'Olivia Rodrigo' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/4ZtFanR9U6ndgddUvNcjcG' },
+        album: {
+          name: 'SOUR',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(1, 20) // 1 hour 20 minutes ago
+    },
+    {
+      track: {
+        id: 'rp4',
+        name: 'Levitating',
+        artist: 'Dua Lipa',
+        artists: [{ name: 'Dua Lipa' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b2732172b607853fa89cefa2beb4' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/5nujrmhLynf4yMoMtj8AQF' },
+        album: {
+          name: 'Future Nostalgia',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b2732172b607853fa89cefa2beb4' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(2, 10) // 2 hours 10 minutes ago
+    },
+    {
+      track: {
+        id: 'rp5',
+        name: 'Watermelon Sugar',
+        artist: 'Harry Styles',
+        artists: [{ name: 'Harry Styles' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b27377fdcfda6535601aff081b6a' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/6UelLqGlWMcVH1E5c4H7lY' },
+        album: {
+          name: 'Fine Line',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b27377fdcfda6535601aff081b6a' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(3, 0) // 3 hours ago
+    },
+    // ...existing code...
+    {
+      track: {
+        id: 'rp7',
+        name: 'Unholy (feat. Kim Petras)',
+        artist: 'Sam Smith',
+        artists: [{ name: 'Sam Smith' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273906f58dbbc6634141598a1fb' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/3nqQXoyQOWXiESFLlDF1hG' },
+        album: {
+          name: 'Gloria',
+          images: [{ url: 'https://i.scdn.co/image/ab67616d0000b273906f58dbbc6634141598a1fb' }]
+        }
+      },
+      played_at: generateRecentTimestamp(5, 15) // 5.25 hours ago
+    },
+    {
+      track: {
+        id: 'rp8',
+        name: 'As It Was',
+        artist: 'Harry Styles',
+        artists: [{ name: 'Harry Styles' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f0' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/4Dvkj6JhhA12EX05fT7y2e' },
+        album: {
+          name: "Harry's House",
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b2732e8ed79e177ff6011076f5f0' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(6, 45) // 6.75 hours ago
+    },
+    {
+      track: {
+        id: 'rp9',
+        name: 'Bad Habit',
+        artist: 'Steve Lacy',
+        artists: [{ name: 'Steve Lacy' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273b85ce288883a3d49248a3622' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/4k6Uh1HltlJna3gWgg6eSS' },
+        album: {
+          name: 'Gemini Rights',
+          images: [{ url: 'https://i.scdn.co/image/ab67616d0000b273b85ce288883a3d49248a3622' }]
+        }
+      },
+      played_at: generateRecentTimestamp(8, 0) // 8 hours ago
+    },
+    {
+      track: {
+        id: 'rp10',
+        name: 'Watermelon Sugar',
+        artist: 'Harry Styles',
+        artists: [{ name: 'Harry Styles' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b2737fcead687e99583072cc217b' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/6UelLqGlWMcVH1E5c4H7lY' },
+        album: {
+          name: 'Fine Line',
+          images: [{ url: 'https://i.scdn.co/image/ab67616d0000b2737fcead687e99583072cc217b' }]
+        }
+      },
+      played_at: generateRecentTimestamp(10, 30) // 10.5 hours ago
+    },
+    {
+      track: {
+        id: 'rp11',
+        name: 'About Damn Time',
+        artist: 'Lizzo',
+        artists: [{ name: 'Lizzo' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273649bce0a39a546b8cc6cf96d' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/1PckUlxKqWQs3VlMaOG0P1' },
+        album: {
+          name: 'About Damn Time',
+          images: [{ url: 'https://i.scdn.co/image/ab67616d0000b273649bce0a39a546b8cc6cf96d' }]
+        }
+      },
+      played_at: generateRecentTimestamp(12, 0) // 12 hours ago
+    },
+    {
+      track: {
+        id: 'rp12',
+        name: 'Heat Waves',
+        artist: 'Glass Animals',
+        artists: [{ name: 'Glass Animals' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b27361d48bc6f64593b810b4cfec' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/02MWAaffLxlfxAUY7c5dvx' },
+        album: {
+          name: 'Dreamland',
+          images: [{ url: 'https://i.scdn.co/image/ab67616d0000b27361d48bc6f64593b810b4cfec' }]
+        }
+      },
+      played_at: generateRecentTimestamp(14, 20) // 14.33 hours ago
+    },
+    {
+      track: {
+        id: 'rp13',
+        name: 'Good 4 U',
+        artist: 'Olivia Rodrigo',
+        artists: [{ name: 'Olivia Rodrigo' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/4ZtFanR9U6ndgddUvNcjcG' },
+        album: {
+          name: 'SOUR',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b273a91c10fe9472d9bd89802e5a' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(16, 10) // 16.17 hours ago
+    },
+    {
+      track: {
+        id: 'rp14',
+        name: 'Levitating',
+        artist: 'Dua Lipa',
+        artists: [{ name: 'Dua Lipa' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b2732172b607853fa89cefa2beb4' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/5nujrmhLynf4yMoMtj8AQF' },
+        album: {
+          name: 'Future Nostalgia',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b2732172b607853fa89cefa2beb4' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(18, 0) // 18 hours ago
+    },
+    {
+      track: {
+        id: 'rp15',
+        name: 'Blinding Lights',
+        artist: 'The Weeknd',
+        artists: [{ name: 'The Weeknd' }],
+        images: [
+          { url: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36' }
+        ],
+        external_urls: { spotify: 'https://open.spotify.com/track/0VjIjW4GlUZAMYd2vXMi3b' },
+        album: {
+          name: 'After Hours',
+          images: [
+            { url: 'https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36' }
+          ]
+        }
+      },
+      played_at: generateRecentTimestamp(20, 30) // 20.5 hours ago
+    }
+  ];
   return mockRecentlyPlayed.slice(0, 15);
 }
 

@@ -10,7 +10,7 @@ import AIIntelligenceSection from './ai/AIIntelligenceSection';
 import RecentlyPlayedTimeline from './RecentlyPlayedTimeline';
 import type { SpotifyData as HookSpotifyData } from '@/hooks/useSpotifyData';
 import { useSpotifyData } from '@/hooks/useSpotifyData';
-
+import { ErrorDisplay, parseSpotifyError } from '@/components/ErrorHandling';
 
 const TIME_RANGES = [
   { key: 'short_term', label: 'Last 4 Weeks' },
@@ -33,7 +33,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
   const [currentData, setCurrentData] = useState<MockSpotifyData | null>(null);
 
   // Use React Query hook to fetch spotify data and expose loading state when not in demo mode
-  const { data: hookData, isLoading: hookLoading } = useSpotifyData(timeRange);
+  const { data: hookData, isLoading: hookLoading, error: hookError } = useSpotifyData(timeRange, { enabled: !isDemo });
 
   useEffect(() => {
     if (isDemo && onTimeRangeChange) {
@@ -63,6 +63,15 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
     }
   };
 
+  if (hookError) {
+    const parsedError = parseSpotifyError(hookError);
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#191414] via-[#1a1a1a] to-[#121212] flex items-center justify-center p-4">
+        <ErrorDisplay error={parsedError} onRetry={() => window.location.reload()} />
+      </div>
+    );
+  }
+  
   if (!currentData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#191414] via-[#1a1a1a] to-[#121212] flex items-center justify-center">
@@ -104,6 +113,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
                     className="bg-[#1a1a1a] text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-[#1DB954] focus:outline-none text-sm font-medium min-w-[180px]"
                     value={timeRange}
                     onChange={(e) => onTimeRangeChange(e.target.value as TimeRangeKey)}
+                    aria-label="Select time range for Spotify data"
                   >
                     {TIME_RANGES.map(range => (
                       <option key={range.key} value={range.key}>
@@ -120,6 +130,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 rounded-lg border border-red-600/30 hover:border-red-600/50 transition-all text-sm font-medium"
+                aria-label="Logout from your account"
               >
                 <FaSignOutAlt />
                 <span className="hidden sm:inline">Logout</span>
@@ -186,7 +197,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
                       </div>
                       <Image
                         src={track.images[0]?.url}
-                        alt={track.name}
+                        alt={`Album art for ${track.name}`}
                         width={index < 3 ? 64 : 48}
                         height={index < 3 ? 64 : 48}
                         className={`${index < 3 ? 'w-16 h-16' : 'w-12 h-12'} rounded object-cover`}
@@ -206,12 +217,13 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
                             rel="noopener noreferrer"
                             className="text-[#1DB954] hover:text-green-400 transition-colors"
                             title="Open in Spotify"
+                            aria-label={`Open ${track.name} by ${track.artist} in Spotify`}
                           >
                             <FaExternalLinkAlt size={14} />
                           </a>
                         )}
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <FaPlay className="text-[#1DB954] cursor-pointer" size={14} />
+                          <FaPlay className="text-[#1DB954] cursor-pointer" size={14} aria-label={`Play ${track.name}`}/>
                         </div>
                       </div>
                     </div>
@@ -245,7 +257,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
                       <div className="relative">
                         <Image
                           src={artist.images[0]?.url}
-                          alt={artist.name}
+                          alt={`Photo of ${artist.name}`}
                           width={index < 3 ? 112 : 80}
                           height={index < 3 ? 112 : 80}
                           className={`${index < 3 ? 'w-28 h-28' : 'w-20 h-20'} rounded-full mx-auto mb-3 object-cover`}
@@ -264,6 +276,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-[#1DB954] hover:text-green-400 transition-colors text-xs"
                           title="Open in Spotify"
+                          aria-label={`Open ${artist.name} in Spotify`}
                         >
                           <FaExternalLinkAlt size={10} />
                           <span>Open</span>

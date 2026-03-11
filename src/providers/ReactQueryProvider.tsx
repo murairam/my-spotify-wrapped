@@ -93,4 +93,4 @@ export function ReactQueryProvider({ children }: ReactQueryProviderProps) {
   );
 }
 
-export { queryClient };
+
