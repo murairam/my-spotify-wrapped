@@ -50,7 +50,7 @@ export function ErrorDisplay({ error, onRetry, onDismiss, className = "" }: Erro
       case 'rate_limit':
         return 'bg-orange-500/20 border-orange-500 text-orange-200';
       case 'insufficient_data':
-        return 'bg-purple-500/20 border-purple-500 text-purple-200';
+        return 'bg-[#00BFFF]/10 border-[#00BFFF]/30 text-[#00BFFF]/90';
       default:
         return 'bg-red-500/20 border-red-500 text-red-200';
     }

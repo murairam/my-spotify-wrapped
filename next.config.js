@@ -41,6 +41,10 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'developer.spotify.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'image-cdn-spotify.scdn.co',
       },
     ],

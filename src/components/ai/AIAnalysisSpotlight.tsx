@@ -124,17 +124,17 @@ export default function AIAnalysisSpotlight({ summary, analysis, className = '' 
   // If no analysis yet, show teaser
   if (!analysis) {
     return (
-      <div className={`bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-xl p-6 border border-purple-500/30 ${className}`}>
+      <div className={`bg-[#080808] rounded-xl p-6 border border-[#00BFFF]/15 ${className}`}>
         <div className="flex items-center gap-3 mb-4">
-          <FaBrain className="text-purple-400 text-2xl animate-pulse" />
+          <FaBrain className="text-[#00BFFF] text-2xl animate-pulse" />
           <div>
             <h3 className="text-2xl font-bold text-white">🎭 AI Spotlight</h3>
             <p className="text-gray-400 text-sm">Powered by Mistral AI • Ready to analyze your musical soul</p>
           </div>
         </div>
 
-        <div className="text-center py-8 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-500/20">
-          <FaRocket className="text-4xl text-purple-400 mx-auto mb-3 animate-bounce" />
+        <div className="text-center py-8 bg-[#00BFFF]/5 rounded-lg border border-[#00BFFF]/15">
+          <FaRocket className="text-4xl text-[#00BFFF] mx-auto mb-3 animate-bounce" />
           <p className="text-gray-300">
             🚀 <strong>Get ready for some AI magic!</strong> I&apos;m about to dive deep into your music and discover things even you didn&apos;t know about your taste!
           </p>
@@ -144,19 +144,19 @@ export default function AIAnalysisSpotlight({ summary, analysis, className = '' 
   }
 
   return (
-    <div className={`bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-xl border border-purple-500/30 overflow-hidden ${className}`}>
+    <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 overflow-hidden glow ${className}`}>
       {/* Header */}
-      <div className="p-6 border-b border-purple-500/20">
+      <div className="p-6 border-b border-[#00BFFF]/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <FaBrain className="text-purple-400 text-2xl" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+              <FaBrain className="text-[#00BFFF] text-2xl" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#00BFFF] rounded-full animate-pulse" style={{boxShadow:'0 0 6px rgba(0,191,255,0.8)'}}></div>
             </div>
             <div>
               <h3 className="text-2xl font-bold text-white">🎭 AI Spotlight</h3>
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-purple-400 font-medium">Powered by Mistral AI</span>
+                <span className="text-[#00BFFF] font-medium">Powered by Mistral AI</span>
                 <div className="flex gap-1">
                   <FaStar className="text-yellow-400 text-xs" />
                   <FaStar className="text-yellow-400 text-xs" />
@@ -167,14 +167,14 @@ export default function AIAnalysisSpotlight({ summary, analysis, className = '' 
           </div>
 
           <div className="text-right">
-            <div className="text-xs text-purple-300 font-medium">AI Confidence</div>
+            <div className="text-xs text-[#00BFFF]/70 font-medium">AI Confidence</div>
             <div className="flex items-center gap-1 mt-1">
               <div className="flex gap-0.5">
                 {[1,2,3,4,5].map(i => (
-                  <div key={i} className={`w-1 h-3 rounded-full ${i <= (analysis?.confidence || 85)/20 ? 'bg-green-400' : 'bg-gray-600'}`} />
+                  <div key={i} className={`w-1 h-3 rounded-full ${i <= (analysis?.confidence || 85)/20 ? 'bg-[#00BFFF]' : 'bg-white/10'}`} />
                 ))}
               </div>
-              <span className="text-xs text-green-400 ml-1">{analysis?.confidence || 85}%</span>
+              <span className="text-xs text-[#00BFFF] ml-1">{analysis?.confidence || 85}%</span>
             </div>
           </div>
         </div>
@@ -185,9 +185,9 @@ export default function AIAnalysisSpotlight({ summary, analysis, className = '' 
         {/* AI Personality Analysis */}
         {personality && (
           <>
-          <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg p-4 border border-purple-400/20">
+          <div className="bg-[#00BFFF]/5 rounded-lg p-4 border border-[#00BFFF]/15">
             <div className="flex items-start gap-3">
-              <FaHeart className="text-pink-400 text-xl mt-1 animate-pulse" />
+              <FaHeart className="text-[#00BFFF] text-xl mt-1 animate-pulse" />
               <div className="flex-1">
                 <h4 className="text-white font-bold mb-2 flex items-center gap-2">
                   🧠 Mistral&apos;s Take on Your Musical Soul
@@ -219,7 +219,7 @@ export default function AIAnalysisSpotlight({ summary, analysis, className = '' 
               </div>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-lg p-4 border border-blue-400/20">
+          <div className="bg-[#00BFFF]/5 rounded-lg p-4 border border-[#00BFFF]/10">
             <div className="flex items-start gap-3">
               <FaLightbulb className="text-yellow-400 text-xl mt-1 animate-pulse" />
               <div className="flex-1">
@@ -230,7 +230,7 @@ export default function AIAnalysisSpotlight({ summary, analysis, className = '' 
                       <div
                         key={i}
                         className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                          i === currentFactIndex ? 'bg-yellow-400 animate-pulse' : 'bg-gray-600'
+                          i === currentFactIndex ? 'bg-[#00BFFF] animate-pulse' : 'bg-white/15'
                         }`}
                       />
                     ))}
@@ -252,17 +252,17 @@ export default function AIAnalysisSpotlight({ summary, analysis, className = '' 
 
         {/* Summary if available */}
         {summary && (
-          <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg p-4 border border-green-400/20">
+          <div className="bg-[#00BFFF]/5 rounded-lg p-4 border border-[#00BFFF]/15">
             <div className="flex items-start gap-3">
-              <FaStar className="text-green-400 text-xl mt-1" />
+              <FaStar className="text-[#00BFFF] text-xl mt-1" />
               <div className="flex-1">
                 <h4 className="text-white font-bold mb-2">🌟 AI Deep Dive Summary</h4>
                 <div
                   className="text-gray-200 text-sm leading-relaxed"
                   dangerouslySetInnerHTML={{
                     __html: summary
-                      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-green-300">$1</strong>')
-                      .replace(/(?:^|[^*])\*([^*]+)\*(?![*])/g, '<em class="text-green-200">$1</em>')
+                      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#00BFFF]">$1</strong>')
+                      .replace(/(?:^|[^*])\*([^*]+)\*(?![*])/g, '<em class="text-[#00BFFF]/80">$1</em>')
                   }}
                 />
               </div>
@@ -294,13 +294,13 @@ export default function AIAnalysisSpotlight({ summary, analysis, className = '' 
           </div>
         )}
 
-        <div className="text-center pt-4 border-t border-purple-500/20">
-          <div className="flex items-center justify-center gap-2 text-xs text-purple-300">
+        <div className="text-center pt-4 border-t border-[#00BFFF]/10">
+          <div className="flex items-center justify-center gap-2 text-xs text-[#00BFFF]/60">
             <span>✨ Analysis crafted by</span>
-            <strong className="text-purple-200">Mistral AI</strong>
+            <strong className="text-[#00BFFF]/90">Mistral AI</strong>
             <span>•</span>
             <span>Bringing personality to your playlist</span>
-            <FaHeart className="text-pink-400 animate-pulse" />
+            <FaHeart className="text-[#00BFFF] animate-pulse" />
           </div>
         </div>
       </div>

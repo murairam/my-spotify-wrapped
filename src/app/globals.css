@@ -3,19 +3,19 @@
 @tailwind utilities;
 
 :root {
+  /* Duotone & Dramatic — pure black + electric blue */
   --background: #000000;
   --foreground: #ffffff;
-  --spotify-green: #1DB954;
-  --spotify-black: #191414;
-  --spotify-dark-gray: #121212;
-  --spotify-light-gray: #b3b3b3;
-}
+  --accent: #00BFFF;
+  --accent-dim: rgba(0, 191, 255, 0.12);
+  --accent-border: rgba(0, 191, 255, 0.22);
+  --accent-border-hover: rgba(0, 191, 255, 0.45);
+  --bg-card: #080808;
+  --bg-card-hover: #0f0f0f;
+  --bg-input: #0c0c0c;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #ffffff;
-  }
+  /* Legacy alias kept for component classes */
+  --spotify-green: #00BFFF;
 }
 
 body {
@@ -24,40 +24,44 @@ body {
   font-family: system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-/* Spotify Design Guidelines */
-.spotify-rounded-small {
-  border-radius: 2px;
+/* ── Duotone accent helpers ── */
+.text-spotify-green  { color: var(--accent); }
+.bg-spotify-green    { background-color: var(--accent); }
+.spotify-bg-primary  { background-color: var(--accent); }
+.spotify-rounded-small { border-radius: 2px; }
+.spotify-rounded-large { border-radius: 4px; }
+
+/* Accent glow — use on cards / interactive elements */
+.glow {
+  box-shadow: 0 0 18px rgba(0, 191, 255, 0.25), 0 0 4px rgba(0, 191, 255, 0.15);
+}
+.glow-sm {
+  box-shadow: 0 0 8px rgba(0, 191, 255, 0.2);
+}
+.glow-lg {
+  box-shadow: 0 0 32px rgba(0, 191, 255, 0.3), 0 0 8px rgba(0, 191, 255, 0.2);
+}
+.glow-text {
+  text-shadow: 0 0 10px rgba(0, 191, 255, 0.6);
 }
 
-.spotify-rounded-large {
-  border-radius: 4px;
+/* Card base */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-border);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-
-.spotify-bg-primary {
-  background-color: var(--spotify-green);
-}
-
-.spotify-bg-dark {
-  background-color: var(--spotify-black);
-}
-
-.spotify-text-light {
-  color: var(--spotify-light-gray);
+.card:hover {
+  border-color: var(--accent-border-hover);
+  box-shadow: 0 0 16px rgba(0, 191, 255, 0.15);
 }
 
 /* Shimmer animation for loading states */
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
-
-.animate-shimmer {
-  animation: shimmer 1.5s infinite;
-}
+.animate-shimmer { animation: shimmer 1.5s infinite; }
 
 /* Custom grid for 24-hour timeline */
 .grid-cols-24 {
@@ -65,7 +69,5 @@ body {
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
 }

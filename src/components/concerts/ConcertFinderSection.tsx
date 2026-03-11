@@ -63,17 +63,17 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
   };
 
   const getMatchScoreColor = (score: number) => {
-    if (score >= 85) return 'text-green-400';
+    if (score >= 85) return 'text-[#00BFFF]';
     if (score >= 75) return 'text-yellow-400';
     return 'text-orange-400';
   };
 
   return (
-    <div className={`bg-[#191414] rounded-xl border border-gray-800 overflow-hidden ${className}`}>
+    <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 overflow-hidden transition-all hover:border-[#00BFFF]/30 hover:shadow-glow-sm ${className}`}>
       {/* Header - Spotify Style */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-6 border-b border-[#00BFFF]/10">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-[#1DB954] to-[#1ed760] rounded-lg flex items-center justify-center">
+          <div className="w-12 h-12 bg-[#00BFFF] rounded-lg flex items-center justify-center shadow-glow">
             <FaTicketAlt className="text-black text-xl" />
           </div>
           <div>
@@ -93,7 +93,7 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
       </div>
 
       {/* Search Interface */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-6 border-b border-[#00BFFF]/10">
         <div className="flex gap-4">
           <div className="flex-1">
             <div className="relative">
@@ -104,7 +104,7 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
                 onChange={(e) => setLocation(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && searchConcerts()}
                 placeholder="Enter your city..."
-                className="w-full pl-10 pr-4 py-3 bg-[#2a2a2a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-[#1DB954] focus:outline-none transition-colors"
+                className="w-full pl-10 pr-4 py-3 bg-black border border-[#00BFFF]/20 rounded-lg text-white placeholder-gray-500 focus:border-[#00BFFF]/60 focus:outline-none transition-all"
               />
             </div>
           </div>
@@ -112,7 +112,7 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
           <button
             onClick={searchConcerts}
             disabled={!location.trim() || isSearching || !spotifyData?.topArtists}
-            className="bg-[#1DB954] hover:bg-[#1ed760] disabled:bg-gray-700 text-black disabled:text-gray-400 font-semibold px-6 py-3 rounded-lg transition-colors disabled:cursor-not-allowed flex items-center gap-2"
+            className="bg-[#00BFFF] hover:bg-[#33ccff] disabled:bg-white/10 text-black disabled:text-gray-500 font-semibold px-6 py-3 rounded-lg transition-all disabled:cursor-not-allowed flex items-center gap-2 shadow-glow-sm hover:shadow-glow"
           >
             {isSearching ? (
               <>
@@ -146,13 +146,13 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
                   {concerts.map((concert, index) => (
                     <div
                       key={index}
-                      className="bg-[#0d1117] rounded-lg p-4 border border-gray-800 hover:border-gray-600 hover:bg-[#181818] transition-all group cursor-pointer"
+                      className="bg-white/[0.03] rounded-lg p-4 border border-transparent hover:border-[#00BFFF]/20 hover:bg-[#00BFFF]/5 transition-all group cursor-pointer"
                       onClick={() => concert.ticketUrl && window.open(concert.ticketUrl, '_blank')}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h4 className="text-white font-semibold text-lg group-hover:text-[#1DB954] transition-colors">
+                            <h4 className="text-white font-semibold text-lg group-hover:text-[#00BFFF] transition-colors">
                               {concert.artist}
                             </h4>
                             <div className="flex items-center gap-1">
@@ -183,7 +183,7 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
                           <p className="text-gray-400 text-sm mb-3">{concert.reason}</p>
 
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-[#1DB954] text-sm group-hover:text-[#1ed760] transition-colors">
+                            <div className="flex items-center gap-2 text-[#00BFFF] text-sm">
                               <FaExternalLinkAlt className="text-xs" />
                               <span>Get Tickets</span>
                             </div>
@@ -216,7 +216,7 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-gray-800 bg-[#0d1117]">
+      <div className="px-6 py-4 border-t border-[#00BFFF]/10 bg-black">
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>Concert data may not reflect real availability</span>
           <div className="flex items-center gap-2">

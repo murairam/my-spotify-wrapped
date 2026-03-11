@@ -120,22 +120,17 @@ export default function AIPlaylistRecommendations({
           console.warn(`⚠️ Spotify search failed for playlist ${i + 1}:`, searchQuery);
         }
 
-        // If still no URL, create a targeted search URL and update text accordingly
+        // If still no URL, build a search URL from the AI name — keep name/description as-is
         if (!processedPlaylist.url) {
-          const genre = spotifyData?.topGenres?.[0] || 'pop';
-          const titlePart = typeof name === 'string' ? name : 'playlist';
-          processedPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(String(genre))}%20${encodeURIComponent(String(titlePart))}`;
-          processedPlaylist.name = `${String(genre).charAt(0).toUpperCase() + String(genre).slice(1)} Search`;
-          processedPlaylist.description = `Find ${String(genre)} playlists on Spotify`;
-          console.log(`🔄 Using targeted search URL for playlist ${i + 1}:`, processedPlaylist.url);
+          const searchTerm = typeof name === 'string' && name ? name : (spotifyData?.topGenres?.[0] || 'playlist');
+          processedPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(searchTerm)}`;
+          console.log(`🔄 Using name-based search URL for playlist ${i + 1}:`, processedPlaylist.url);
         }
       } catch (error) {
         console.error(`❌ Error enriching playlist ${i + 1}:`, error);
-        // Use basic fallback URL and update text
-        const genre = spotifyData?.topGenres?.[0] || 'pop';
-        processedPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(genre)}%20playlist`;
-        processedPlaylist.name = `${genre.charAt(0).toUpperCase() + genre.slice(1)} Playlists`;
-        processedPlaylist.description = `Discover ${genre} music on Spotify`;
+        // Keep AI name/description, just set a search URL
+        const searchTerm = typeof name === 'string' && name ? name : (spotifyData?.topGenres?.[0] || 'playlist');
+        processedPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(searchTerm)}`;
       }
 
       processed.push(processedPlaylist);
@@ -203,24 +198,16 @@ export default function AIPlaylistRecommendations({
         }
       }
 
-      // If still no URL, use targeted search and update text
+      // If still no URL, build a search URL from the existing name — keep name/description as-is
       if (!fourthPlaylist.url) {
-        if (topArtist) {
-          fourthPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(topArtist.name)}%20radio`;
-          fourthPlaylist.name = `${topArtist.name} Radio Search`;
-          fourthPlaylist.description = `Find radio stations based on ${topArtist.name}`;
-        } else {
-          fourthPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(topGenres[0])}%20discover`;
-          fourthPlaylist.name = `${topGenres[0].charAt(0).toUpperCase() + topGenres[0].slice(1)} Discovery`;
-          fourthPlaylist.description = `Discover new ${topGenres[0]} music`;
-        }
-        console.log('🔄 Using targeted search URL for 4th playlist:', fourthPlaylist.url);
+        const searchTerm = fourthPlaylist.name || (topArtist ? `${topArtist.name} radio` : `${topGenres[0]} discover`);
+        fourthPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(searchTerm)}`;
+        console.log('🔄 Using name-based search URL for 4th playlist:', fourthPlaylist.url);
       }
     } catch (error) {
       console.error('❌ Error enriching 4th playlist:', error);
-      fourthPlaylist.url = `https://open.spotify.com/search/discover%20weekly`;
-      fourthPlaylist.name = 'Discover Weekly Style';
-      fourthPlaylist.description = 'Find new music recommendations';
+      const searchTerm = fourthPlaylist.name || 'discover weekly';
+      fourthPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(searchTerm)}`;
     }
 
   processed.push(fourthPlaylist);
@@ -341,24 +328,20 @@ export default function AIPlaylistRecommendations({
     processPlaylists();
   }, [aiPlaylists, topGenre, processAIPlaylists, createFallbackPlaylists]); // Only re-run when AI data changes
 
-  // Don't render anything if no AI analysis has been run
-  if (!aiPlaylists && playlists.length === 0) {
-    return null;
-  }
-
+  // Show loading skeleton while playlists are being processed (including when aiPlaylists is undefined)
   if (isLoading && playlists.length === 0) {
     return (
-      <div className={`bg-[#1a1a1a] rounded-xl border border-gray-800 p-6 ${className}`}>
+      <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 p-6 ${className}`}>
         <div className="flex items-center gap-3 mb-4">
-          <FaListUl className="text-[#1DB954] text-xl" />
+          <FaListUl className="text-[#00BFFF] text-xl" />
           <h3 className="text-lg font-bold text-white">Playlist Suggestions</h3>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[1,2,3,4].map(i => (
-            <div key={i} className="bg-black/20 rounded-lg p-3 animate-pulse">
-              <div className="aspect-square bg-gray-700 rounded mb-2"></div>
-              <div className="h-4 bg-gray-700 rounded mb-1"></div>
-              <div className="h-3 bg-gray-800 rounded w-3/4"></div>
+            <div key={i} className="bg-white/[0.03] rounded-lg p-3 animate-pulse">
+              <div className="aspect-square bg-white/[0.06] rounded mb-2"></div>
+              <div className="h-4 bg-white/[0.06] rounded mb-1"></div>
+              <div className="h-3 bg-white/[0.04] rounded w-3/4"></div>
             </div>
           ))}
         </div>
@@ -367,15 +350,31 @@ export default function AIPlaylistRecommendations({
   }
 
   if (playlists.length === 0) {
-    return null;
+    // Still waiting for first render cycle — show skeleton so layout stays stable
+    return (
+      <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 p-6 ${className}`}>
+        <div className="flex items-center gap-3 mb-4">
+          <FaListUl className="text-[#00BFFF] text-xl" />
+          <h3 className="text-lg font-bold text-white">Playlist Suggestions</h3>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-white/[0.03] rounded-lg p-3 animate-pulse">
+              <div className="aspect-square bg-white/[0.06] rounded mb-2" />
+              <div className="h-4 bg-white/[0.06] rounded mb-1" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className={`bg-[#1a1a1a] rounded-xl border border-gray-800 overflow-hidden ${className}`}>
+    <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 overflow-hidden transition-all hover:border-[#00BFFF]/30 hover:shadow-glow-sm ${className}`}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-6 border-b border-[#00BFFF]/10">
         <div className="flex items-center gap-3">
-          <FaListUl className="text-[#1DB954] text-2xl" />
+          <FaListUl className="text-[#00BFFF] text-2xl" />
           <h2 className="text-2xl font-bold text-white">AI Playlist Suggestions</h2>
           <span className="text-gray-400 text-sm ml-auto">
             {playlists.length} AI-curated mixes
@@ -386,7 +385,7 @@ export default function AIPlaylistRecommendations({
       {/* Content */}
       <div className="p-6">
         {isLoading && playlists.length > 0 && (
-          <div className="flex items-center gap-2 mb-4 text-sm text-[#1DB954]">
+          <div className="flex items-center gap-2 mb-4 text-sm text-[#00BFFF]">
             <FaSpinner className="animate-spin" />
             Enriching playlists with Spotify data...
           </div>
@@ -396,11 +395,11 @@ export default function AIPlaylistRecommendations({
           {playlists.map((playlist, index) => (
             <div
               key={index}
-              className="flex flex-col gap-3 p-4 rounded-lg bg-black/20 hover:bg-black/40 transition-all group cursor-pointer"
+              className="flex flex-col gap-3 p-4 rounded-lg bg-white/[0.03] hover:bg-[#00BFFF]/5 border border-transparent hover:border-[#00BFFF]/15 transition-all group cursor-pointer"
               onClick={() => playlist.url && window.open(playlist.url, '_blank')}
             >
               {/* Image */}
-              <div className="aspect-square rounded-lg overflow-hidden bg-gray-800 relative">
+              <div className="aspect-square rounded-lg overflow-hidden bg-white/[0.05] relative">
                 <Image
                   src={playlist.image || getPlaylistImage(index)}
                   alt={playlist.name}
@@ -416,15 +415,15 @@ export default function AIPlaylistRecommendations({
 
                 {/* Play overlay */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <div className="w-10 h-10 bg-[#1DB954] rounded-full flex items-center justify-center">
-                    <FaPlay className="text-white text-sm ml-0.5" />
+                  <div className="w-10 h-10 bg-[#00BFFF] rounded-full flex items-center justify-center shadow-glow">
+                    <FaPlay className="text-black text-sm ml-0.5" />
                   </div>
                 </div>
               </div>
 
               {/* Info */}
               <div className="min-h-0">
-                <h4 className="font-semibold text-white text-sm leading-tight truncate group-hover:text-[#1DB954] transition-colors">
+                <h4 className="font-semibold text-white text-sm leading-tight truncate group-hover:text-[#00BFFF] transition-colors">
                   {playlist.name}
                 </h4>
                 <p className="text-gray-400 text-xs mt-1 line-clamp-2 leading-tight">

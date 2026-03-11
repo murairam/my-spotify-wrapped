@@ -328,6 +328,10 @@ RESPONSE_SCHEMA:
       }
     }
 
+    // Guarantee newArtists and playlists are always arrays so components never receive undefined
+    if (!Array.isArray(enhancedObj.newArtists)) enhancedObj.newArtists = [];
+    if (!Array.isArray(enhancedObj.playlists)) enhancedObj.playlists = [];
+
     // If AI didn't return a sufficiently long analysisParagraph, synthesize one from available fields
     const ensureTwoParagraphs = () => {
       const ap = (enhancedObj.analysisParagraph as string) || '';

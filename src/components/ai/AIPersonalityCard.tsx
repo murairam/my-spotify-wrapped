@@ -29,9 +29,9 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
   const funFacts = enhanced.funFacts || [];
 
   return (
-    <div className={`bg-gradient-to-br from-[#0f1724]/30 to-[#071233]/30 rounded-xl border border-[#2b2f4a]/20 overflow-hidden ${className}`}>
+    <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 overflow-hidden glow ${className}`}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#5B21B6]/10 to-[#7C3AED]/10 border-b border-[#6d28d9]/10 p-6">
+      <div className="bg-[#00BFFF]/6 border-b border-[#00BFFF]/15 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg overflow-hidden bg-transparent flex items-center justify-center">
@@ -39,14 +39,14 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Your Musical Personality</h3>
-              <p className="text-purple-300 text-sm">AI-powered insights</p>
+              <p className="text-[#00BFFF]/70 text-sm">AI-powered insights</p>
             </div>
           </div>
 
           {/* Confidence Score */}
           <div className="text-right">
-            <div className="text-2xl font-bold text-white">{confidence}%</div>
-            <div className="text-xs text-purple-300">Confidence</div>
+            <div className="text-2xl font-bold text-[#00BFFF]">{confidence}%</div>
+            <div className="text-xs text-[#00BFFF]/60">Confidence</div>
           </div>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
         {/* Musical Personality */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <FaHeart className="text-pink-400" />
+            <FaHeart className="text-[#00BFFF]" />
             <h4 className="text-white font-semibold">Musical Identity</h4>
           </div>
           <p className="text-gray-200 text-sm leading-relaxed">
@@ -67,7 +67,7 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
         {/* Discovery Style */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <FaCompass className="text-blue-400" />
+            <FaCompass className="text-[#00BFFF]" />
             <h4 className="text-white font-semibold">Discovery Style</h4>
           </div>
           <p className="text-gray-200 text-sm leading-relaxed">
@@ -78,7 +78,7 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
         {/* Social Profile */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <FaUsers className="text-green-400" />
+            <FaUsers className="text-[#00BFFF]" />
             <h4 className="text-white font-semibold">Social Listening</h4>
           </div>
           <p className="text-gray-200 text-sm leading-relaxed">
@@ -95,7 +95,7 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
             </div>
             <div className="space-y-2">
               {funFacts.map((fact, index) => (
-                <div key={index} className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                <div key={index} className="bg-yellow-500/8 border border-yellow-500/15 rounded-lg p-3">
                   <p className="text-yellow-200 text-sm">{fact}</p>
                 </div>
               ))}
@@ -105,7 +105,7 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-3 bg-black/10 border-t border-[#6d28d9]/10">
+      <div className="px-6 py-3 bg-black border-t border-[#00BFFF]/10">
         <p className="text-xs text-gray-400 text-center flex items-center justify-center gap-2">
           <Image src="/mistral-logo-color-white.png" alt="Mistral" width={16} height={16} className="inline-block" unoptimized />
           <span>Powered by Mistral AI • Musical Personality Analysis</span>

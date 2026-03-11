@@ -1,32 +1,64 @@
 // 3. FIXED: src/components/ai/AIIntelligenceSection.tsx (Note: filename case sensitivity)
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { FaBrain, FaFire } from 'react-icons/fa';
 import type { SpotifyData } from '@/types/spotify';
 import useAIAnalysis from '@/hooks/useAIAnalysis';
 import MusicDNACard from './MusicDNACard';
 import AIPlaylistRecommendations from './AIPlaylistRecommendations';
-import MoodAnalysisCard from './MoodAnalysisCard';
 import ArtistRecommendations from './ArtistRecommendations';
 import AIPersonalityCard from './AIPersonalityCard';
-import AIAnalysisSpotlight from './AIAnalysisSpotlight';
+import AIStory from './AIStory';
+import MusicSpiritAnimal from './MusicSpiritAnimal';
 
 interface AIIntelligenceSectionProps {
   spotifyData: SpotifyData;
   className?: string;
 }
 
+function StepIndicator({ current, total, labels }: { current: number; total: number; labels: string[] }) {
+  return (
+    <div className="flex items-center justify-center gap-2 mb-2">
+      {labels.map((label, i) => {
+        const step = i + 1;
+        const done = step < current;
+        const active = step === current;
+        return (
+          <React.Fragment key={i}>
+            <div className="flex flex-col items-center gap-1">
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                  done ? 'bg-[#00BFFF]/30 text-[#00BFFF]' :
+                  active ? 'bg-[#00BFFF] text-black shadow-glow' :
+                  'bg-white/5 text-gray-600'
+                }`}
+              >
+                {done ? '✓' : step}
+              </div>
+              <span className={`text-[10px] font-medium uppercase tracking-wide ${
+                active ? 'text-[#00BFFF]' : done ? 'text-[#00BFFF]/50' : 'text-gray-600'
+              }`}>{label}</span>
+            </div>
+            {i < total - 1 && (
+              <div className={`h-px w-8 mb-4 transition-all ${step < current ? 'bg-[#00BFFF]/40' : 'bg-white/10'}`} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AIIntelligenceSection({ spotifyData, className = '' }: AIIntelligenceSectionProps) {
-  const { analysis, isLoading, error, analyzeData, lastRequest, lastRawResponse } = useAIAnalysis();
-  const [hasStarted, setHasStarted] = useState(false);
-  const lastSpotifyDataRef = useRef<SpotifyData | null>(null);
+  const { analysis, error, analyzeData } = useAIAnalysis();
+  const [storyStep, setStoryStep] = useState<'start' | 'loading' | 'dna' | 'personality' | 'recommendations'>('start');
 
   const handleStartAnalysis = async () => {
     if (!spotifyData) return;
 
-    setHasStarted(true);
+    setStoryStep('loading');
     await analyzeData({
       spotifyData,
       preferences: {
@@ -37,96 +69,30 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
         includeDebug: false
       }
     });
+    setStoryStep('dna');
   };
 
-  // Re-run analysis when spotifyData changes after initial run
-  useEffect(() => {
-    // If analysis hasn't started yet but spotifyData is now available, auto-start once
-    if (!hasStarted) {
-      lastSpotifyDataRef.current = spotifyData;
-      if (spotifyData) {
-        // auto-run analysis on first data arrival
-        setHasStarted(true);
-        analyzeData({
-          spotifyData,
-          preferences: {
-            includeConcerts: false,
-            includeNewArtists: true,
-            includePlaylistSuggestions: true,
-            includeMoodAnalysis: true,
-            includeDebug: false
-          }
-        }).catch(() => {});
-      }
-      return;
+  const handleNextStep = () => {
+    switch (storyStep) {
+      case 'dna':
+        setStoryStep('personality');
+        break;
+      case 'personality':
+        setStoryStep('recommendations');
+        break;
+      default:
+        break;
     }
-
-    // Simple shallow change detection by reference and JSON stringify fallback
-    try {
-      const prev = lastSpotifyDataRef.current;
-      const prevStr = prev ? JSON.stringify(prev) : null;
-      const nextStr = spotifyData ? JSON.stringify(spotifyData) : null;
-      if (prevStr !== nextStr) {
-        // store new value and re-run analysis
-        lastSpotifyDataRef.current = spotifyData;
-        // fire and forget; setHasStarted remains true
-        analyzeData({
-          spotifyData,
-          preferences: {
-            includeConcerts: false,
-            includeNewArtists: true,
-            includePlaylistSuggestions: true,
-            includeMoodAnalysis: true,
-            includeDebug: false
-          }
-        }).catch(() => {
-          // analyzeData already surfaces errors via hook; ignore here
-        });
-      }
-    } catch {
-      // If stringify fails, conservatively re-run analysis
-      lastSpotifyDataRef.current = spotifyData;
-      analyzeData({
-        spotifyData,
-        preferences: {
-          includeConcerts: false,
-          includeNewArtists: true,
-          includePlaylistSuggestions: true,
-          includeMoodAnalysis: true,
-          includeDebug: false
-        }
-      }).catch(() => {});
-    }
-  }, [spotifyData, hasStarted, analyzeData]);
-
-  const parseMoodData = (data: unknown) => {
-    if (typeof data === 'string') {
-      try {
-        const parsed = JSON.parse(data);
-        if (parsed.primaryMood) {
-          return {
-            primaryMood: parsed.primaryMood,
-            energy: Math.floor(Math.random() * 100) + 1,
-            vibes: parsed.vibes || ['Introspective', 'Energetic', 'Chill'],
-            listeningTime: parsed.listeningContext || 'Late night sessions'
-          };
-        }
-      } catch {}
-    }
-    return {
-      primaryMood: 'Eclectic Explorer',
-      energy: 73,
-      vibes: ['Adventurous', 'Moody', 'Diverse'],
-      listeningTime: 'Peak focus hours'
-    };
   };
+
+
 
   return (
-    <div className={`bg-[#191414] rounded-xl border border-gray-800 overflow-hidden ${className}`}>
+    <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 overflow-hidden transition-all hover:border-[#00BFFF]/30 hover:shadow-glow-sm ${className}`}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-6 border-b border-[#00BFFF]/10">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-[#1DB954] to-[#1ed760] rounded-lg flex items-center justify-center">
+          <div className="w-12 h-12 bg-[#00BFFF] rounded-lg flex items-center justify-center shadow-glow">
             <FaBrain className="text-black text-xl" />
           </div>
           <div>
@@ -142,41 +108,79 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
       </div>
 
       <div className="p-6">
-  {/* Start Button */}
-        {!hasStarted && (
-          <div className="text-center py-12">
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FaBrain className="text-white text-2xl" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-4">Ready to Unlock Your Music Intelligence?</h3>
-            <p className="text-gray-300 mb-8 max-w-lg mx-auto">
-              Get AI-powered insights, discover perfect playlists, and explore your musical personality.
-            </p>
-            <button
-              onClick={handleStartAnalysis}
-              disabled={!spotifyData}
-              className="bg-[#1DB954] hover:bg-[#1ed760] text-black font-semibold px-8 py-4 rounded-full transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 mx-auto"
-            >
-              <FaBrain />
-              <span>Analyze My Music</span>
-              <FaFire />
-            </button>
-          </div>
-        )}
-
-        {/* Loading */}
-        {isLoading && (
-          <div className="text-center py-16">
-            <div className="relative w-16 h-16 mx-auto mb-6">
-              <div className="absolute inset-0 border-4 border-[#1DB954]/20 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-transparent border-t-[#1DB954] rounded-full animate-spin"></div>
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">Analyzing your music with Mistral AI...</h3>
-            <p className="text-gray-400">This might take a moment</p>
-          </div>
-        )}
-
-        {/* Error */}
+        {(() => {
+          switch (storyStep) {
+            case 'start':
+              return (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-[#00BFFF] rounded-full flex items-center justify-center mx-auto mb-6 shadow-glow-lg">
+                    <FaBrain className="text-black text-2xl" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-4">Ready to Unlock Your Music Intelligence?</h3>
+                  <p className="text-gray-300 mb-8 max-w-lg mx-auto">
+                    Get AI-powered insights, discover perfect playlists, and explore your musical personality.
+                  </p>
+                  <button
+                    onClick={handleStartAnalysis}
+                    disabled={!spotifyData}
+                    className="bg-[#00BFFF] hover:bg-[#33ccff] text-black font-semibold px-8 py-4 rounded-full transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 mx-auto shadow-glow hover:shadow-glow-lg"
+                  >
+                    <FaBrain />
+                    <span>Analyze My Music</span>
+                    <FaFire />
+                  </button>
+                </div>
+              );
+            case 'loading':
+              return (
+                <div className="text-center py-16">
+                  <div className="relative w-16 h-16 mx-auto mb-6">
+                    <div className="absolute inset-0 border-4 border-[#00BFFF]/20 rounded-full"></div>
+                    <div className="absolute inset-0 border-4 border-transparent border-t-[#00BFFF] rounded-full animate-spin"></div>
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Analyzing your music with Mistral AI...</h3>
+                  <p className="text-gray-400 mb-1">Crunching your listening history — usually takes 10–20 seconds</p>
+                  <p className="text-[#00BFFF]/50 text-xs mt-3">Building your music DNA, personality profile &amp; playlist suggestions</p>
+                </div>
+              );
+            case 'dna':
+              return (
+                <div className="space-y-4">
+                  <StepIndicator current={1} total={3} labels={['Your DNA', 'Your Story', 'Discover']} />
+                  {analysis && <MusicSpiritAnimal analysis={analysis} />}
+                  <MusicDNACard spotifyData={spotifyData} />
+                  <button
+                    onClick={handleNextStep}
+                    className="w-full mt-2 bg-[#00BFFF] hover:bg-[#33ccff] text-black font-semibold px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-glow flex items-center justify-center gap-2"
+                  >
+                    Continue to Your Story →
+                  </button>
+                </div>
+              );
+            case 'personality':
+              return (
+                <div className="space-y-4">
+                  <StepIndicator current={2} total={3} labels={['Your DNA', 'Your Story', 'Discover']} />
+                  {analysis && <AIStory analysis={analysis} />}
+                  {analysis && <AIPersonalityCard analysis={analysis} />}
+                  <button
+                    onClick={handleNextStep}
+                    className="w-full mt-2 bg-[#00BFFF] hover:bg-[#33ccff] text-black font-semibold px-8 py-4 rounded-full transition-all transform hover:scale-105 shadow-glow flex items-center justify-center gap-2"
+                  >
+                    See Recommendations →
+                  </button>
+                </div>
+              );
+            case 'recommendations':
+              return (
+                <div className="space-y-4">
+                  <StepIndicator current={3} total={3} labels={['Your DNA', 'Your Story', 'Discover']} />
+                  {analysis && <ArtistRecommendations recommendations={analysis?.enhanced?.newArtists} analysis={analysis} spotifyData={spotifyData} />}
+                  {analysis && <AIPlaylistRecommendations spotifyData={spotifyData} aiPlaylists={analysis?.enhanced?.playlists} />}
+                </div>
+              );
+          }
+        })()}
         {error && (
           <div className="text-center py-12 bg-red-900/10 rounded-lg border border-red-500/20">
             <FaBrain className="text-red-400 text-3xl mx-auto mb-4" />
@@ -187,53 +191,6 @@ export default function AIIntelligenceSection({ spotifyData, className = '' }: A
             >
               Try Again
             </button>
-          </div>
-        )}
-
-        {/* Results */}
-        {analysis && (
-          <div className="space-y-6">
-            {/* Small debug/metadata row */}
-            <div className="flex items-center justify-between text-xs text-white/60">
-              <div>Last analysis: {analysis.timestamp ? new Date(analysis.timestamp).toLocaleString() : '—'}</div>
-              <div>Data snapshot: {(spotifyData && JSON.stringify(spotifyData).length) || 0} chars</div>
-            </div>
-
-            {/* Collapsible network/debug panel */}
-            {(process.env.NODE_ENV === 'development' || lastRequest) && (
-              <details className="bg-black/10 border border-white/6 rounded-md p-3 text-xs text-white/60">
-                <summary className="cursor-pointer font-medium">AI Network Log (click to expand)</summary>
-                <div className="mt-3 space-y-2">
-                  <div>
-                    <div className="font-semibold text-white text-sm">Last Request</div>
-                    <pre className="whitespace-pre-wrap break-words text-xs text-white/70 max-h-36 overflow-auto">{lastRequest ? JSON.stringify(lastRequest, null, 2) : '—'}</pre>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-white text-sm">Last Raw Response (truncated)</div>
-                    <pre className="whitespace-pre-wrap break-words text-xs text-white/70 max-h-36 overflow-auto">{lastRawResponse ? (lastRawResponse.length > 2000 ? lastRawResponse.substring(0, 2000) + '... (truncated)' : lastRawResponse) : '—'}</pre>
-                  </div>
-                </div>
-              </details>
-            )}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <AIAnalysisSpotlight summary={analysis?.summary} playlists={analysis?.enhanced?.playlists} analysis={analysis} className="lg:col-span-2" />
-                  <div className="space-y-6">
-                    <MusicDNACard spotifyData={spotifyData} />
-                    {/* Moved: show current vibe (MoodAnalysisCard) here instead of Personality */}
-                    <MoodAnalysisCard moodData={parseMoodData(analysis?.enhanced?.moodAnalysis)} />
-                  </div>
-                </div>
-
-                {/* Make personality card full width */}
-                <div className="mt-6">
-                  <AIPersonalityCard analysis={analysis} />
-                </div>
-
-                {/* Artists above playlists stacked vertically (one above the other) */}
-                <div className="grid grid-cols-1 gap-6 mt-6">
-                  <ArtistRecommendations recommendations={analysis?.enhanced?.newArtists} analysis={analysis} spotifyData={spotifyData} />
-                  <AIPlaylistRecommendations spotifyData={spotifyData} aiPlaylists={analysis?.enhanced?.playlists} />
-                </div>
           </div>
         )}
       </div>

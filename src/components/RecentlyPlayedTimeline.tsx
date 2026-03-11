@@ -132,12 +132,12 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
       <div className="backdrop-blur-lg bg-white/10 rounded-2xl border border-white/20 p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <FontAwesomeIcon icon={faClock} className="text-[#1DB954] text-xl" />
+            <FontAwesomeIcon icon={faClock} className="text-[#00BFFF] text-xl" />
             <h3 className="text-xl font-bold text-white">Recently Played</h3>
           </div>
         </div>
         <div className="flex items-center justify-center h-32">
-          <FontAwesomeIcon icon={faSpinner} className="text-[#1DB954] text-2xl animate-spin" />
+          <FontAwesomeIcon icon={faSpinner} className="text-[#00BFFF] text-2xl animate-spin" />
         </div>
       </div>
     );
@@ -148,7 +148,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
       <div className="backdrop-blur-lg bg-white/10 rounded-2xl border border-white/20 p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <FontAwesomeIcon icon={faClock} className="text-[#1DB954] text-xl" />
+            <FontAwesomeIcon icon={faClock} className="text-[#00BFFF] text-xl" />
             <h3 className="text-xl font-bold text-white">Recently Played</h3>
           </div>
         </div>
@@ -167,7 +167,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
     <div className="backdrop-blur-lg bg-white/8 rounded-2xl border border-white/12 p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <FontAwesomeIcon icon={faClock} className="text-[#1DB954] text-xl" />
+          <FontAwesomeIcon icon={faClock} className="text-[#00BFFF] text-xl" />
           <h3 className="text-xl font-bold text-white">Recently Played</h3>
         </div>
         <div className="text-sm text-white/60">
@@ -177,19 +177,19 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
 
       {/* Desktop: Horizontal scroll timeline */}
       <div className="hidden sm:block">
-        <div className="relative">
+        <div className="flex items-center gap-2">
           <button
             aria-label="Scroll left"
             onClick={() => {
               const scroller = document.getElementById('recent-scroller');
               if (scroller) scroller.scrollBy({ left: -320, behavior: 'smooth' });
             }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-md"
+            className="flex-shrink-0 bg-black/40 hover:bg-black/60 text-white px-2 py-4 rounded-md transition-colors"
           >
             ‹
           </button>
 
-          <div id="recent-scroller" className="overflow-x-auto pb-4 scrollbar-hide" style={{ scrollBehavior: 'smooth' }}>
+          <div id="recent-scroller" className="flex-1 overflow-x-auto pb-4 scrollbar-hide" style={{ scrollBehavior: 'smooth' }}>
             <div className="flex space-x-4 min-w-max" onPointerDown={(e) => {
               const el = e.currentTarget.parentElement as HTMLElement | null;
               if (!el) return;
@@ -251,7 +251,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
                       {track?.artists}
                     </div>
                     <div className="flex items-center justify-between mt-2 text-xs">
-                      <span className="text-[#1DB954]">{track?.timeAgo}</span>
+                      <span className="text-[#00BFFF]">{track?.timeAgo}</span>
                     </div>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
               const scroller = document.getElementById('recent-scroller');
               if (scroller) scroller.scrollBy({ left: 320, behavior: 'smooth' });
             }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 text-white p-2 rounded-md"
+            className="flex-shrink-0 bg-black/40 hover:bg-black/60 text-white px-2 py-4 rounded-md transition-colors"
           >
             ›
           </button>
@@ -297,7 +297,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
                             aria-label={playingPreview && playingPreview.id === track.id ? `Pause preview for ${track.name}` : `Play preview for ${track.name}`}
                             className="absolute inset-0 bg-black/60 rounded-md flex items-center justify-center text-white"
                           >
-                            <FontAwesomeIcon icon={faPlayCircle} className={`text-lg ${playingPreview && playingPreview.id === track.id ? 'text-green-400' : 'text-white'}`} />
+                            <FontAwesomeIcon icon={faPlayCircle} className={`text-lg ${playingPreview && playingPreview.id === track.id ? 'text-[#00BFFF]' : 'text-white'}`} />
                           </button>
                         )}
                       </div>
@@ -318,7 +318,7 @@ const RecentlyPlayedTimeline: React.FC<RecentlyPlayedTimelineProps> = ({
             </div>
 
             <div className="flex-shrink-0 text-right">
-              <div className="text-[#1DB954] text-xs">{track?.timeAgo}</div>
+              <div className="text-[#00BFFF] text-xs">{track?.timeAgo}</div>
             </div>
           </div>
         ))}

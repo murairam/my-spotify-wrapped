@@ -126,9 +126,9 @@ const handleRetry = () => {
 // Conditional rendering (only one set)
 if (status === 'loading' || appState === 'loading') {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#191414] via-[#1a1a1a] to-[#121212] flex items-center justify-center">
+    <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="text-center">
-        <FaSpinner className="text-[#1DB954] text-6xl mx-auto animate-spin mb-4" />
+        <FaSpinner className="text-[#00BFFF] text-6xl mx-auto animate-spin mb-4" style={{filter:'drop-shadow(0 0 12px rgba(0,191,255,0.6))'}} />
         <h2 className="text-2xl font-bold text-white mb-4">
           {authMethod === 'spotify' ? 'Connecting to Spotify...' : 'Loading Dashboard...'}
         </h2>
@@ -141,8 +141,8 @@ if (status === 'loading' || appState === 'loading') {
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className="w-3 h-3 bg-[#1DB954] rounded-full animate-bounce"
-              style={{ animationDelay: `${i * 0.2}s` }}
+              className="w-3 h-3 bg-[#00BFFF] rounded-full animate-bounce"
+              style={{ animationDelay: `${i * 0.2}s`, boxShadow: '0 0 8px rgba(0,191,255,0.5)' }}
             />
           ))}
         </div>
@@ -153,7 +153,7 @@ if (status === 'loading' || appState === 'loading') {
 
 if (error || appState === 'error') {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#191414] via-[#1a1a1a] to-[#121212] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="max-w-md mx-auto text-center">
         <div className="mb-8">
           <FaExclamationTriangle className="text-red-500 text-6xl mx-auto" />
@@ -163,7 +163,7 @@ if (error || appState === 'error') {
         <div className="space-y-4">
           <button
             onClick={handleRetry}
-            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#1DB954] hover:bg-green-600 text-white rounded-lg font-semibold transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#00BFFF] hover:bg-[#33ccff] text-black font-semibold rounded-lg transition-all shadow-glow hover:shadow-glow-lg"
           >
             <FaArrowRight />
             Try Again
@@ -171,14 +171,14 @@ if (error || appState === 'error') {
           {error?.type === 'auth_failed' || error?.type === 'insufficient_data' ? (
             <button
               onClick={handleMockData}
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-[#00BFFF]/10 hover:bg-[#00BFFF]/20 text-[#00BFFF] border border-[#00BFFF]/30 hover:border-[#00BFFF]/50 rounded-lg font-semibold transition-all"
             >
               <FaEye />
               Try Demo Instead
             </button>
           ) : null}
         </div>
-        <div className="mt-8 p-4 bg-gray-800/30 rounded-lg border border-gray-700">
+        <div className="mt-8 p-4 bg-[#080808] rounded-lg border border-[#00BFFF]/15">
           <p className="text-gray-400 text-sm">
             {error?.type === 'insufficient_data' && "💡 New Spotify accounts need at least 4 weeks of listening history."}
             {error?.type === 'rate_limit' && "💡 Rate limits reset every hour. Try again later."}
@@ -194,9 +194,9 @@ if (error || appState === 'error') {
 if (session) {
   if (!spotifyData && !error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#191414] via-[#1a1a1a] to-[#121212] flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <FaSpinner className="text-[#1DB954] text-6xl mx-auto animate-spin mb-4" />
+          <FaSpinner className="text-[#00BFFF] text-6xl mx-auto animate-spin mb-4" style={{filter:'drop-shadow(0 0 12px rgba(0,191,255,0.6))'}} />
           <h2 className="text-2xl font-bold text-white">Loading your Spotify data...</h2>
         </div>
       </div>
@@ -219,19 +219,19 @@ if (appState === 'dashboard') {
 
 // Default: Landing page UI with sign in and demo options
 return (
-  <div className="min-h-screen bg-gradient-to-br from-[#191414] via-[#1a1a1a] to-[#121212] flex items-center justify-center">
+  <div className="min-h-screen bg-black flex items-center justify-center">
     <div className="max-w-xl w-full mx-auto text-center p-8">
-      <h1 className="text-4xl font-bold text-white mb-6">Welcome to My Spotify Wrapped</h1>
+      <h1 className="text-4xl font-bold text-white mb-6 glow-text">Welcome to My Spotify Wrapped</h1>
       <p className="text-gray-400 mb-8">Sign in with Spotify to see your personalized music insights, or try the demo.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        <div className="bg-gradient-to-br from-green-600/20 to-green-900/20 p-8 rounded-xl border border-green-500/30 hover:border-green-500/50 transition-all cursor-pointer group"
+        <div className="bg-[#00BFFF]/8 p-8 rounded-xl border border-[#00BFFF]/25 hover:border-[#00BFFF]/55 hover:shadow-glow transition-all duration-300 cursor-pointer group"
              onClick={handleSpotifyLogin}>
-          <FaSpotify className="text-[#1DB954] text-4xl mx-auto mb-4 group-hover:scale-110 transition-transform" />
+          <FaSpotify className="text-[#00BFFF] text-4xl mx-auto mb-4 group-hover:scale-110 transition-transform" style={{filter:'drop-shadow(0 0 8px rgba(0,191,255,0.5))'}} />
           <h3 className="text-xl font-bold text-white mb-3">Sign in with Spotify</h3>
           <p className="text-gray-300 text-sm mb-6">
             Connect your Spotify account to unlock your real listening stats, top tracks, artists, genres, and more.
           </p>
-          <div className="flex items-center justify-center gap-2 text-[#1DB954] font-semibold">
+          <div className="flex items-center justify-center gap-2 text-[#00BFFF] font-semibold">
             <span>Connect Account</span>
             <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
           </div>
@@ -239,14 +239,14 @@ return (
             ✓ Real listening data ✓ Personalized insights ✓ Live updates
           </div>
         </div>
-        <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 p-8 rounded-xl border border-purple-500/30 hover:border-purple-500/50 transition-all cursor-pointer group"
+        <div className="bg-[#00BFFF]/8 p-8 rounded-xl border border-[#00BFFF]/25 hover:border-[#00BFFF]/55 hover:shadow-glow transition-all duration-300 cursor-pointer group"
              onClick={handleMockData}>
-          <FaEye className="text-purple-400 text-4xl mx-auto mb-4 group-hover:scale-110 transition-transform" />
+          <FaEye className="text-[#00BFFF] text-4xl mx-auto mb-4 group-hover:scale-110 transition-transform" style={{filter:'drop-shadow(0 0 8px rgba(0,191,255,0.5))'}} />
           <h3 className="text-xl font-bold text-white mb-3">Try Demo</h3>
           <p className="text-gray-300 text-sm mb-6">
             Explore the interface with sample data to see how the dashboard works before connecting your account.
           </p>
-          <div className="flex items-center justify-center gap-2 text-purple-400 font-semibold">
+          <div className="flex items-center justify-center gap-2 text-[#00BFFF] font-semibold">
             <span>View Demo</span>
             <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
           </div>
@@ -255,14 +255,14 @@ return (
           </div>
         </div>
       </div>
-      <div className="mt-12 p-4 bg-gray-800/30 rounded-lg border border-gray-700">
+      <div className="mt-12 p-4 bg-[#080808] rounded-lg border border-[#00BFFF]/15">
         <p className="text-gray-400 text-sm">
           <FaSpotify className="inline mr-2" />
           This app uses the Spotify Web API and requires Premium for full functionality.
           Your data is processed securely and never stored permanently.
         </p>
       </div>
-      <div className="mt-6 p-4 bg-gray-800/20 rounded-lg border border-gray-700 flex items-center gap-3 justify-center text-gray-300 text-sm">
+      <div className="mt-6 p-4 bg-[#080808] rounded-lg border border-[#00BFFF]/10 flex items-center gap-3 justify-center text-gray-300 text-sm">
   <Image src="/m-boxed-rainbow.png" alt="Mistral AI" width={24} height={24} className="w-6 h-6" unoptimized />
         <div>
           <div className="font-semibold text-white">AI Analysis powered by Mistral</div>

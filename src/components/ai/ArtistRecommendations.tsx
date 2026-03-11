@@ -205,18 +205,37 @@ export default function ArtistRecommendations({ recommendations, className = '' 
     processArtists();
   }, [recommendations]);
 
-  // Don't render if no recommendations
-  if (!recommendations || enrichedArtists.length === 0) {
-    return null;
+  // No recommendations prop at all — render nothing
+  if (!recommendations) return null;
+
+  // Enrichment pending (initial render or async Spotify calls in flight) — show skeleton
+  if (enrichedArtists.length === 0) {
+    return (
+      <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 p-6 ${className}`}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-[#00BFFF]/20 rounded-lg animate-pulse" />
+          <div className="h-4 w-40 bg-white/5 rounded animate-pulse" />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-white/[0.03] rounded-lg p-4 animate-pulse">
+              <div className="w-12 h-12 rounded-full bg-white/5 mb-3" />
+              <div className="h-3 bg-white/5 rounded mb-2 w-3/4" />
+              <div className="h-2 bg-white/5 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className={`bg-[#1a1a1a] rounded-xl border border-gray-800 overflow-hidden ${className}`}>
+    <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 overflow-hidden transition-all hover:border-[#00BFFF]/30 hover:shadow-glow-sm ${className}`}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-800">
+      <div className="p-6 border-b border-[#00BFFF]/10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg flex items-center justify-center">
-            <FaMusic className="text-white text-lg" />
+          <div className="w-10 h-10 bg-[#00BFFF] rounded-lg flex items-center justify-center shadow-glow-sm">
+            <FaMusic className="text-black text-lg" />
           </div>
           <div>
             <h3 className="text-2xl font-bold text-white">Artists You&apos;ll Love</h3>
@@ -233,12 +252,12 @@ export default function ArtistRecommendations({ recommendations, className = '' 
           {enrichedArtists.map((artist, index) => (
             <div
               key={index}
-              className="bg-black/20 hover:bg-black/40 rounded-lg p-4 transition-all group"
+              className="bg-white/[0.03] hover:bg-[#00BFFF]/5 border border-transparent hover:border-[#00BFFF]/15 rounded-lg p-4 transition-all group"
             >
               {/* Artist Header with Image */}
               <div className="flex items-center gap-3 mb-3">
                 {artist.artistImage ? (
-                  <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-[#00BFFF]/20">
                     <Image
                       src={artist.artistImage}
                       alt={artist.name}
@@ -249,16 +268,16 @@ export default function ArtistRecommendations({ recommendations, className = '' 
                     />
                   </div>
                 ) : (
-                  <div className="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-                    <FaMusic className="text-gray-400" />
+                  <div className="w-12 h-12 bg-[#00BFFF]/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <FaMusic className="text-[#00BFFF]" />
                   </div>
                 )}
 
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-white truncate group-hover:text-[#1DB954] transition-colors">
+                  <h4 className="font-semibold text-white truncate group-hover:text-[#00BFFF] transition-colors">
                     {artist.name}
                   </h4>
-                  <span className="text-xs px-2 py-1 bg-green-600/20 text-green-400 rounded-full">
+                  <span className="text-xs px-2 py-1 bg-[#00BFFF]/10 text-[#00BFFF] rounded-full">
                     {artist.genre}
                   </span>
                 </div>
@@ -272,19 +291,19 @@ export default function ArtistRecommendations({ recommendations, className = '' 
               {/* Recommended Song */}
               <div className="mb-4">
                 <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
-                  <FaPlay className="text-[#1DB954]" />
+                  <FaPlay className="text-[#00BFFF]" />
                   <span>Start with:</span>
                 </div>
                 <button
                   onClick={() => artist.songUrl && window.open(artist.songUrl, '_blank')}
-                  className="w-full text-left p-3 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg transition-all group/song"
+                  className="w-full text-left p-3 bg-white/[0.03] hover:bg-[#00BFFF]/8 border border-transparent hover:border-[#00BFFF]/20 rounded-lg transition-all group/song"
                   disabled={artist.isLoading}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-white font-medium group-hover/song:text-[#1DB954] transition-colors">
+                    <span className="text-white font-medium group-hover/song:text-[#00BFFF] transition-colors">
                       &quot;{artist.recommendedSong}&quot;
                     </span>
-                    <FaExternalLinkAlt className="text-gray-500 group-hover/song:text-[#1DB954] transition-colors text-xs" />
+                    <FaExternalLinkAlt className="text-gray-500 group-hover/song:text-[#00BFFF] transition-colors text-xs" />
                   </div>
                 </button>
               </div>
@@ -293,12 +312,12 @@ export default function ArtistRecommendations({ recommendations, className = '' 
               <div className="flex gap-2">
                 <button
                   onClick={() => artist.artistUrl && window.open(artist.artistUrl, '_blank')}
-                  className="flex-1 bg-[#1DB954] hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#00BFFF] hover:bg-[#33ccff] text-black px-4 py-2 rounded-lg font-medium transition-all shadow-glow-sm hover:shadow-glow flex items-center justify-center gap-2"
                   disabled={artist.isLoading}
                 >
                   {artist.isLoading ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
                       <span>Loading...</span>
                     </>
                   ) : (

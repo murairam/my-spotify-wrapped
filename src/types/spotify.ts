@@ -95,6 +95,7 @@ export interface AIEnhancedInsights {
   // Playlist suggestions as an array of simple playlist descriptors
   playlists: Array<{ name: string; description?: string }>;
   funFacts: string[];
+  musicSpiritAnimal?: string;
 }
 
 export interface AIAnalysisResponse {
