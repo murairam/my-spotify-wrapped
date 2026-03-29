@@ -29,7 +29,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/spotify-web-api-node": "^5.0.11",
-    "eslint": "^8",
+    "eslint": "^10.1.0",
     "eslint-config-next": "^16.2.1",
     "knip": "^5.86.0",
     "postcss": "^8",
