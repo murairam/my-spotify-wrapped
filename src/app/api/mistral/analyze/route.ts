@@ -170,6 +170,9 @@ RESPONSE REQUIREMENTS:
 RESPONSE_SCHEMA:
 {
   "summary": "A fun, engaging 2-3 sentence summary with **bold highlights** and emojis that captures the user's musical essence and shows off AI personality",
+  "musicSpiritAnimal": "An emoji followed by a 2-word animal name that matches this user's listening soul, e.g. '🦅 Night Hawk' or '🐺 Lone Wolf' or '🦋 Dream Chaser'. Be creative and base it on their actual genres and artists.",
+  "spiritAnimalDescription": "One sharp, witty sentence (max 15 words) describing what this spirit animal says about their music taste. E.g. 'Hunts for rare sounds at 2am. Rarely follows the flock.'",
+  "threeWordTagline": ["Adjective1", "Adjective2", "Adjective3"],
   "newArtists": [{ "artist": "", "genre": "", "song": "", "reason": "" }],
   "playlists": [{ "name": "", "description": "", "occasion": "", "songs": ["Song - Artist"], "seedArtists": ["Artist Name"] }],
   "moodAnalysis": {
@@ -179,6 +182,8 @@ RESPONSE_SCHEMA:
     "seasonalTrend": "Their music evolution patterns"
   },
   "musicPersonality": "A witty, insightful analysis of their musical character with **bold highlights** and emojis (2-3 sentences)",
+  "discoveryStyle": "A 2-3 sentence AI analysis of HOW this specific user discovers music, based on their actual data. Reference their artists or genres.",
+  "socialProfile": "A 2-3 sentence AI analysis of their social listening personality — are they a taste-maker, a solo curator, a trendsetter? Ground it in their data.",
   "funFacts": [
     "🤖 **AI Insight**: A clever observation about their music taste",
     "🎵 **Fun Fact**: A entertaining discovery about their listening habits",
@@ -197,10 +202,8 @@ RESPONSE_SCHEMA:
           { role: 'system', content: 'You are an expert music analyst and curator.' },
           { role: 'user', content: structuredPrompt },
         ],
-        // Slightly warmer to encourage richer prose for the longer paragraph
         temperature: 0.7,
-        // Increase tokens to allow a longer analysis paragraph without truncation
-        maxTokens: 3000,
+        maxTokens: 4500,
       });
 
       const content = chatResponse.choices?.[0]?.message?.content;
@@ -325,6 +328,36 @@ RESPONSE_SCHEMA:
         } catch {
           // ignore
         }
+      }
+
+      // Extract AI-generated personality fields (previously dropped — now forwarded)
+      if (obj.musicPersonality && typeof obj.musicPersonality === 'string') {
+        enhancedObj.musicPersonality = obj.musicPersonality.trim();
+      }
+      if (obj.discoveryStyle && typeof obj.discoveryStyle === 'string') {
+        enhancedObj.discoveryStyle = obj.discoveryStyle.trim();
+      }
+      if (obj.socialProfile && typeof obj.socialProfile === 'string') {
+        enhancedObj.socialProfile = obj.socialProfile.trim();
+      }
+      if (Array.isArray(obj.funFacts) && obj.funFacts.length > 0) {
+        enhancedObj.funFacts = obj.funFacts;
+      }
+      if (obj.summary && typeof obj.summary === 'string') {
+        enhancedObj.summary = obj.summary.trim();
+      }
+
+      // Extract new spirit animal + tagline fields
+      if (obj.musicSpiritAnimal && typeof obj.musicSpiritAnimal === 'string') {
+        enhancedObj.musicSpiritAnimal = obj.musicSpiritAnimal.trim();
+      }
+      if (obj.spiritAnimalDescription && typeof obj.spiritAnimalDescription === 'string') {
+        enhancedObj.spiritAnimalDescription = obj.spiritAnimalDescription.trim();
+      }
+      if (Array.isArray(obj.threeWordTagline) && obj.threeWordTagline.length > 0) {
+        enhancedObj.threeWordTagline = (obj.threeWordTagline as unknown[])
+          .filter((w): w is string => typeof w === 'string')
+          .slice(0, 3);
       }
     }
 
