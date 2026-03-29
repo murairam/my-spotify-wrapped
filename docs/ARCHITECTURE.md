@@ -25,14 +25,14 @@ The application is a **Next.js monolith** using the App Router. The React fronte
 ```mermaid
 flowchart TD
     subgraph Browser["Client — Browser"]
-        UI["React UI\n─────────────────\nLandingPage\nDashboard\nAI Components"]
-        Hooks["Data Layer\n─────────────────\nuseSpotifyData\nuseAIAnalysis\nTanStack Query"]
+        UI["React UI\nLandingPage · Dashboard · AI Components"]
+        Hooks["TanStack Query\nuseSpotifyData · useAIAnalysis"]
     end
 
-    subgraph Vercel["Server — Next.js on Vercel  ← all live traffic"]
-        Auth["/api/auth/[...nextauth]\n─────────────────\nnext-auth · JWT · Cookies"]
-        SpotifyRoutes["/api/spotify/*\n─────────────────\ntop-items · search\nsearch-playlists · search-track"]
-        MistralRoutes["/api/mistral/*\n─────────────────\nanalyze · playlists"]
+    subgraph Vercel["Next.js on Vercel — all live traffic"]
+        Auth["/api/auth/[...nextauth]\nnext-auth · JWT · Cookies"]
+        SpotifyRoutes["/api/spotify/*\ntop-items · search · search-playlists"]
+        MistralRoutes["/api/mistral/*\nanalyze · playlists"]
     end
 
     subgraph External["External Services"]
@@ -40,8 +40,8 @@ flowchart TD
         MistralAPI["Mistral AI\nmistral-small-latest"]
     end
 
-    subgraph CloudRun["Google Cloud Run  ← deployed, receives no frontend traffic yet"]
-        NestJS["NestJS Microservice\n─────────────────\nGET /spotify/top-items\n\nPlanned: route frontend\ndata calls here"]
+    subgraph CloudRun["Google Cloud Run — deployed, not yet receiving frontend traffic"]
+        NestJS["NestJS Microservice\nGET /spotify/top-items"]
     end
 
     UI <--> Hooks
