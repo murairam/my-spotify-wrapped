@@ -1,6 +1,6 @@
 export declare class SpotifyService {
     getTopItems(accessToken: string, timeRange?: string, limit?: number): Promise<{
-        userProfile: SpotifyApi.CurrentUsersProfileResponse;
+        userProfile: any;
         topTracks: {
             id: any;
             name: any;
@@ -43,9 +43,6 @@ export declare class SpotifyService {
             oldestTrackYear: number | undefined;
             newestTrackYear: number | undefined;
         };
-        recentTracks: {
-            track: any;
-            played_at: any;
-        }[];
+        recentTracks: any;
     }>;
 }

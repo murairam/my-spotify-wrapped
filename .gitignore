@@ -35,4 +35,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# backend env
+/backend/.env
+
 dev.log
+
+# deployment secrets
+cloudrun-env.yaml

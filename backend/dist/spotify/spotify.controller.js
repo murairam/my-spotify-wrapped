@@ -19,19 +19,20 @@ let SpotifyController = class SpotifyController {
     constructor(spotifyService) {
         this.spotifyService = spotifyService;
     }
-    async getTopItems(timeRange = 'short_term', limit = '50', req, res) {
+    async getTopItems(timeRange, limit, req) {
         const authHeader = req.headers['authorization'];
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(common_1.HttpStatus.UNAUTHORIZED).json({ error: 'Not authenticated' });
+            throw new common_1.UnauthorizedException('Not authenticated');
         }
         const accessToken = authHeader.replace('Bearer ', '');
+        const safeTimeRange = timeRange || 'short_term';
+        const safeLimit = limit ? parseInt(limit) : 50;
         try {
-            const data = await this.spotifyService.getTopItems(accessToken, timeRange, parseInt(limit));
-            return res.status(common_1.HttpStatus.OK).json(data);
+            return await this.spotifyService.getTopItems(accessToken, safeTimeRange, safeLimit);
         }
         catch (error) {
             const message = (error && typeof error === 'object' && 'message' in error) ? error.message : 'Failed to fetch Spotify data';
-            return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({ error: message });
+            throw new common_1.InternalServerErrorException(message);
         }
     }
 };
@@ -41,9 +42,8 @@ __decorate([
     __param(0, (0, common_1.Query)('time_range')),
     __param(1, (0, common_1.Query)('limit')),
     __param(2, (0, common_1.Req)()),
-    __param(3, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object, Object]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], SpotifyController.prototype, "getTopItems", null);
 exports.SpotifyController = SpotifyController = __decorate([

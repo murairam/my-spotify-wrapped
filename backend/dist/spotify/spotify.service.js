@@ -8,11 +8,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SpotifyService = void 0;
 const common_1 = require("@nestjs/common");
-const spotify_web_api_node_1 = require("spotify-web-api-node");
+const SpotifyWebApi = require('spotify-web-api-node');
 let SpotifyService = class SpotifyService {
     async getTopItems(accessToken, timeRange = 'short_term', limit = 50) {
         var _a;
-        const spotifyApi = new spotify_web_api_node_1.default();
+        const spotifyApi = new SpotifyWebApi();
         spotifyApi.setAccessToken(accessToken);
         try {
             const [userProfile, topTracks, topArtists, recentlyPlayed] = await Promise.all([
