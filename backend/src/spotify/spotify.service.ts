@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-const SpotifyWebApi = require('spotify-web-api-node');
+import SpotifyWebApi from 'spotify-web-api-node';
 
 @Injectable()
 export class SpotifyService {
@@ -14,8 +14,8 @@ export class SpotifyService {
         spotifyApi.getMyRecentlyPlayedTracks({ limit: 20 })
       ]);
 
-      const formatTrackData = (tracks: { body: { items: any[] } }, timeRange: string) =>
-        tracks.body.items.slice(0, limit).map((track: any, index: number) => ({
+      const formatTrackData = (tracks: { body: { items: SpotifyApi.TrackObjectFull[] } }, timeRange: string) =>
+        tracks.body.items.slice(0, limit).map((track: SpotifyApi.TrackObjectFull, index: number) => ({
           id: track.id,
           name: track.name,
           artist: track.artists[0].name,
@@ -31,8 +31,8 @@ export class SpotifyService {
           rank: index + 1,
           timeRange
         }));
-      const formatArtistData = (artists: { body: { items: any[] } }, timeRange: string) =>
-        artists.body.items.slice(0, limit).map((artist: any, index: number) => ({
+      const formatArtistData = (artists: { body: { items: SpotifyApi.ArtistObjectFull[] } }, timeRange: string) =>
+        artists.body.items.slice(0, limit).map((artist: SpotifyApi.ArtistObjectFull, index: number) => ({
           id: artist.id,
           name: artist.name,
           genres: artist.genres,
@@ -69,7 +69,7 @@ export class SpotifyService {
         oldestTrackYear,
         newestTrackYear
       };
-      const recentTracks = (recentlyPlayed?.body?.items || []).slice(0, 20).map((item: any) => {
+      const recentTracks = (recentlyPlayed?.body?.items || []).slice(0, 20).map((item: SpotifyApi.PlayHistoryObject) => {
         const t = item.track;
         return {
           track: {
@@ -88,8 +88,11 @@ export class SpotifyService {
         discoveryMetrics,
         recentTracks
       };
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to fetch Spotify data');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('Failed to fetch Spotify data');
     }
   }
 }

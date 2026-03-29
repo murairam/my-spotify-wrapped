@@ -1,0 +1,234 @@
+# Interview Preparation Guide
+
+**Purpose**: This document is a preparation guide for the technical interview. The interviewers have asked to "walk us through the functionality, and discuss your technical choices and challenges." It contains a scripted demo walkthrough, pre-prepared defences for every technology decision, and deep-dive explanations for the two hardest engineering challenges.
+
+---
+
+## Table of Contents
+
+1. [Demo Walkthrough (Screen Share)](#1-demo-walkthrough-screen-share)
+2. [Technical Choice Defences](#2-technical-choice-defences)
+3. [Hardest Technical Challenges](#3-hardest-technical-challenges)
+4. [Quick-Reference Q&A](#4-quick-reference-qa)
+
+---
+
+## 1. Demo Walkthrough (Screen Share)
+
+**Target duration**: 8–10 minutes. Move with purpose — the goal is to demonstrate engineering depth, not to narrate the UI feature by feature.
+
+---
+
+### Opening Statement (30 seconds)
+
+> "My Spotify Wrapped is a full-stack web application — a richer, always-available alternative to Spotify's annual Wrapped. It connects to your real Spotify account via OAuth, computes music intelligence metrics on the server, and sends that data to Mistral AI to generate a personalised personality analysis, artist recommendations, and curated playlists. Let me walk you through the full user journey."
+
+---
+
+### Stop 1 — Landing Page
+
+> "This is the entry point. Users have two options: authenticate with Spotify to use their real listening data, or enter Demo Mode — which loads the full UI with realistic mock data."
+
+**Points to emphasise**:
+- The "Connect with Spotify" button initiates a full OAuth 2.0 authorisation code flow.
+- Demo Mode was a deliberate design decision. It keeps the application fully demonstrable without requiring users to hand over account access, which lowers the barrier to evaluation significantly.
+
+---
+
+### Stop 2 — Spotify OAuth Flow
+
+> "When a user authenticates, Spotify redirects to my `/api/auth/callback/spotify` endpoint. NextAuth handles the authorisation code exchange, stores the access token and refresh token encrypted inside an httpOnly JWT cookie, and from that point on, every API call my server makes on the user's behalf uses that token. The token never touches the browser after the initial redirect — it lives entirely server-side."
+
+**If asked to go deeper on tokens**:
+
+> "Spotify access tokens expire after one hour. I handle this transparently in the NextAuth `jwt` callback, which runs on every session read. It compares `Date.now()` against a stored `expiresAt` timestamp. If the token has expired, it calls Spotify's token refresh endpoint, updates the JWT, and returns a fresh session — all before the user's request reaches the API route. The user never sees an error or a re-login prompt.
+
+> The harder case is when the refresh itself fails — for example, if the user revoked the application's access. In that case, I set an error flag on the session object: `error: 'RefreshAccessTokenError'`. On the client, a custom hook called `useSpotifySessionGuard()` watches for that field and calls `signOut()` if it finds it, routing the user cleanly back to the landing page instead of leaving them in a broken state."
+
+---
+
+### Stop 3 — Dashboard: Statistics
+
+> "The main dashboard fetches the user's data via a custom hook, `useSpotifyData`, which wraps TanStack Query. I can display stats across three time ranges — the last four weeks, six months, and all time — because those map directly to the `time_range` parameter Spotify's API exposes."
+
+**Points to emphasise**:
+- Switching the time range fires a new request or hits the cache (5-minute stale window).
+- The Music Intelligence metrics — mainstream score, artist diversity, underground percentage, vintage collector percentage — are not fields from Spotify. They are computed on the server from the raw track and artist data.
+
+> "For example, the mainstream score is a weighted average of the `popularity` field Spotify assigns to each track — a 0–100 value they derive from stream counts and recency. I normalise that across the user's top 50 tracks to produce a single meaningful number."
+
+---
+
+### Stop 4 — AI Intelligence Suite
+
+> "This is the core feature. When the user triggers an analysis, the frontend sends the full Spotify data payload — top artists, top tracks, genres, computed metrics — as a POST body to `/api/mistral/analyze`. That route builds a structured prompt, calls Mistral AI, parses the response, and returns a typed analysis object."
+
+**Walk through each section**:
+
+| Card | What to say |
+|---|---|
+| **Music DNA** | "Derived from the Spotify data — genre distribution, artist diversity score, discovery metrics." |
+| **Spirit Animal + Tagline** | "A fun feature, but the one that required the most prompt engineering. Getting the model to reliably return a specific format — an emoji followed by exactly two words — took several iterations of constraint tuning in the prompt schema." |
+| **Personality Card** | "Three dimensions generated by the model: music personality, discovery style, and social profile." |
+| **Mood Analysis** | "The model infers a primary mood and emotional description from the genre and listening pattern data." |
+| **Artist Recommendations** | "Five new artists the model recommends based on the user's listening history, with a specific per-artist reason grounded in the data — not generic suggestions." |
+| **AI Playlists** | "Here is something I think is well-engineered: the model generates playlist *concepts* — a name, a mood, an occasion. Then my API makes a live call to Spotify's search endpoint to find a real, listenable playlist matching each concept. Every recommendation links directly to something the user can open." |
+| **The Story** | "A two-paragraph narrative written specifically about this user's listening habits. This is where the personalisation is most visible." |
+
+---
+
+### Stop 5 — Recently Played Timeline (brief)
+
+> "This timeline reads from Spotify's recently-played endpoint and adds temporal context to the analysis — you can see how recent listening activity connects to the longer-term patterns shown in the stats."
+
+---
+
+### Closing the Walkthrough
+
+> "Everything is deployed on Vercel — the Next.js frontend and all API routes build and deploy together as a single unit. There is also an optional NestJS microservice in the repository that mirrors the top-items data fetching logic and can run on Google Cloud Run for deployments that require that layer to be separated and scaled independently. The main application does not depend on it."
+
+---
+
+## 2. Technical Choice Defences
+
+---
+
+### Why Next.js?
+
+> "Next.js was the right choice for two specific reasons. First, the App Router gives me full-stack capability in a single deployable unit. My `/api/spotify/top-items` route runs on the server, reads the user's encrypted session, and calls Spotify with their bearer token — without that token ever reaching the browser. If I had built a pure React SPA with a separate Express backend, I would have needed to manage CORS, a separate deployment pipeline, and a secure token-forwarding mechanism between two services. Next.js eliminates all of that complexity.
+
+> Second, the file-based routing convention makes the architecture self-documenting. A new engineer can open the `app/` directory and immediately understand what routes exist, what runs on the server, and what renders in the browser — without reading any configuration files."
+
+---
+
+### Why Tailwind CSS?
+
+> "Tailwind keeps me inside the component file. When I am building a glassmorphism card with backdrop blur and a translucent border, I write `backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl` directly on the element and see the result immediately — without switching to a CSS file, inventing a class name, and mapping back.
+
+> In production, Tailwind purges every unused utility class, so the CSS bundle contains only what is actually referenced in the markup. For a project where the design was evolving rapidly — adjusting spacing, iterating on breakpoints, experimenting with effects — the tight feedback loop and zero-configuration approach made it significantly more productive than the alternatives. I have also used styled-components and CSS modules; Tailwind is the right choice when you own the design from scratch and value iteration speed."
+
+---
+
+### Why REST over GraphQL?
+
+> "GraphQL solves a specific problem: enabling clients to request exactly the shape of data they need when you have a complex, relational graph with multiple consumer types. This application does not have that problem. The data flow is entirely linear — one client making predictable requests for a fixed shape of data. The Spotify response structure is the same every time. There is no under-fetching or over-fetching issue to solve.
+
+> REST also maps naturally onto Spotify's own API, which made the integration straightforward. Caching semantics are standard HTTP `Cache-Control` headers — no additional infrastructure required.
+
+> That said, I would reach for GraphQL if I added social features: comparing listening histories across users, querying mutual top artists, building a friend activity feed. That is a genuinely relational data graph with variable client query needs, and GraphQL would earn its added complexity there."
+
+---
+
+### Why Mistral AI over OpenAI?
+
+> "Two reasons — one contextual and one technical. Contextually, this project originated as part of a Mistral AI internship application, so using their model was the right call.
+
+> Technically, `mistral-small-latest` is the appropriate model for this task. Generating structured personality insights from a medium-sized JSON payload does not require frontier-model reasoning. The tasks are well-defined: classify a music profile into personality dimensions, format five artist recommendations with per-artist reasoning, write two paragraphs of narrative. A fast, cost-efficient model handles all of this well — and response latency matters meaningfully for a feature that runs on direct user interaction.
+
+> If the application required multi-step tool use — looking up live concert dates, cross-referencing with user location, reasoning over scheduling constraints — I would re-evaluate. But for what this feature actually does, `mistral-small-latest` is the correct level of capability."
+
+---
+
+## 3. Hardest Technical Challenges
+
+---
+
+### Challenge 1: Spotify OAuth Token Lifecycle and Secure Session Management
+
+#### The Problem
+
+Spotify access tokens expire after 60 minutes. The application must refresh them transparently — the user should never encounter an authentication error mid-session. At the same time, tokens must never be exposed to the client. There is also a failure mode most OAuth tutorials omit: the refresh token itself can become invalid if the user revokes access, and that scenario must be handled explicitly rather than silently degrading.
+
+#### The Solution
+
+Next-auth's `jwt` callback runs on every session read, making it the correct interception point for token lifecycle management. I store three fields in the JWT: `accessToken`, `refreshToken`, and `expiresAt` (a Unix timestamp in milliseconds). The callback compares `Date.now()` against `expiresAt`. If the token is still valid, it returns immediately with no external calls. If it has expired, it calls Spotify's `/api/token` endpoint with the `refresh_token` grant, updates both token fields, and returns the refreshed JWT — all before the user's request reaches the API route handler.
+
+```
+Incoming request requiring session
+  → next-auth jwt() callback fires
+  → Date.now() < token.expiresAt?  →  return token unchanged
+  → else  →  POST /api/token { grant_type: "refresh_token" }
+              on success: return { ...token, accessToken, expiresAt }
+              on failure: return { ...token, error: "RefreshAccessTokenError" }
+```
+
+The failure path required separate, deliberate handling. If Spotify rejects the refresh because the user revoked access or the refresh token expired due to inactivity, the callback sets `token.error = "RefreshAccessTokenError"` and returns. This error field propagates to the client-side session object. A custom hook — `useSpotifySessionGuard()` — watches for that field and calls `signOut()` when it appears, routing the user cleanly back to the landing page rather than leaving them in a loop of silent failures.
+
+#### What This Demonstrated
+
+Error propagation in authentication layers must be deliberate and typed. Silent failures — where a token is invalid but the system continues attempting calls — produce confusing, hard-to-reproduce bugs. Encoding the error state as a first-class field in the session object, and reacting to it explicitly in the UI, was the right design. It also reinforced that authentication is not just a login problem but a continuous state management problem.
+
+---
+
+### Challenge 2: Prompt Engineering — Reliable Structured JSON Output from an LLM
+
+#### The Problem
+
+The AI analysis endpoint returns a complex nested object — personality dimensions, an array of five artist recommendations, a mood analysis sub-object, playlist suggestions, and fun facts — which is mapped directly onto typed React component props. If the model returns malformed JSON, adds a prose preamble, wraps output in markdown code fences, or omits a required field, the frontend fails to render.
+
+Language models are not deterministic. Even with strict instructions, the model occasionally formats its response differently — particularly when the input data has unusual characteristics, or at the boundaries of the token budget. This cannot be tested away. It must be defended against at runtime.
+
+#### The Solution
+
+A three-layer defensive system, where each layer is a fallback if the previous one fails.
+
+**Layer 1 — Prompt-level output contract**
+
+The system prompt establishes strict constraints on response format and schema:
+
+```
+You are a music personality analyst.
+You MUST respond with ONLY valid JSON.
+No prose, no markdown fences, no explanation outside the JSON object.
+DATA_JSON is the authoritative source. Do not invent data not present in it.
+```
+
+The user message includes the complete expected schema with per-field constraints: `"exactly 5 items"`, `"emoji + 2-word animal (max 3 words)"`, `"array of exactly 3 adjectives"`. Explicit constraints make schema violations less likely by making the expected structure unambiguous to the model.
+
+`temperature: 0.7` is the deliberate calibration point — stable enough that the JSON structure is consistent across calls, varied enough that personality outputs feel specific to the individual rather than generic.
+
+**Layer 2 — Multi-fallback JSON parser**
+
+```typescript
+function parseModelResponse(raw: string): AIAnalysisResponse {
+  // Attempt 1: Model returned clean JSON (expected happy path)
+  try { return JSON.parse(raw); } catch {}
+
+  // Attempt 2: Model wrapped response in a ```json ... ``` code block
+  const fence = raw.match(/```json\n?([\s\S]*?)\n?```/);
+  if (fence) { try { return JSON.parse(fence[1]); } catch {} }
+
+  // Attempt 3: Extract the outermost { ... } from any surrounding prose
+  const obj = raw.match(/\{[\s\S]*\}/);
+  if (obj) { try { return JSON.parse(obj[0]); } catch {} }
+
+  throw new Error("PARSE_FAILED");
+}
+```
+
+**Layer 3 — Deterministic fallback generation**
+
+If all three parsing attempts fail, the handler does not return an error to the client. It constructs a minimal but complete `AIAnalysisResponse` from the raw `SpotifyData` using deterministic logic — the top artist seeds the summary, the most frequent genre seeds the tagline, and remaining required fields are populated with well-formed defaults. The frontend always receives a renderable object.
+
+#### What This Demonstrated
+
+LLM output must be treated with the same defensive posture as any other external API: untrusted, potentially malformed, and requiring explicit validation and fallback handling. The prompt is a strong suggestion, not a contract. The contract is enforced by the parsing and normalisation layer in the route handler. This separation — model as creative data source, API route as reliability layer — is the pattern I would apply to any production LLM integration.
+
+---
+
+## 4. Quick-Reference Q&A
+
+| Question | Answer |
+|---|---|
+| How does authentication work? | Spotify OAuth 2.0 → next-auth callback → `accessToken` + `refreshToken` encrypted in httpOnly JWT cookie |
+| How are tokens refreshed? | `jwt` callback checks `expiresAt` on every session read; calls Spotify's refresh endpoint automatically if expired |
+| What happens if the refresh fails? | `error: "RefreshAccessTokenError"` is set on the session; `useSpotifySessionGuard()` calls `signOut()` |
+| What Spotify scopes are requested? | `user-read-private`, `user-read-email`, `user-top-read`, `user-read-recently-played`, `user-follow-read`, `playlist-read-private`, `playlist-read-collaborative`, `user-library-read` |
+| What does TanStack Query handle? | Caching (5 min stale, 30 min gc), request deduplication, exponential backoff retry (no retry on 4xx) |
+| Why not call Spotify or Mistral from the browser? | API keys and session tokens would be exposed. All credentialed calls are made server-side in API routes. |
+| How does the AI call work? | `POST /api/mistral/analyze` → structured prompt → Mistral API → three-layer JSON parse → typed response |
+| What model and parameters? | `mistral-small-latest`, `temperature: 0.7`, `maxTokens: 4500` |
+| What if Mistral returns malformed JSON? | Three-layer parse fallback (direct parse → code block extraction → regex); deterministic generation if all fail |
+| How is CORS handled? | No CORS configuration needed — all API calls are same-origin (client to Next.js routes on the same domain) |
+| What is the NestJS backend for? | An optional microservice for Cloud Run deployments; the main application does not depend on it |
+| What would you build next? | Social listening comparison (a genuine use case for GraphQL), concert recommendations with live ticketing data, shareable PDF or image export |
