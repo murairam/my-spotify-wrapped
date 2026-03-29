@@ -200,8 +200,8 @@ This section is an honest engineering retrospective — the changes I would make
 ### 1. Wire up the NestJS backend and eliminate the Next.js API routes
 The NestJS service is deployed to Google Cloud Run but the frontend still calls Next.js API routes directly. The intended architecture is for the frontend to talk exclusively to NestJS. Moving all data-fetching logic there would properly separate concerns, make the backend independently testable, and let the two services scale and deploy independently.
 
-### 2. Replace REST with GraphQL
-The Spotify data model is relational — tracks have artists, artists have genres, playlists have tracks. REST forces the frontend to over-fetch or under-fetch and requires multiple round-trips for composite views. GraphQL would let any component request exactly the fields it needs in a single query, and the strongly-typed schema would serve as a living contract between frontend and backend.
+### 2. Stream the AI analysis with Server-Sent Events
+The AI analysis is a single blocking POST that can take 5–10 seconds. The user stares at a spinner. With SSE (or WebSockets), the server could stream each section of the analysis (mood card, spirit animal, recommendations) as Mistral returns it — sections would pop in progressively, which is both faster-feeling and a better UX. This is the most impactful single improvement for a real user.
 
 ### 3. Add a database layer (PostgreSQL + Redis)
 Currently there is no persistence — every page load re-fetches from Spotify. A PostgreSQL database would let me store user profiles and historical snapshots (so users could compare their stats month over month). Redis would serve as a shared cache layer so the Spotify API is not hammered on every request — and so cached data survives server restarts.
