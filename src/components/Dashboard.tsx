@@ -292,33 +292,72 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
           {/* Right Column - Secondary Analytics */}
           <div className="space-y-8">
 
-            {/* Music Intelligence */}
+            {/* Taste Profile Radar */}
             <div className="bg-[#080808] rounded-xl border border-[#00BFFF]/15 p-6 transition-all hover:border-[#00BFFF]/30 hover:shadow-glow-sm">
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-4">
                 <FaBrain className="text-[#00BFFF] text-2xl" />
-                <h2 className="text-xl font-bold text-white">Music Intelligence</h2>
+                <h2 className="text-xl font-bold text-white">Taste Profile</h2>
               </div>
               {currentData.musicIntelligence ? (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-white/[0.03] border border-[#00BFFF]/8">
-                    <span className="text-gray-300 text-sm">Mainstream Taste</span>
-                    <span className="text-[#00BFFF] font-bold">{currentData.musicIntelligence.mainstreamTaste}%</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-white/[0.03] border border-[#00BFFF]/8">
-                    <span className="text-gray-300 text-sm">Artist Diversity</span>
-                    <span className="text-[#00BFFF] font-bold">{currentData.musicIntelligence.artistDiversity}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-white/[0.03] border border-[#00BFFF]/8">
-                    <span className="text-gray-300 text-sm">Vintage Collector</span>
-                    <span className="text-[#00BFFF] font-bold">{currentData.musicIntelligence.vintageCollector}%</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 rounded-lg bg-white/[0.03] border border-[#00BFFF]/8">
-                    <span className="text-gray-300 text-sm">Underground Taste</span>
-                    <span className="text-[#00BFFF] font-bold">{currentData.musicIntelligence.undergroundTaste}%</span>
-                  </div>
-                </div>
+                (() => {
+                  const mi = currentData.musicIntelligence!;
+                  const cx = 100, cy = 100, maxR = 62;
+                  const axes = [
+                    { label: 'Mainstream', value: mi.mainstreamTaste ?? 0, angle: -Math.PI / 2 },
+                    { label: 'Underground', value: mi.undergroundTaste ?? 0, angle: 0 },
+                    { label: 'Vintage', value: mi.vintageCollector ?? 0, angle: Math.PI / 2 },
+                    { label: 'Diversity', value: Math.min(mi.artistDiversity ?? 0, 100), angle: Math.PI },
+                  ];
+                  const pt = (angle: number, val: number) => ({
+                    x: cx + (val / 100) * maxR * Math.cos(angle),
+                    y: cy + (val / 100) * maxR * Math.sin(angle),
+                  });
+                  const ringPts = (pct: number) =>
+                    axes.map(a => { const p = pt(a.angle, pct); return `${p.x},${p.y}`; }).join(' ');
+                  const dataPts = axes.map(a => { const p = pt(a.angle, a.value); return `${p.x},${p.y}`; }).join(' ');
+                  return (
+                    <div className="flex flex-col items-center">
+                      <svg width="100%" viewBox="0 0 200 200" className="max-w-[190px]">
+                        {[25, 50, 75, 100].map(pct => (
+                          <polygon key={pct} points={ringPts(pct)} fill="none" stroke="rgba(0,191,255,0.1)" strokeWidth="0.8" />
+                        ))}
+                        {axes.map((a, i) => {
+                          const end = pt(a.angle, 100);
+                          return <line key={i} x1={cx} y1={cy} x2={end.x} y2={end.y} stroke="rgba(0,191,255,0.15)" strokeWidth="0.8" />;
+                        })}
+                        <polygon points={dataPts} fill="rgba(0,191,255,0.13)" stroke="#00BFFF" strokeWidth="1.5" strokeLinejoin="round" />
+                        {axes.map((a, i) => {
+                          const p = pt(a.angle, a.value);
+                          return <circle key={i} cx={p.x} cy={p.y} r="3" fill="#00BFFF" />;
+                        })}
+                        <text x={cx} y={cy - maxR - 10} textAnchor="middle" fill="#9ca3af" fontSize="9.5">Mainstream</text>
+                        <text x={cx + maxR + 8} y={cy} textAnchor="start" dominantBaseline="middle" fill="#9ca3af" fontSize="9.5">Underground</text>
+                        <text x={cx} y={cy + maxR + 14} textAnchor="middle" fill="#9ca3af" fontSize="9.5">Vintage</text>
+                        <text x={cx - maxR - 8} y={cy} textAnchor="end" dominantBaseline="middle" fill="#9ca3af" fontSize="9.5">Diversity</text>
+                      </svg>
+                      <div className="grid grid-cols-2 gap-1.5 w-full mt-1 text-xs">
+                        <div className="flex justify-between px-2 py-1 rounded bg-white/[0.03]">
+                          <span className="text-gray-400">Mainstream</span>
+                          <span className="text-[#00BFFF] font-bold">{mi.mainstreamTaste}%</span>
+                        </div>
+                        <div className="flex justify-between px-2 py-1 rounded bg-white/[0.03]">
+                          <span className="text-gray-400">Underground</span>
+                          <span className="text-[#00BFFF] font-bold">{mi.undergroundTaste}%</span>
+                        </div>
+                        <div className="flex justify-between px-2 py-1 rounded bg-white/[0.03]">
+                          <span className="text-gray-400">Vintage</span>
+                          <span className="text-[#00BFFF] font-bold">{mi.vintageCollector}%</span>
+                        </div>
+                        <div className="flex justify-between px-2 py-1 rounded bg-white/[0.03]">
+                          <span className="text-gray-400">Diversity</span>
+                          <span className="text-[#00BFFF] font-bold">{mi.artistDiversity} artists</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()
               ) : (
-                <div className="text-gray-400">Music intelligence data not available.</div>
+                <div className="text-gray-400 text-sm">Taste profile data not available.</div>
               )}
             </div>
 
@@ -353,36 +392,28 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
               </div>
             </div>
 
-            {/* Quick Stats */}
+            {/* Track Popularity */}
             <div className="bg-[#080808] rounded-xl border border-[#00BFFF]/15 p-6 transition-all hover:border-[#00BFFF]/30 hover:shadow-glow-sm">
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-5">
                 <FaChartLine className="text-[#00BFFF] text-2xl" />
-                <h2 className="text-xl font-bold text-white">Quick Stats</h2>
+                <h2 className="text-xl font-bold text-white">Track Popularity</h2>
               </div>
-
-              <div className="space-y-4">
-                {currentData.musicIntelligence ? (
-                  <>
-                    <div className="flex items-center gap-3">
-                      <FaHeart className="text-[#00BFFF]" />
-                      <span className="text-gray-300">Unique Albums</span>
-                      <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.uniqueAlbumsCount}</span>
+              <div className="space-y-2.5">
+                {currentData.topTracks.slice(0, 6).map((track, i) => (
+                  <div key={track.id} className="flex items-center gap-2.5">
+                    <span className="text-gray-600 text-xs w-3 shrink-0 text-right">{i + 1}</span>
+                    <span className="text-gray-300 text-xs w-[88px] truncate shrink-0">{track.name}</span>
+                    <div className="flex-1 bg-white/5 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#005f80] to-[#00BFFF]"
+                        style={{ width: `${track.popularity}%` }}
+                      />
                     </div>
-                    <div className="flex items-center gap-3">
-                      <FaCalendarAlt className="text-[#00BFFF]" />
-                      <span className="text-gray-300">Recent Music</span>
-                      <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.recentMusicLover}%</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <FaUsers className="text-[#00BFFF]" />
-                      <span className="text-gray-300">Artist Diversity</span>
-                      <span className="text-white font-bold ml-auto">{currentData.musicIntelligence.artistDiversity}</span>
-                    </div>
-                  </>
-                ) : (
-                  <span className="text-gray-400">No quick stats available</span>
-                )}
+                    <span className="text-[#00BFFF] text-xs font-mono w-5 shrink-0 text-right">{track.popularity}</span>
+                  </div>
+                ))}
               </div>
+              <p className="text-gray-600 text-xs mt-4 text-center">Spotify popularity score (0–100)</p>
             </div>
           </div>
         </div>
