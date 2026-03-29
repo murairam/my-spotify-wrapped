@@ -1,0 +1,15 @@
+# Dockerfile for NestJS backend
+FROM node:20-alpine as builder
+WORKDIR /app
+COPY backend/package*.json ./
+RUN npm install --production=false
+COPY backend .
+RUN npm run build
+
+FROM node:20-alpine as runner
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+EXPOSE 3001
+CMD ["node", "dist/main.js"]
