@@ -49,7 +49,7 @@
    “This is My Spotify Wrapped, a full-stack TypeScript project that visualizes your Spotify listening data and leverages AI for insights.”
 
 2. **Architecture:**  
-   “The frontend is Next.js 14 (App Router), and the backend is being extracted to a standalone NestJS REST API for scalability and maintainability.”
+   “The frontend is Next.js 14 (App Router), deployed to Vercel. The backend is a standalone NestJS REST API, containerized with Docker and deployed to Google Cloud Run. Local development uses Docker Compose with root-level Dockerfile.backend and Dockerfile.frontend.”
 
 3. **Demo:**  
    “Let me show you the dashboard, how we fetch top tracks, and how AI analysis is integrated.”
@@ -57,7 +57,9 @@
 **Hardest Technical Challenge:**
 
 - **Spotify OAuth Token Refresh:**  
-  Handling token expiration and refresh flows securely, especially when moving from Next.js API routes to a dedicated backend, ensuring seamless user experience and secure storage of credentials.
+   Handling token expiration and refresh flows securely, especially when moving from Next.js API routes to a dedicated backend, ensuring seamless user experience and secure storage of credentials.
+- **Monorepo Deployment:**
+   Ensuring Vercel only builds the frontend (using .vercelignore), and that Docker Compose uses the correct root-level Dockerfiles for local development, while Cloud Run uses Dockerfile.backend for backend deployment.
 
 - **(Runner-up):**  
   Prompting Mistral AI to return consistent, structured JSON for downstream processing.

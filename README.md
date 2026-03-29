@@ -3,13 +3,15 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-14-blue)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.13-06B6D4)](https://tailwindcss.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4)](https://tailwindcss.com/)
 [![Spotify Web API](https://img.shields.io/badge/Spotify_API-v1.0-green)](https://developer.spotify.com/documentation/web-api/)
 [![Mistral AI](https://img.shields.io/badge/Mistral_AI-Integrated-purple)](https://mistral.ai/)
 
 **A sophisticated, year-round alternative to Spotify Wrapped** — providing deep, interactive insights into your music listening habits with advanced analytics, real-time data, and AI-powered recommendations.
 
 🔗 **[Try Live Demo on Vercel](https://my-spotify-wrapped-one.vercel.app/)** | 📖 **[Documentation](#documentation)**
+
+> **New**: AI playlist suggestions now pair Mistral-curated mixes with live Spotify search results, so every recommendation links to a real playlist you can open immediately.
 
 > **🚀 Deployed on Vercel**: The application is live and ready to test! You can try the **Demo Mode** with sample data, or contact me to be added as a test user for the full Spotify integration.
 
@@ -81,12 +83,21 @@ Built for music enthusiasts, developers, and data lovers, it showcases modern we
 
 **🚀 Live on Vercel**: The application is deployed and accessible at [https://my-spotify-wrapped-one.vercel.app/](https://my-spotify-wrapped-one.vercel.app/)
 
-For your own deployment:
+
+### Local Docker Compose (for development)
+
+To run both frontend and backend locally with Docker Compose:
 
 ```bash
-npm run build
-npm start
+docker-compose up --build
 ```
+
+This uses the root-level `Dockerfile.backend` and `Dockerfile.frontend` for backend and frontend services, respectively.
+
+### Production Deployment
+
+- **Backend:** Deploy to Google Cloud Run using the root-level `Dockerfile.backend`.
+- **Frontend:** Deploy to Vercel (Dockerfile not used by Vercel).
 
 **Spotify API Limitation**: The live deployment runs in Spotify's development mode, which requires manual approval of test users. Contact me to be added to the approved users list, or clone the project locally for unrestricted access with your own Spotify app credentials.
 
@@ -104,22 +115,31 @@ The application exposes several API routes for data fetching and AI analysis:
 - **`/api/spotify/top-items`** - Top tracks and artists with time range support
 - **`/api/spotify/recently-played`** - Recent listening history
 - **`/api/spotify/playlists`** - User playlists and metadata
+- **`/api/spotify/search-playlists`** - Finds real Spotify playlists to pair with AI recommendations (with short-lived caching)
 - **`/api/mistral/analyze`** - AI-powered music analysis and recommendations
 
-### Component Architecture
+
+### Component Architecture (Partial)
 
 ```
-components/
+src/components/
 ├── ai/                    # AI-powered components
 │   ├── AIAnalysisSpotlight.tsx
-│   └── AIIntelligenceSection.tsx
-├── charts/               # Data visualization
-│   ├── GenreChart.tsx
-│   └── AudioFeaturesRadar.tsx
-├── Dashboard.tsx         # Main dashboard layout
-├── TopTracks.tsx         # Track rankings display
-├── TopArtists.tsx        # Artist rankings display
-└── MusicIntelligence.tsx # Analytics metrics
+│   ├── AIIntelligenceSection.tsx
+│   ├── AIPersonalityCard.tsx
+│   ├── AIPlaylistRecommendations.tsx
+│   ├── AIStory.tsx
+│   ├── ArtistRecommendations.tsx
+│   ├── MoodAnalysisCard.tsx
+│   ├── MusicDNACard.tsx
+│   └── MusicSpiritAnimal.tsx
+├── concerts/              # Concert finder
+│   └── ConcertFinderSection.tsx
+├── Dashboard.tsx
+├── ErrorHandling.tsx
+├── LandingPage.tsx
+├── RecentlyPlayedTimeline.tsx
+└── ...
 ```
 
 ### Environment Variables
@@ -171,6 +191,7 @@ MISTRAL_API_KEY=from-mistral-console
 | **🕒 Listening Patterns** | Time-based activity analysis and detailed listening habit insights |
 | **🎧 Audio Profile** | Deep musical taste analysis (energy, danceability, valence, acousticness, etc.) |
 | **🧠 AI-Powered Insights** | **Mistral AI integration** providing personalized music intelligence and recommendations |
+| **🔍 AI + Live Playlists** | New AI playlist suggestions enriched with real Spotify search results and fallback gradients |
 | **📱 Recently Played Timeline** | Real-time tracking with audio previews and social sharing capabilities |
 | **📊 Music Intelligence** | Advanced metrics including mainstream vs. underground preferences, discovery patterns |
 | **🎪 Interactive Dashboard** | Glassmorphism UI with responsive charts and touch-friendly interactions |
@@ -219,26 +240,28 @@ The application integrates with **10+ Spotify Web API endpoints**:
 
 ## 🏗 Project Structure
 
+
 ```bash
 my-spotify-wrapped/
+├── backend/                  # (No Dockerfile here; see root)
+├── public/                   # Static assets and images
+├── scripts/                  # Mock/test data
 ├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── api/               # API routes for Spotify and Mistral
-│   │   ├── globals.css        # Global styles and Tailwind imports
-│   │   └── layout.tsx         # Root layout component
-│   ├── components/            # Reusable UI components
-│   │   ├── ai/               # AI-powered components
-│   │   ├── charts/           # Chart components
-│   │   └── ui/               # Base UI components
-│   ├── hooks/                 # Custom React hooks
-│   ├── lib/                   # Utility functions and API clients
-│   ├── styles/                # Additional styling
-│   └── types/                 # TypeScript type definitions
-├── public/                    # Static assets and images
+│   ├── app/                  # Next.js App Router
+│   ├── components/           # Reusable UI components
+│   ├── hooks/                # Custom React hooks
+│   ├── lib/                  # Utility functions and API clients
+│   ├── providers/            # React context providers
+│   └── types/                # TypeScript type definitions
+├── types/                    # NextAuth types
+├── Dockerfile.backend        # Used for backend in Docker Compose & Cloud Run
+├── Dockerfile.frontend       # Used for frontend in Docker Compose
+├── docker-compose.yml        # Local dev orchestration
+├── .vercelignore             # Excludes backend from Vercel builds
 ├── .env.example              # Environment variables template
-├── tailwind.config.js        # Tailwind CSS configuration
-├── next.config.js            # Next.js configuration
-└── package.json              # Dependencies and scripts
+├── next.config.js            # Next.js config
+├── package.json              # Dependencies and scripts
+└── ...
 ```
 
 ---
@@ -265,7 +288,19 @@ This project started as a simple idea for the [Mistral AI Internship Application
 - **AI Integration**: Sophisticated prompt engineering for music personality analysis
 - **Performance Optimization**: Image optimization, caching, and responsive design
 
+
 **AI Assistance**: This project was built with significant help from **Mistral AI Chat** and **Claude AI Chat** for problem-solving, code review, and architectural decisions. The AI integration features were particularly enhanced through iterative collaboration with AI tools.
+
+---
+
+## 🐳 Docker & Deployment Notes
+
+- Only the root-level `Dockerfile.backend` and `Dockerfile.frontend` are used for local Docker Compose.
+- The backend is deployed to Cloud Run using `Dockerfile.backend`.
+- The frontend is deployed to Vercel (Dockerfile not used by Vercel).
+- `.vercelignore` ensures the backend is not included in Vercel builds.
+
+---
 
 ---
 
