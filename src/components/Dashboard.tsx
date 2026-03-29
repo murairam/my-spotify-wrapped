@@ -301,7 +301,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
               {currentData.musicIntelligence ? (
                 (() => {
                   const mi = currentData.musicIntelligence!;
-                  const cx = 100, cy = 100, maxR = 62;
+                  const cx = 115, cy = 105, maxR = 62;
                   const axes = [
                     { label: 'Mainstream', value: mi.mainstreamTaste ?? 0, angle: -Math.PI / 2 },
                     { label: 'Underground', value: mi.undergroundTaste ?? 0, angle: 0 },
@@ -317,7 +317,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
                   const dataPts = axes.map(a => { const p = pt(a.angle, a.value); return `${p.x},${p.y}`; }).join(' ');
                   return (
                     <div className="flex flex-col items-center">
-                      <svg width="100%" viewBox="0 0 200 200" className="max-w-[190px]">
+                      <svg width="100%" viewBox="0 0 240 215" className="max-w-[220px]">
                         {[25, 50, 75, 100].map(pct => (
                           <polygon key={pct} points={ringPts(pct)} fill="none" stroke="rgba(0,191,255,0.1)" strokeWidth="0.8" />
                         ))}
@@ -330,10 +330,10 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
                           const p = pt(a.angle, a.value);
                           return <circle key={i} cx={p.x} cy={p.y} r="3" fill="#00BFFF" />;
                         })}
-                        <text x={cx} y={cy - maxR - 10} textAnchor="middle" fill="#9ca3af" fontSize="9.5">Mainstream</text>
-                        <text x={cx + maxR + 8} y={cy} textAnchor="start" dominantBaseline="middle" fill="#9ca3af" fontSize="9.5">Underground</text>
-                        <text x={cx} y={cy + maxR + 14} textAnchor="middle" fill="#9ca3af" fontSize="9.5">Vintage</text>
-                        <text x={cx - maxR - 8} y={cy} textAnchor="end" dominantBaseline="middle" fill="#9ca3af" fontSize="9.5">Diversity</text>
+                        <text x={cx} y={cy - maxR - 10} textAnchor="middle" fill="#9ca3af" fontSize="9">Mainstream</text>
+                        <text x={cx + maxR + 6} y={cy} textAnchor="start" dominantBaseline="middle" fill="#9ca3af" fontSize="9">Underground</text>
+                        <text x={cx} y={cy + maxR + 14} textAnchor="middle" fill="#9ca3af" fontSize="9">Vintage</text>
+                        <text x={cx - maxR - 6} y={cy} textAnchor="end" dominantBaseline="middle" fill="#9ca3af" fontSize="9">Diversity</text>
                       </svg>
                       <div className="grid grid-cols-2 gap-1.5 w-full mt-1 text-xs">
                         <div className="flex justify-between px-2 py-1 rounded bg-white/[0.03]">
