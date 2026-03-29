@@ -123,19 +123,89 @@ http://127.0.0.1:3000/api/auth/callback/spotify
 
 ### 4. Run the development server
 
+#### Frontend only
+
 ```bash
 npm run dev
 ```
 
 Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
 
-### 5. (Optional) Run the NestJS microservice
-
+**Verify it's working:**
 ```bash
-cd backend && npm install && npm run start:dev
+curl http://127.0.0.1:3000
+# Should return HTML (Next.js landing page)
 ```
 
-The backend API runs on port 4000.
+Expected terminal output:
+```
+▲ Next.js 16.x.x
+- Local: http://127.0.0.1:3000
+✓ Ready in ~2s
+```
+
+---
+
+#### Backend only (NestJS)
+
+```bash
+cd backend
+npm install        # first time only
+npm run start:dev
+```
+
+**Verify it's working:**
+```bash
+curl http://localhost:4000/spotify/top-items \
+  -H "Authorization: Bearer YOUR_SPOTIFY_ACCESS_TOKEN"
+# Should return JSON with top tracks data
+```
+
+Or just check the health of the server:
+```bash
+curl http://localhost:4000
+# Returns a 404 JSON response from NestJS — that means the server is up
+```
+
+Expected terminal output:
+```
+[Nest] LOG [NestApplication] Nest application successfully started
+[Nest] LOG [NestApplication] Listening on http://localhost:4000
+```
+
+---
+
+#### Both frontend + backend (Docker Compose)
+
+```bash
+docker compose up --build
+```
+
+This starts both services in containers:
+- Frontend → [http://127.0.0.1:3000](http://127.0.0.1:3000)
+- Backend → [http://localhost:4000](http://localhost:4000)
+
+**Verify both are running:**
+```bash
+curl http://127.0.0.1:3000   # frontend — should return HTML
+curl http://localhost:4000    # backend — should return NestJS 404 JSON
+```
+
+To stop:
+```bash
+docker compose down
+```
+
+---
+
+#### Quick reference
+
+| What | Command | URL |
+|---|---|---|
+| Frontend dev | `npm run dev` | http://127.0.0.1:3000 |
+| Backend dev | `cd backend && npm run start:dev` | http://localhost:4000 |
+| Both (Docker) | `docker compose up --build` | :3000 + :4000 |
+| Stop Docker | `docker compose down` | — |
 
 ---
 
@@ -200,8 +270,8 @@ This section is an honest engineering retrospective — the changes I would make
 ### 1. Wire up the NestJS backend and eliminate the Next.js API routes
 The NestJS service is deployed to Google Cloud Run but the frontend still calls Next.js API routes directly. The intended architecture is for the frontend to talk exclusively to NestJS. Moving all data-fetching logic there would properly separate concerns, make the backend independently testable, and let the two services scale and deploy independently.
 
-### 2. Replace REST with GraphQL
-The Spotify data model is relational — tracks have artists, artists have genres, playlists have tracks. REST forces the frontend to over-fetch or under-fetch and requires multiple round-trips for composite views. GraphQL would let any component request exactly the fields it needs in a single query, and the strongly-typed schema would serve as a living contract between frontend and backend.
+### 2. Stream the AI analysis with Server-Sent Events
+The AI analysis is a single blocking POST that can take 5–10 seconds. The user stares at a spinner. With SSE (or WebSockets), the server could stream each section of the analysis (mood card, spirit animal, recommendations) as Mistral returns it — sections would pop in progressively, which is both faster-feeling and a better UX. This is the most impactful single improvement for a real user.
 
 ### 3. Add a database layer (PostgreSQL + Redis)
 Currently there is no persistence — every page load re-fetches from Spotify. A PostgreSQL database would let me store user profiles and historical snapshots (so users could compare their stats month over month). Redis would serve as a shared cache layer so the Spotify API is not hammered on every request — and so cached data survives server restarts.
