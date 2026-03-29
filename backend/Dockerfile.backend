@@ -1,7 +1,7 @@
 # Dockerfile for NestJS backend (Cloud Build/Run)
 # This file is used by Google Cloud Build/Run. It should match the previous working version.
 
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 COPY tsconfig*.json ./
@@ -9,7 +9,7 @@ COPY src ./src
 COPY nest-cli.json ./
 RUN npm ci && npm run build
 
-FROM node:20-alpine
+FROM node:24-alpine
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
