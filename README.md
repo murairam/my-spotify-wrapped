@@ -123,19 +123,89 @@ http://127.0.0.1:3000/api/auth/callback/spotify
 
 ### 4. Run the development server
 
+#### Frontend only
+
 ```bash
 npm run dev
 ```
 
 Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
 
-### 5. (Optional) Run the NestJS microservice
-
+**Verify it's working:**
 ```bash
-cd backend && npm install && npm run start:dev
+curl http://127.0.0.1:3000
+# Should return HTML (Next.js landing page)
 ```
 
-The backend API runs on port 4000.
+Expected terminal output:
+```
+▲ Next.js 16.x.x
+- Local: http://127.0.0.1:3000
+✓ Ready in ~2s
+```
+
+---
+
+#### Backend only (NestJS)
+
+```bash
+cd backend
+npm install        # first time only
+npm run start:dev
+```
+
+**Verify it's working:**
+```bash
+curl http://localhost:4000/spotify/top-items \
+  -H "Authorization: Bearer YOUR_SPOTIFY_ACCESS_TOKEN"
+# Should return JSON with top tracks data
+```
+
+Or just check the health of the server:
+```bash
+curl http://localhost:4000
+# Returns a 404 JSON response from NestJS — that means the server is up
+```
+
+Expected terminal output:
+```
+[Nest] LOG [NestApplication] Nest application successfully started
+[Nest] LOG [NestApplication] Listening on http://localhost:4000
+```
+
+---
+
+#### Both frontend + backend (Docker Compose)
+
+```bash
+docker compose up --build
+```
+
+This starts both services in containers:
+- Frontend → [http://127.0.0.1:3000](http://127.0.0.1:3000)
+- Backend → [http://localhost:4000](http://localhost:4000)
+
+**Verify both are running:**
+```bash
+curl http://127.0.0.1:3000   # frontend — should return HTML
+curl http://localhost:4000    # backend — should return NestJS 404 JSON
+```
+
+To stop:
+```bash
+docker compose down
+```
+
+---
+
+#### Quick reference
+
+| What | Command | URL |
+|---|---|---|
+| Frontend dev | `npm run dev` | http://127.0.0.1:3000 |
+| Backend dev | `cd backend && npm run start:dev` | http://localhost:4000 |
+| Both (Docker) | `docker compose up --build` | :3000 + :4000 |
+| Stop Docker | `docker compose down` | — |
 
 ---
 
