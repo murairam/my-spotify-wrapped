@@ -398,7 +398,9 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
         {/* AI Intelligence Section - Full Width Below Main Dashboard */}
         <div className="mt-16 pt-8 border-t border-[#00BFFF]/10 space-y-8">
           <AIIntelligenceSection
+            key={timeRange}
             spotifyData={spotifyDataForAI}
+            recentTracks={isDemo ? getRecentlyPlayedForTimeRange() : ((currentData as unknown as HookSpotifyData)?.recentTracks || null)}
             className="w-full"
           />
         </div>

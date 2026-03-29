@@ -136,83 +136,7 @@ export default function AIPlaylistRecommendations({
       processed.push(processedPlaylist);
     }
 
-    // ADD A 4TH PLAYLIST using the same enrichment logic
-    const topGenres = spotifyData?.topGenres || ['pop'];
-    const topArtist = spotifyData?.topArtists?.[0];
-
-    const fourthPlaylist: PlaylistRecommendation = {
-      name: topArtist ? `${topArtist.name} Mix` : 'Your Discovery Mix',
-      description: topArtist ? `Songs like ${topArtist.name}` : 'Music tailored to your taste',
-      image: getPlaylistImage(3),
-      curator: 'Spotify',
-      tracks: 50,
-      songs: [],
-      url: undefined
-    };
-
-    // Enrich the 4th playlist the same way - UPDATE TEXT TOO
-    try {
-      const searchQuery = topArtist ? `${topArtist.name} radio` : `${topGenres[0]} discover`;
-      console.log('🔍 Searching Spotify for 4th playlist:', searchQuery);
-
-      const response = await fetch(`/api/spotify/search-playlists?q=${encodeURIComponent(searchQuery)}&limit=5`);
-
-      if (response.ok) {
-        const searchData: unknown = await response.json();
-        console.log('✅ Spotify search result for 4th playlist:', searchData);
-
-        if (isRecord(searchData) && 'playlists' in searchData && Array.isArray((searchData as Record<string, unknown>).playlists) && ((searchData as Record<string, unknown>).playlists as unknown[]).length > 0) {
-          const playlistsArr = (searchData as Record<string, unknown>).playlists as unknown[];
-          const bestMatch = playlistsArr.find((pl) => {
-            if (!pl || typeof pl !== 'object') return false;
-            const p = pl as Record<string, unknown>;
-            const external_urls = p.external_urls as Record<string, unknown> | undefined;
-            return !!(external_urls && typeof external_urls.spotify === 'string' && p.image);
-          }) as Record<string, unknown> | undefined || (playlistsArr[0] as Record<string, unknown> | undefined);
-
-          if (bestMatch) {
-            const bm = bestMatch as Record<string, unknown>;
-            const bmExternal = bm.external_urls as Record<string, unknown> | undefined;
-            const bmUrl = bmExternal && typeof bmExternal.spotify === 'string' ? bmExternal.spotify : (typeof bm.url === 'string' ? bm.url : undefined);
-            const bmImage = typeof bm.image === 'string' ? bm.image : (topArtist?.images?.[0]?.url || getPlaylistImage(3));
-            const bmCurator = typeof bm.curator === 'string' ? bm.curator : 'Spotify';
-            const bmTracks = typeof bm.tracks === 'number' ? bm.tracks : undefined;
-            const bmName = typeof bm.name === 'string' ? bm.name : undefined;
-            const bmDesc = typeof bm.description === 'string' ? bm.description : undefined;
-
-            fourthPlaylist.url = bmUrl;
-            fourthPlaylist.image = bmImage;
-            fourthPlaylist.curator = bmCurator;
-            fourthPlaylist.tracks = bmTracks || fourthPlaylist.tracks;
-
-            // UPDATE TEXT to match the actual Spotify playlist
-            fourthPlaylist.name = bmName || fourthPlaylist.name;
-            fourthPlaylist.description = bmDesc || `Spotify playlist with ${bmTracks || 'many'} tracks`;
-
-            console.log('✅ Enhanced 4th playlist with Spotify data:', {
-              name: fourthPlaylist.name,
-              description: fourthPlaylist.description,
-              url: fourthPlaylist.url
-            });
-          }
-        }
-      }
-
-      // If still no URL, build a search URL from the existing name — keep name/description as-is
-      if (!fourthPlaylist.url) {
-        const searchTerm = fourthPlaylist.name || (topArtist ? `${topArtist.name} radio` : `${topGenres[0]} discover`);
-        fourthPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(searchTerm)}`;
-        console.log('🔄 Using name-based search URL for 4th playlist:', fourthPlaylist.url);
-      }
-    } catch (error) {
-      console.error('❌ Error enriching 4th playlist:', error);
-      const searchTerm = fourthPlaylist.name || 'discover weekly';
-      fourthPlaylist.url = `https://open.spotify.com/search/${encodeURIComponent(searchTerm)}`;
-    }
-
-  processed.push(fourthPlaylist);
-
-    console.log('✅ Final processed playlists (4 total):', processed.map(p => ({
+    console.log('✅ Final processed playlists (3 total):', processed.map(p => ({
       name: p.name,
       description: p.description,
       url: p.url
@@ -258,14 +182,6 @@ export default function AIPlaylistRecommendations({
         curator: 'Spotify',
         tracks: 50
       },
-      {
-        name: 'Focus Playlist',
-        description: 'Perfect for concentration',
-        url: 'https://open.spotify.com/search/focus%20playlist',
-        image: getPlaylistImage(3),
-        curator: 'Spotify',
-        tracks: 100
-      }
     ];
   }, [spotifyData]);
 
@@ -336,8 +252,8 @@ export default function AIPlaylistRecommendations({
           <FaListUl className="text-[#00BFFF] text-xl" />
           <h3 className="text-lg font-bold text-white">Playlist Suggestions</h3>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[1,2,3,4].map(i => (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[1,2,3].map(i => (
             <div key={i} className="bg-white/[0.03] rounded-lg p-3 animate-pulse">
               <div className="aspect-square bg-white/[0.06] rounded mb-2"></div>
               <div className="h-4 bg-white/[0.06] rounded mb-1"></div>
@@ -357,8 +273,8 @@ export default function AIPlaylistRecommendations({
           <FaListUl className="text-[#00BFFF] text-xl" />
           <h3 className="text-lg font-bold text-white">Playlist Suggestions</h3>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map(i => (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[1, 2, 3].map(i => (
             <div key={i} className="bg-white/[0.03] rounded-lg p-3 animate-pulse">
               <div className="aspect-square bg-white/[0.06] rounded mb-2" />
               <div className="h-4 bg-white/[0.06] rounded mb-1" />
@@ -377,7 +293,7 @@ export default function AIPlaylistRecommendations({
           <FaListUl className="text-[#00BFFF] text-2xl" />
           <h2 className="text-2xl font-bold text-white">AI Playlist Suggestions</h2>
           <span className="text-gray-400 text-sm ml-auto">
-            {playlists.length} AI-curated mixes
+            3 AI-curated mixes
           </span>
         </div>
       </div>
@@ -391,7 +307,7 @@ export default function AIPlaylistRecommendations({
           </div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {playlists.map((playlist, index) => (
             <div
               key={index}

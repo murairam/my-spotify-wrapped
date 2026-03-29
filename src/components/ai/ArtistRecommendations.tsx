@@ -205,11 +205,14 @@ export default function ArtistRecommendations({ recommendations, className = '' 
     processArtists();
   }, [recommendations]);
 
-  // No recommendations prop at all — render nothing
+  // No recommendations prop at all, or empty array with no enrichment in flight — render nothing
   if (!recommendations) return null;
+  if (Array.isArray(recommendations) && (recommendations as unknown[]).length === 0) return null;
 
-  // Enrichment pending (initial render or async Spotify calls in flight) — show skeleton
+  // Enrichment is in flight — show skeleton
+  const isEnriching = enrichedArtists.length > 0 && enrichedArtists.some(a => a.isLoading);
   if (enrichedArtists.length === 0) {
+    // Only show skeleton briefly; if recs were empty the guard above already returned null
     return (
       <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 p-6 ${className}`}>
         <div className="flex items-center gap-3 mb-4">
@@ -228,6 +231,7 @@ export default function ArtistRecommendations({ recommendations, className = '' 
       </div>
     );
   }
+  void isEnriching; // used in JSX below
 
   return (
     <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 overflow-hidden transition-all hover:border-[#00BFFF]/30 hover:shadow-glow-sm ${className}`}>

@@ -1,9 +1,8 @@
-// src/components/ai/AIPersonalityCard.tsx - CORRECTED VERSION
+// src/components/ai/AIPersonalityCard.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { FaHeart, FaCompass, FaUsers, FaChartLine } from 'react-icons/fa';
 
 interface AIPersonalityCardProps {
   analysis: {
@@ -18,97 +17,122 @@ interface AIPersonalityCardProps {
   className?: string;
 }
 
-export default function AIPersonalityCard({ analysis, className = '' }: AIPersonalityCardProps) {
-  const enhanced = analysis?.enhanced || {};
-  const confidence = analysis?.confidence || 0;
+interface TraitChip {
+  icon: string;
+  label: string;
+  // First sentence extracted from full text — shown on chip
+  headline: string;
+  // Full text — shown on expand
+  full: string;
+  accent: string;
+  bg: string;
+  border: string;
+}
 
-  // Extract personality data with better fallbacks
-  const musicPersonality = enhanced.musicPersonality || "Your unique musical identity is still being analyzed...";
-  const discoveryStyle = enhanced.discoveryStyle || "Your discovery patterns reveal an adventurous listener...";
-  const socialProfile = enhanced.socialProfile || "Your musical social tendencies show interesting patterns...";
-  const funFacts = enhanced.funFacts || [];
+function firstSentence(text: string): string {
+  const match = text.match(/^[^.!?]+[.!?]/);
+  return match ? match[0].replace(/\*\*/g, '').trim() : text.split(' ').slice(0, 8).join(' ') + '…';
+}
+
+export default function AIPersonalityCard({ analysis, className = '' }: AIPersonalityCardProps) {
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const enhanced = analysis?.enhanced || {};
+  const confidence = analysis?.confidence ?? 0;
+
+  const musicPersonality = enhanced.musicPersonality || '';
+  const discoveryStyle   = enhanced.discoveryStyle   || '';
+  const socialProfile    = enhanced.socialProfile    || '';
+  const funFacts         = enhanced.funFacts         || [];
+
+  const chips: TraitChip[] = [
+    {
+      icon: '🎭',
+      label: 'Musical Identity',
+      headline: musicPersonality ? firstSentence(musicPersonality) : 'Defining your sound…',
+      full: musicPersonality,
+      accent: '#00BFFF',
+      bg: 'rgba(0,191,255,0.07)',
+      border: 'rgba(0,191,255,0.18)',
+    },
+    {
+      icon: '🧭',
+      label: 'Discovery Style',
+      headline: discoveryStyle ? firstSentence(discoveryStyle) : 'How you find new music…',
+      full: discoveryStyle,
+      accent: '#9B8BF4',
+      bg: 'rgba(155,139,244,0.07)',
+      border: 'rgba(155,139,244,0.18)',
+    },
+    {
+      icon: '🎧',
+      label: 'Social Listening',
+      headline: socialProfile ? firstSentence(socialProfile) : 'Your listening personality…',
+      full: socialProfile,
+      accent: '#FF8FAB',
+      bg: 'rgba(255,143,171,0.07)',
+      border: 'rgba(255,143,171,0.18)',
+    },
+    {
+      icon: '⚡',
+      label: 'Fun Fact',
+      headline: funFacts.length > 0 ? funFacts[0].replace(/\*\*/g, '').replace(/^[^\s]+\s/, '').split('.')[0] : 'Interesting insight…',
+      full: funFacts.join('\n\n'),
+      accent: '#FFD700',
+      bg: 'rgba(255,215,0,0.07)',
+      border: 'rgba(255,215,0,0.18)',
+    },
+  ].filter(c => c.full.length > 0);
+
+  if (chips.length === 0) return null;
 
   return (
-    <div className={`bg-[#080808] rounded-xl border border-[#00BFFF]/15 overflow-hidden glow ${className}`}>
+    <div className={`rounded-2xl overflow-hidden border border-[#00BFFF]/15 ${className}`}
+      style={{ background: 'linear-gradient(135deg, #080808, #09090f)' }}>
+
       {/* Header */}
-      <div className="bg-[#00BFFF]/6 border-b border-[#00BFFF]/15 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg overflow-hidden bg-transparent flex items-center justify-center">
-              <Image src="/m-boxed-rainbow.png" alt="Mistral" width={40} height={40} className="w-10 h-10" unoptimized />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-white">Your Musical Personality</h3>
-              <p className="text-[#00BFFF]/70 text-sm">AI-powered insights</p>
-            </div>
-          </div>
-
-          {/* Confidence Score */}
-          <div className="text-right">
-            <div className="text-2xl font-bold text-[#00BFFF]">{confidence}%</div>
-            <div className="text-xs text-[#00BFFF]/60">Confidence</div>
-          </div>
+      <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Image src="/m-boxed-rainbow.png" alt="Mistral" width={24} height={24} unoptimized />
+          <span className="text-white font-semibold text-sm">Your Musical Personality</span>
         </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-6 space-y-6">
-        {/* Musical Personality */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <FaHeart className="text-[#00BFFF]" />
-            <h4 className="text-white font-semibold">Musical Identity</h4>
-          </div>
-          <p className="text-gray-200 text-sm leading-relaxed">
-            {musicPersonality}
-          </p>
-        </div>
-
-        {/* Discovery Style */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <FaCompass className="text-[#00BFFF]" />
-            <h4 className="text-white font-semibold">Discovery Style</h4>
-          </div>
-          <p className="text-gray-200 text-sm leading-relaxed">
-            {discoveryStyle}
-          </p>
-        </div>
-
-        {/* Social Profile */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <FaUsers className="text-[#00BFFF]" />
-            <h4 className="text-white font-semibold">Social Listening</h4>
-          </div>
-          <p className="text-gray-200 text-sm leading-relaxed">
-            {socialProfile}
-          </p>
-        </div>
-
-        {/* Fun Facts */}
-        {funFacts.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <FaChartLine className="text-yellow-400" />
-              <h4 className="text-white font-semibold">Fun Facts</h4>
-            </div>
-            <div className="space-y-2">
-              {funFacts.map((fact, index) => (
-                <div key={index} className="bg-yellow-500/8 border border-yellow-500/15 rounded-lg p-3">
-                  <p className="text-yellow-200 text-sm">{fact}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+        {confidence > 0 && (
+          <span className="text-[10px] font-semibold tracking-wider uppercase text-[#00BFFF]/60 bg-[#00BFFF]/8 border border-[#00BFFF]/15 px-2.5 py-1 rounded-full">
+            {confidence}% confidence
+          </span>
         )}
       </div>
 
+      {/* 2×2 chip grid */}
+      <div className="p-4 grid grid-cols-2 gap-3">
+        {chips.map((chip, i) => {
+          const isOpen = expanded === i;
+          return (
+            <button
+              key={chip.label}
+              onClick={() => setExpanded(isOpen ? null : i)}
+              className="text-left rounded-xl p-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              style={{ background: chip.bg, border: `1px solid ${chip.border}` }}
+            >
+              <div className="text-2xl mb-2">{chip.icon}</div>
+              <p className="text-[10px] tracking-[0.15em] uppercase mb-1.5" style={{ color: chip.accent, opacity: 0.7 }}>
+                {chip.label}
+              </p>
+              <p className="text-xs text-white/70 leading-relaxed">
+                {isOpen ? chip.full.replace(/\*\*/g, '') : chip.headline}
+              </p>
+              {!isOpen && chip.full !== chip.headline && (
+                <p className="text-[10px] mt-2" style={{ color: chip.accent, opacity: 0.5 }}>tap to expand ↓</p>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Footer */}
-      <div className="px-6 py-3 bg-black border-t border-[#00BFFF]/10">
-        <p className="text-xs text-gray-400 text-center flex items-center justify-center gap-2">
-          <Image src="/mistral-logo-color-white.png" alt="Mistral" width={16} height={16} className="inline-block" unoptimized />
-          <span>Powered by Mistral AI • Musical Personality Analysis</span>
+      <div className="px-6 py-3 border-t border-white/5">
+        <p className="text-[10px] text-white/25 text-center flex items-center justify-center gap-1.5">
+          <Image src="/mistral-logo-color-white.png" alt="Mistral" width={12} height={12} unoptimized />
+          Powered by Mistral AI
         </p>
       </div>
     </div>
