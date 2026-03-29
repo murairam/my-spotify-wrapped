@@ -42,3 +42,6 @@ dev.log
 
 # deployment secrets
 cloudrun-env.yaml
+
+# Claude Code internals
+.claude/
