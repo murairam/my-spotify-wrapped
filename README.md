@@ -193,6 +193,41 @@ my-spotify-wrapped/
 
 ---
 
+## What I Would Improve
+
+This section is an honest engineering retrospective — the changes I would make if continuing to develop this project, and why.
+
+### 1. Wire up the NestJS backend and eliminate the Next.js API routes
+The NestJS service is deployed to Google Cloud Run but the frontend still calls Next.js API routes directly. The intended architecture is for the frontend to talk exclusively to NestJS. Moving all data-fetching logic there would properly separate concerns, make the backend independently testable, and let the two services scale and deploy independently.
+
+### 2. Replace REST with GraphQL
+The Spotify data model is relational — tracks have artists, artists have genres, playlists have tracks. REST forces the frontend to over-fetch or under-fetch and requires multiple round-trips for composite views. GraphQL would let any component request exactly the fields it needs in a single query, and the strongly-typed schema would serve as a living contract between frontend and backend.
+
+### 3. Add a database layer (PostgreSQL + Redis)
+Currently there is no persistence — every page load re-fetches from Spotify. A PostgreSQL database would let me store user profiles and historical snapshots (so users could compare their stats month over month). Redis would serve as a shared cache layer so the Spotify API is not hammered on every request — and so cached data survives server restarts.
+
+### 4. Add proper testing
+The project has no automated tests. I would add:
+- **Unit tests** for pure functions (metric calculations, AI response parsing) with Jest
+- **Integration tests** for the NestJS service hitting Spotify's API with a recorded fixture
+- **E2E tests** for critical user flows (login → dashboard render → AI analysis) with Playwright
+
+### 5. Improve security posture
+- Move Spotify credentials out of the JWT session and into a server-side token store (Redis-backed, keyed by session ID) to avoid leaking tokens to the client
+- Add rate limiting to the AI endpoints (currently a single user can trigger unlimited Mistral calls)
+- Add input validation via NestJS `ValidationPipe` + `class-validator` on all incoming requests
+
+### 6. Real-time features with WebSockets / GraphQL Subscriptions
+The AI analysis is currently a one-shot POST that the user waits on. With GraphQL Subscriptions, the server could stream partial results back as each section of the analysis is ready — much better UX for a slow LLM call.
+
+### 7. CI/CD pipeline improvements
+Add a proper pipeline that runs lint → type-check → unit tests → integration tests → build → deploy, with branch preview environments on Vercel and automatic Cloud Run deployments on merge to `main`.
+
+### 8. Observability
+Add structured logging (e.g. Pino in NestJS), error tracking (Sentry), and metrics (response time, Spotify API error rates, AI timeout rates). Right now the app is flying blind in production.
+
+---
+
 ## Development Story
 
 This project started as a submission for the Mistral AI Internship Application but grew into something far more involved. What was meant to be a couple of days of work turned into two-plus weeks of deep work — learning the Next.js App Router in depth, wrestling with OAuth token lifecycle edge cases, and doing a lot of prompt engineering to get consistent structured JSON out of an LLM.
