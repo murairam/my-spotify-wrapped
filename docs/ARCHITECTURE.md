@@ -20,7 +20,7 @@ This document describes the technical architecture of My Spotify Wrapped: how th
 
 ## 1. System Overview
 
-The application is a **Next.js monolith** using the App Router. The React frontend and all server-side API logic live in the same repository and deploy together to Vercel. An optional NestJS microservice exists for Cloud Run deployments but is not a dependency of the main application.
+The application is a **Next.js monolith** using the App Router. The React frontend and all server-side API logic — Spotify data fetching, Mistral AI calls, authentication — live in the same repository and deploy together to Vercel. A NestJS microservice is separately deployed to Google Cloud Run, but the frontend currently routes all traffic through the Next.js API layer and does not call Cloud Run directly.
 
 ```mermaid
 flowchart TD
@@ -29,7 +29,7 @@ flowchart TD
         Hooks["Data Layer\n─────────────────\nuseSpotifyData\nuseAIAnalysis\nTanStack Query"]
     end
 
-    subgraph Vercel["Server — Next.js on Vercel"]
+    subgraph Vercel["Server — Next.js on Vercel  ← all live traffic"]
         Auth["/api/auth/[...nextauth]\n─────────────────\nnext-auth · JWT · Cookies"]
         SpotifyRoutes["/api/spotify/*\n─────────────────\ntop-items · search\nsearch-playlists · search-track"]
         MistralRoutes["/api/mistral/*\n─────────────────\nanalyze · playlists"]
@@ -40,8 +40,8 @@ flowchart TD
         MistralAPI["Mistral AI\nmistral-small-latest"]
     end
 
-    subgraph CloudRun["Optional — Google Cloud Run"]
-        NestJS["NestJS Microservice\nGET /spotify/top-items"]
+    subgraph CloudRun["Google Cloud Run  ← deployed, receives no frontend traffic yet"]
+        NestJS["NestJS Microservice\n─────────────────\nGET /spotify/top-items\n\nPlanned: route frontend\ndata calls here"]
     end
 
     UI <--> Hooks
@@ -49,14 +49,19 @@ flowchart TD
     Hooks -- "POST /api/mistral/*" --> MistralRoutes
     UI -- "Session / signIn / signOut" --> Auth
 
-    Auth -- "OAuth 2.0 PKCE" --> SpotifyAPI
+    Auth -- "OAuth 2.0" --> SpotifyAPI
     SpotifyRoutes -- "Bearer token" --> SpotifyAPI
     MistralRoutes -- "API key (server-only)" --> MistralAPI
 
-    NestJS -. "Bearer token (optional)" .-> SpotifyAPI
+    NestJS -. "Bearer token (independent)" .-> SpotifyAPI
+
+    classDef inactive stroke-dasharray:5 5,opacity:0.5
+    class NestJS inactive
 ```
 
 **Core principle**: all secrets (Spotify client secret, Mistral API key, NextAuth secret) are environment variables accessible only in server-side API route handlers. The browser never receives or transmits them directly.
+
+> **Current state vs. planned state**: The Next.js API routes handle all data fetching today. The intended next step is to route the Spotify and Mistral calls through the NestJS service on Cloud Run, while keeping authentication in Next.js (next-auth is framework-specific and cannot be moved to NestJS without a full rewrite using Passport.js).
 
 ---
 
@@ -342,9 +347,9 @@ The next-auth `Session` and `JWT` types are extended in `types/next-auth.d.ts` t
 
 ---
 
-## 9. Optional NestJS Microservice
+## 9. NestJS Microservice — Deployed, Not Yet Connected
 
-`backend/` contains a NestJS application (port 4000) with a single module, `SpotifyModule`, exposing one endpoint:
+`backend/` contains a NestJS application deployed to **Google Cloud Run**. It has a single module, `SpotifyModule`, exposing one endpoint:
 
 ```
 GET /spotify/top-items
@@ -359,4 +364,30 @@ Response: {
 }
 ```
 
-This service mirrors the computation in `/api/spotify/top-items` and was built to validate a microservice deployment pattern on Google Cloud Run. The main Next.js application does not depend on or call it — it fetches Spotify directly via its own API routes. The microservice is useful in architectures where the data fetching layer needs to be scaled or deployed independently of the frontend.
+The service is live and reachable at its Cloud Run URL. It expects the user's Spotify access token as a `Bearer` header and calls the Spotify Web API directly.
+
+**It is not currently called by the frontend.** The Next.js app calls its own `/api/spotify/top-items` route instead. The `NEXT_PUBLIC_API_URL` environment variable is set on Vercel but is not yet consumed by any code in `src/`.
+
+### Why it exists
+
+The NestJS service was built to validate the separation of concerns between the presentation layer (Next.js/Vercel) and the data layer (NestJS/Cloud Run), and to confirm the deployment pipeline works end-to-end.
+
+### Planned integration path
+
+Routing the frontend through Cloud Run while keeping auth in Next.js:
+
+```mermaid
+flowchart LR
+    subgraph Current["Current"]
+        C1["Next.js API route\n/api/spotify/top-items"] --> C2["Spotify Web API"]
+    end
+
+    subgraph Planned["Planned"]
+        P1["Next.js API route\n(thin proxy or removed)"] --> P2["NestJS on Cloud Run\n/spotify/top-items"] --> P3["Spotify Web API"]
+    end
+```
+
+The steps:
+1. Update `fetchSpotifyData` in `useSpotifyData.ts` to call `${process.env.NEXT_PUBLIC_API_URL}/spotify/top-items` and pass the session token as `Authorization: Bearer`.
+2. Add `search`, Mistral modules to NestJS.
+3. The Next.js `/api/auth` routes remain — next-auth cannot be moved to NestJS without replacing it with Passport.js.

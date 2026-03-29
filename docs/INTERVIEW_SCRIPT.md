@@ -85,7 +85,7 @@
 
 ### Closing the Walkthrough
 
-> "Everything is deployed on Vercel — the Next.js frontend and all API routes build and deploy together as a single unit. There is also an optional NestJS microservice in the repository that mirrors the top-items data fetching logic and can run on Google Cloud Run for deployments that require that layer to be separated and scaled independently. The main application does not depend on it."
+> "The Next.js app — frontend and all API routes — is deployed as a single unit on Vercel. I also have a NestJS microservice separately deployed to Google Cloud Run. It mirrors the top-items data-fetching logic and is live and reachable, but the frontend currently calls the Next.js API routes directly rather than routing through Cloud Run. That was a deliberate sequencing decision — I wanted to validate the Cloud Run deployment pipeline independently before wiring the frontend through it. The next step is updating the data-fetching hooks to point at the Cloud Run URL and passing the session token as a Bearer header, which the NestJS controller already expects."
 
 ---
 
@@ -230,5 +230,6 @@ LLM output must be treated with the same defensive posture as any other external
 | What model and parameters? | `mistral-small-latest`, `temperature: 0.7`, `maxTokens: 4500` |
 | What if Mistral returns malformed JSON? | Three-layer parse fallback (direct parse → code block extraction → regex); deterministic generation if all fail |
 | How is CORS handled? | No CORS configuration needed — all API calls are same-origin (client to Next.js routes on the same domain) |
-| What is the NestJS backend for? | An optional microservice for Cloud Run deployments; the main application does not depend on it |
+| What is the NestJS backend for? | It's deployed to Google Cloud Run and mirrors the top-items data logic. The frontend currently calls its own Next.js API routes — wiring it through Cloud Run is the planned next step. |
+| Why isn't the frontend calling Cloud Run yet? | Deliberate sequencing: I validated the Cloud Run deployment first, independently. The integration (updating fetch URLs + forwarding the Bearer token) is straightforward and is the next task. |
 | What would you build next? | Social listening comparison (a genuine use case for GraphQL), concert recommendations with live ticketing data, shareable PDF or image export |

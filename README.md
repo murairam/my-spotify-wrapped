@@ -63,9 +63,11 @@ A full-stack, AI-enhanced music analytics platform — a richer, always-availabl
 | Spotify Web API | Top items, recently played, search, user profile |
 | Mistral AI (`mistral-small-latest`) | Music personality analysis, recommendations, narrative |
 
-### Optional Microservice (`backend/`)
+### NestJS Microservice (`backend/`)
 
-A NestJS service (port 4000) that mirrors the top-items API logic using `spotify-web-api-node`. Intended for load-separated deployments on Google Cloud Run. The main application does not depend on it.
+A NestJS service deployed to **Google Cloud Run** that exposes `GET /spotify/top-items` using `spotify-web-api-node`. It expects the user's Spotify access token as a `Bearer` header and returns the same data shape as the Next.js API route.
+
+The service is live on Cloud Run. The frontend currently calls the Next.js API routes directly — routing data fetching through the NestJS service is the planned next integration step.
 
 ---
 
@@ -185,8 +187,8 @@ my-spotify-wrapped/
 
 ## Deployment
 
-- **Frontend** → Vercel. Push to `main`, deploys automatically.
-- **Backend (optional)** → Google Cloud Run via `backend/Dockerfile.backend`.
+- **Frontend + API routes** → Vercel. Push to `main`, deploys automatically.
+- **NestJS microservice** → Google Cloud Run via `backend/Dockerfile.backend`. Deployed and live; not yet connected to the frontend.
 - **Local full-stack** → `docker-compose up --build` runs both services in containers.
 
 ---
