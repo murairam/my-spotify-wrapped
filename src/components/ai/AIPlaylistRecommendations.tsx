@@ -57,14 +57,14 @@ export default function AIPlaylistRecommendations({
       console.log(`🎵 Processing AI playlist ${i + 1}:`, aiPlaylist);
 
       const name = aiPlaylist && typeof aiPlaylist.name === 'string' ? aiPlaylist.name : `AI Playlist ${i + 1}`;
-      const description = aiPlaylist && typeof aiPlaylist.description === 'string' ? aiPlaylist.description : 'AI curated for your taste';
+      const description = aiPlaylist && typeof aiPlaylist.description === 'string' ? aiPlaylist.description : 'Curated for your taste';
       const songsArray = aiPlaylist && Array.isArray(aiPlaylist.songs) ? (aiPlaylist.songs.filter((s: unknown) => typeof s === 'string') as string[]) : [];
 
       const processedPlaylist: PlaylistRecommendation = {
         name,
         description,
         image: getPlaylistImage(i),
-        curator: 'AI Curator',
+        curator: 'Picked for you',
         tracks: songsArray.length || 30,
         songs: songsArray,
         url: undefined // Ensure we always try to get a real URL
@@ -376,9 +376,9 @@ export default function AIPlaylistRecommendations({
       <div className="p-6 border-b border-[#00BFFF]/10">
         <div className="flex items-center gap-3">
           <FaListUl className="text-[#00BFFF] text-2xl" />
-          <h2 className="text-2xl font-bold text-white">AI Playlist Suggestions</h2>
-          <span className="text-gray-400 text-sm ml-auto">
-            {playlists.length} AI-curated mixes
+          <h2 className="text-2xl font-bold text-white">Playlist Suggestions</h2>
+          <span className="text-white/40 text-sm ml-auto">
+            {playlists.length} picks
           </span>
         </div>
       </div>
@@ -427,12 +427,12 @@ export default function AIPlaylistRecommendations({
                 <h4 className="font-semibold text-white text-sm leading-tight truncate group-hover:text-[#00BFFF] transition-colors">
                   {playlist.name}
                 </h4>
-                <p className="text-gray-400 text-xs mt-1 line-clamp-2 leading-tight">
+                <p className="text-white/50 text-xs mt-1 line-clamp-2 leading-tight">
                   {playlist.description}
                 </p>
 
                 {/* Meta */}
-                <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                <div className="flex items-center justify-between mt-2 text-xs text-white/35">
                   <span>{playlist.tracks} songs</span>
                   <div className="flex items-center gap-1">
                     <span>{playlist.curator}</span>
@@ -442,7 +442,7 @@ export default function AIPlaylistRecommendations({
 
                 {/* Songs preview */}
                 {playlist.songs && playlist.songs.length > 0 && (
-                  <div className="mt-2 text-xs text-gray-500">
+                  <div className="mt-2 text-xs text-white/35">
                     <div className="truncate">
                       🎵 {playlist.songs.slice(0, 2).join(' • ')}
                     </div>
