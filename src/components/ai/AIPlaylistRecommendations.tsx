@@ -1,5 +1,4 @@
 // src/components/ai/AIPlaylistRecommendations.tsx
-// WORKING VERSION - Uses AI Analysis + Spotify API
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';

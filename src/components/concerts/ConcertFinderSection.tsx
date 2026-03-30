@@ -102,7 +102,7 @@ export default function ConcertFinderSection({ spotifyData, className = '' }: Co
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && searchConcerts()}
+                onKeyDown={(e) => e.key === 'Enter' && searchConcerts()}
                 placeholder="Enter your city..."
                 className="w-full pl-10 pr-4 py-3 bg-black border border-[#00BFFF]/20 rounded-lg text-white placeholder-gray-500 focus:border-[#00BFFF]/60 focus:outline-none transition-all"
               />

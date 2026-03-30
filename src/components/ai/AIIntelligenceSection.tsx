@@ -61,7 +61,7 @@ function TopArtistStatCard({ artists }: { artists: SpotifyArtist[] }) {
     <div className="rounded-2xl overflow-hidden border border-white/8 p-6"
       style={{ background: 'linear-gradient(135deg, #080808, #0a0814)' }}>
       <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-5">Your Artist Loyalty</p>
-      <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
         {top.map((artist, i) => {
           const pct = estimateTopPercent(i, artist.popularity ?? 70);
           return (
@@ -73,11 +73,11 @@ function TopArtistStatCard({ artists }: { artists: SpotifyArtist[] }) {
                   alt={artist.name}
                   width={52}
                   height={52}
-                  className="w-13 h-13 rounded-full object-cover flex-shrink-0 ring-2 ring-white/10"
+                  className="w-14 h-14 rounded-full object-cover flex-shrink-0 ring-2 ring-white/10"
                   unoptimized
                 />
               ) : (
-                <div className="w-13 h-13 rounded-full bg-white/5 flex-shrink-0" />
+                <div className="w-14 h-14 rounded-full bg-white/5 flex-shrink-0" />
               )}
 
               <div className="flex-1 min-w-0">

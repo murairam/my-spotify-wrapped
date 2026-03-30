@@ -1,4 +1,4 @@
-// 1. FIXED: src/app/api/spotify/search-playlists/route.ts
+// src/app/api/spotify/search-playlists/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 // This route uses request headers / server session and must be dynamic
 export const dynamic = 'force-dynamic';

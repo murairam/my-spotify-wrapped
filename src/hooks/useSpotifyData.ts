@@ -1,4 +1,5 @@
 import { useSession, signOut } from 'next-auth/react';
+import { useEffect } from 'react';
 /**
  * Custom hook that signs out the user if the session has a refresh token error
  * Use this in your top-level component to force sign-out on token refresh failure
@@ -6,10 +7,11 @@ import { useSession, signOut } from 'next-auth/react';
 import type { Session } from 'next-auth';
 export function useSpotifySessionGuard() {
   const { data: session, status } = useSession() as { data: (Session & { error?: string }) | null, status: string };
-  if (session && session.error === 'RefreshAccessTokenError') {
-    // Optionally, show a toast or UI message here before sign out
-    signOut({ callbackUrl: '/' });
-  }
+  useEffect(() => {
+    if (session?.error === 'RefreshAccessTokenError') {
+      signOut({ callbackUrl: '/' });
+    }
+  }, [session]);
   return { session, status };
 }
 
