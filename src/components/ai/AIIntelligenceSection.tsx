@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { FaBrain, FaFire } from 'react-icons/fa';
 import type { SpotifyData, SpotifyArtist } from '@/types/spotify';
@@ -199,8 +199,18 @@ function StepIndicator({ current }: { current: Step }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function AIIntelligenceSection({ spotifyData, recentTracks, className = '' }: AIIntelligenceSectionProps) {
-  const { analysis, error, analyzeData } = useAIAnalysis();
+  const { analysis, error, analyzeData, clearAnalysis } = useAIAnalysis();
   const [storyStep, setStoryStep] = useState<Step>('start');
+  const prevSpotifyDataRef = useRef(spotifyData);
+
+  // Reset analysis when spotifyData changes (e.g. timeframe switch)
+  useEffect(() => {
+    if (prevSpotifyDataRef.current !== spotifyData) {
+      prevSpotifyDataRef.current = spotifyData;
+      setStoryStep('start');
+      clearAnalysis();
+    }
+  }, [spotifyData, clearAnalysis]);
 
   const handleStartAnalysis = async () => {
     if (!spotifyData) return;
