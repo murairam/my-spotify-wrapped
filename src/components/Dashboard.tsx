@@ -441,9 +441,9 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
           <div className="flex items-center justify-center gap-3 text-gray-400">
               <span className="flex items-center justify-center gap-1">
                 Data provided by
-                <Image src="/spotify-logo.svg" alt="Spotify" width={24} height={24} className="inline align-middle mx-1" unoptimized />
+                <Image src="/spotify-green-logo.png" alt="Spotify" width={32} height={32} className="inline align-middle mx-1" unoptimized />
                 Web API and
-                <Image src="/mistral-logo-color-white.png" alt="Mistral" width={24} height={24} className="inline align-middle mx-1" unoptimized />
+                <Image src="/m-boxed-rainbow.png" alt="Mistral" width={32} height={32} className="inline align-middle mx-1" unoptimized />
                 Web API
               </span>
           </div>

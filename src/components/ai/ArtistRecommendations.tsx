@@ -1,5 +1,4 @@
 // src/components/ai/ArtistRecommendations.tsx
-// FIXED VERSION - Real Spotify Artist and Song Links
 "use client";
 
 import React, { useEffect, useState } from 'react';
