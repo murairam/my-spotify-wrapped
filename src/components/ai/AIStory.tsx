@@ -48,7 +48,7 @@ const AIStory: React.FC<AIStoryProps> = ({ analysis }) => {
 
       {/* Pull quote — the hero */}
       <div className="px-6 pt-7 pb-5 border-b border-white/5">
-        <p className="text-[10px] tracking-[0.2em] uppercase text-[#00BFFF]/40 mb-4">Your Musical Story</p>
+        <p className="text-xs font-medium text-[#00BFFF]/60 mb-4">Your story</p>
         <div className="relative pl-5">
           {/* Left accent bar */}
           <div className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full"
@@ -74,7 +74,7 @@ const AIStory: React.FC<AIStoryProps> = ({ analysis }) => {
         {showFull ? (
           <div className="space-y-3">
             {paragraphs.map((para, i) => (
-              <p key={i} className={`leading-relaxed text-sm ${i === 0 ? 'text-white/80' : 'text-white/55'}`}>
+              <p key={i} className={`leading-relaxed text-sm ${i === 0 ? 'text-white/85' : 'text-white/65'}`}>
                 {renderMarkdown(para)}
               </p>
             ))}
@@ -95,9 +95,6 @@ const AIStory: React.FC<AIStoryProps> = ({ analysis }) => {
         )}
       </div>
 
-      <div className="px-6 pb-4">
-        <p className="text-[10px] text-white/20 text-right">✦ Crafted by Mistral AI</p>
-      </div>
     </div>
   );
 };

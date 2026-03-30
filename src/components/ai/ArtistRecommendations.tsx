@@ -242,8 +242,8 @@ export default function ArtistRecommendations({ recommendations, className = '' 
           </div>
           <div>
             <h3 className="text-2xl font-bold text-white">Artists You&apos;ll Love</h3>
-            <p className="text-gray-400 text-sm">
-              {enrichedArtists.length} AI-curated discoveries
+            <p className="text-white/45 text-sm">
+              {enrichedArtists.length} picks based on your taste
             </p>
           </div>
         </div>

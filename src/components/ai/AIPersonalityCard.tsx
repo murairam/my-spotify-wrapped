@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 
 interface AIPersonalityCardProps {
   analysis: {
@@ -37,7 +36,6 @@ function firstSentence(text: string): string {
 export default function AIPersonalityCard({ analysis, className = '' }: AIPersonalityCardProps) {
   const [expanded, setExpanded] = useState<number | null>(null);
   const enhanced = analysis?.enhanced || {};
-  const confidence = analysis?.confidence ?? 0;
 
   const musicPersonality = enhanced.musicPersonality || '';
   const discoveryStyle   = enhanced.discoveryStyle   || '';
@@ -90,16 +88,8 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
       style={{ background: 'linear-gradient(135deg, #080808, #09090f)' }}>
 
       {/* Header */}
-      <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Image src="/m-boxed-rainbow.png" alt="Mistral" width={24} height={24} unoptimized />
-          <span className="text-white font-semibold text-sm">Your Musical Personality</span>
-        </div>
-        {confidence > 0 && (
-          <span className="text-[10px] font-semibold tracking-wider uppercase text-[#00BFFF]/60 bg-[#00BFFF]/8 border border-[#00BFFF]/15 px-2.5 py-1 rounded-full">
-            {confidence}% confidence
-          </span>
-        )}
+      <div className="px-6 py-4 border-b border-white/5">
+        <span className="text-white font-semibold text-sm">Your personality</span>
       </div>
 
       {/* 2×2 chip grid */}
@@ -114,27 +104,20 @@ export default function AIPersonalityCard({ analysis, className = '' }: AIPerson
               style={{ background: chip.bg, border: `1px solid ${chip.border}` }}
             >
               <div className="text-2xl mb-2">{chip.icon}</div>
-              <p className="text-[10px] tracking-[0.15em] uppercase mb-1.5" style={{ color: chip.accent, opacity: 0.7 }}>
+              <p className="text-[11px] font-medium mb-1.5" style={{ color: chip.accent, opacity: 0.8 }}>
                 {chip.label}
               </p>
-              <p className="text-xs text-white/70 leading-relaxed">
+              <p className="text-xs text-white/75 leading-relaxed">
                 {isOpen ? chip.full.replace(/\*\*/g, '') : chip.headline}
               </p>
               {!isOpen && chip.full !== chip.headline && (
-                <p className="text-[10px] mt-2" style={{ color: chip.accent, opacity: 0.5 }}>tap to expand ↓</p>
+                <p className="text-[11px] mt-2" style={{ color: chip.accent, opacity: 0.55 }}>tap to expand ↓</p>
               )}
             </button>
           );
         })}
       </div>
 
-      {/* Footer */}
-      <div className="px-6 py-3 border-t border-white/5">
-        <p className="text-[10px] text-white/25 text-center flex items-center justify-center gap-1.5">
-          <Image src="/mistral-logo-color-white.png" alt="Mistral" width={12} height={12} unoptimized />
-          Powered by Mistral AI
-        </p>
-      </div>
     </div>
   );
 }
