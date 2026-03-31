@@ -170,8 +170,8 @@ RESPONSE REQUIREMENTS:
 RESPONSE_SCHEMA:
 {
   "summary": "A fun, engaging 2-3 sentence summary with **bold highlights** and emojis that captures the user's musical essence and shows off AI personality",
-  "musicSpiritAnimal": "An emoji followed by a 2-word animal name that matches this user's listening soul, e.g. '🦅 Night Hawk' or '🐺 Lone Wolf' or '🦋 Dream Chaser'. Be creative and base it on their actual genres and artists.",
-  "spiritAnimalDescription": "One sharp, witty sentence (max 15 words) describing what this spirit animal says about their music taste. E.g. 'Hunts for rare sounds at 2am. Rarely follows the flock.'",
+  "musicSpiritAnimal": "An emoji followed by a real animal name (single animal, e.g. '🦉 Owl', '🐺 Wolf', '🦊 Fox', '🐆 Leopard', '🦅 Eagle'). Pick the real animal that best matches this user's music personality based on their actual genres and artists. No made-up names.",
+  "spiritAnimalDescription": "One sentence (max 20 words) explaining WHY this specific animal fits their music taste. Connect it directly to their genres or listening habits.",
   "threeWordTagline": ["Adjective1", "Adjective2", "Adjective3"],
   "newArtists": [{ "artist": "", "genre": "", "song": "", "reason": "" }],
   "playlists": [{ "name": "", "description": "", "occasion": "", "songs": ["Song - Artist"], "seedArtists": ["Artist Name"] }],
