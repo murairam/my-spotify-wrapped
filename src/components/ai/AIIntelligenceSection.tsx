@@ -159,17 +159,21 @@ function BiggestListeningDayCard({ recentTracks }: { recentTracks: RecentTrack[]
 
 // ─── Step indicator ───────────────────────────────────────────────────────────
 
-function StepIndicator({ current }: { current: Step }) {
+function StepIndicator({ current, onStepClick }: { current: Step; onStepClick: (step: typeof STEPS[number]['key']) => void }) {
   const currentIdx = STEPS.findIndex(s => s.key === current);
   return (
     <div className="flex items-center justify-center gap-2 mb-6">
       {STEPS.map((step, i) => {
-        const done   = i < currentIdx;
-        const active = step.key === current;
-        const accent = STEP_ACCENT[step.key];
+        const done      = i < currentIdx;
+        const active    = step.key === current;
+        const clickable = done || active;
+        const accent    = STEP_ACCENT[step.key];
         return (
           <React.Fragment key={step.key}>
-            <div className="flex flex-col items-center gap-1">
+            <div
+              className={`flex flex-col items-center gap-1 ${clickable ? 'cursor-pointer' : 'cursor-default'}`}
+              onClick={() => clickable && onStepClick(step.key)}
+            >
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                 style={{
@@ -296,9 +300,9 @@ export default function AIIntelligenceSection({ spotifyData, recentTracks, class
         {/* ── Steps ── */}
         {(storyStep === 'dna' || storyStep === 'personality' || storyStep === 'recommendations') && (
           <div>
-            <StepIndicator current={storyStep} />
+            <StepIndicator current={storyStep} onStepClick={(key) => setStoryStep(key)} />
 
-            <div className="rounded-2xl p-5 mb-5 space-y-4"
+            <div className="rounded-2xl p-5 mb-5 flex flex-col gap-6"
               style={{ background: STEP_GRADIENTS[storyStep], border: `1px solid ${accent}18` }}>
 
               {/* Step 1 — DNA: Top % + Biggest Day + Genre DNA */}
