@@ -53,8 +53,8 @@ const MusicSpiritAnimal: React.FC<MusicSpiritAnimalProps> = ({ analysis }) => {
       </div>
 
       {/* Label */}
-      <p className="relative text-[10px] font-semibold tracking-[0.25em] uppercase text-[#00BFFF]/50 mb-5">
-        Your Music Spirit Animal
+      <p className="relative text-xs font-medium text-[#00BFFF]/60 mb-5">
+        Your music spirit animal
       </p>
 
       {/* Emoji */}
@@ -80,7 +80,7 @@ const MusicSpiritAnimal: React.FC<MusicSpiritAnimalProps> = ({ analysis }) => {
 
       {/* AI-generated one-liner */}
       {spiritAnimalDescription && (
-        <p className="relative text-white/50 text-sm max-w-xs mx-auto leading-relaxed mb-5">
+        <p className="relative text-white/60 text-sm max-w-xs mx-auto leading-relaxed mb-5">
           {spiritAnimalDescription}
         </p>
       )}
@@ -103,8 +103,7 @@ const MusicSpiritAnimal: React.FC<MusicSpiritAnimalProps> = ({ analysis }) => {
       {/* Subtle divider */}
       <div className="relative w-16 h-px bg-gradient-to-r from-transparent via-[#00BFFF]/30 to-transparent mx-auto mt-2" />
 
-      {/* Watermark — key for shareability */}
-      <p className="relative mt-4 text-[10px] text-white/20 tracking-widest uppercase">
+      <p className="relative mt-4 text-xs text-white/25">
         my-spotify-wrapped
       </p>
     </div>

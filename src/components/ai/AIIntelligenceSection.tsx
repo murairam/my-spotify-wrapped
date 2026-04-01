@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { FaBrain, FaFire } from 'react-icons/fa';
 import type { SpotifyData, SpotifyArtist } from '@/types/spotify';
@@ -60,7 +60,7 @@ function TopArtistStatCard({ artists }: { artists: SpotifyArtist[] }) {
   return (
     <div className="rounded-2xl overflow-hidden border border-white/8 p-6"
       style={{ background: 'linear-gradient(135deg, #080808, #0a0814)' }}>
-      <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-5">Your Artist Loyalty</p>
+      <p className="text-xs font-medium text-white/45 mb-5">Your artist loyalty</p>
       <div className="space-y-4">
         {top.map((artist, i) => {
           const pct = estimateTopPercent(i, artist.popularity ?? 70);
@@ -73,15 +73,15 @@ function TopArtistStatCard({ artists }: { artists: SpotifyArtist[] }) {
                   alt={artist.name}
                   width={52}
                   height={52}
-                  className="w-13 h-13 rounded-full object-cover flex-shrink-0 ring-2 ring-white/10"
+                  className="w-14 h-14 rounded-full object-cover flex-shrink-0 ring-2 ring-white/10"
                   unoptimized
                 />
               ) : (
-                <div className="w-13 h-13 rounded-full bg-white/5 flex-shrink-0" />
+                <div className="w-14 h-14 rounded-full bg-white/5 flex-shrink-0" />
               )}
 
               <div className="flex-1 min-w-0">
-                <p className="text-white/50 text-xs mb-0.5 truncate">{artist.name}</p>
+                <p className="text-white/65 text-xs mb-0.5 truncate">{artist.name}</p>
                 {/* Big % stat */}
                 <div className="flex items-baseline gap-1.5">
                   <span
@@ -98,7 +98,7 @@ function TopArtistStatCard({ artists }: { artists: SpotifyArtist[] }) {
                     Top {pct}%
                   </span>
                 </div>
-                <p className="text-white/30 text-xs">of all {artist.name} listeners</p>
+                <p className="text-white/45 text-xs">of all {artist.name} listeners</p>
               </div>
             </div>
           );
@@ -139,7 +139,7 @@ function BiggestListeningDayCard({ recentTracks }: { recentTracks: RecentTrack[]
   return (
     <div className="rounded-2xl border border-white/8 p-6 text-center"
       style={{ background: 'linear-gradient(135deg, rgba(255,215,0,0.06), rgba(255,107,107,0.04), #080808)' }}>
-      <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-4">Biggest Music Day</p>
+      <p className="text-xs font-medium text-white/45 mb-4">Biggest music day</p>
       <p
         className="text-5xl font-black mb-2"
         style={{
@@ -151,8 +151,8 @@ function BiggestListeningDayCard({ recentTracks }: { recentTracks: RecentTrack[]
       >
         {topDay}
       </p>
-      <p className="text-white/40 text-sm mb-3">{topCount} tracks played that day</p>
-      <p className="text-white/25 text-xs italic">{vibe}</p>
+      <p className="text-white/50 text-sm mb-3">{topCount} tracks played that day</p>
+      <p className="text-white/40 text-xs italic">{vibe}</p>
     </div>
   );
 }
@@ -184,8 +184,8 @@ function StepIndicator({ current, onStepClick }: { current: Step; onStepClick: (
               >
                 {done ? '✓' : step.num}
               </div>
-              <span className="text-[10px] font-medium uppercase tracking-wide"
-                style={{ color: active ? accent : done ? `${accent}70` : 'rgba(255,255,255,0.25)' }}>
+              <span className="text-xs font-medium"
+                style={{ color: active ? accent : done ? `${accent}70` : 'rgba(255,255,255,0.3)' }}>
                 {step.label}
               </span>
             </div>
@@ -203,8 +203,18 @@ function StepIndicator({ current, onStepClick }: { current: Step; onStepClick: (
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function AIIntelligenceSection({ spotifyData, recentTracks, className = '' }: AIIntelligenceSectionProps) {
-  const { analysis, error, analyzeData } = useAIAnalysis();
+  const { analysis, error, analyzeData, clearAnalysis } = useAIAnalysis();
   const [storyStep, setStoryStep] = useState<Step>('start');
+  const prevSpotifyDataRef = useRef(spotifyData);
+
+  // Reset analysis when spotifyData changes (e.g. timeframe switch)
+  useEffect(() => {
+    if (prevSpotifyDataRef.current !== spotifyData) {
+      prevSpotifyDataRef.current = spotifyData;
+      setStoryStep('start');
+      clearAnalysis();
+    }
+  }, [spotifyData, clearAnalysis]);
 
   const handleStartAnalysis = async () => {
     if (!spotifyData) return;
@@ -241,11 +251,8 @@ export default function AIIntelligenceSection({ spotifyData, recentTracks, class
           <FaBrain className="text-black text-lg" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-white">Music Intelligence</h2>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <Image src="/m-boxed-rainbow.png" alt="Mistral" width={13} height={13} unoptimized />
-            <span className="text-xs text-white/40">Powered by Mistral AI</span>
-          </div>
+          <h2 className="text-lg font-bold text-white">Your Sound</h2>
+          <p className="text-xs text-white/40 mt-0.5">A deep look at your listening</p>
         </div>
       </div>
 
@@ -259,9 +266,9 @@ export default function AIIntelligenceSection({ spotifyData, recentTracks, class
               style={{ background: 'linear-gradient(135deg, #00BFFF, #9B8BF4)', boxShadow: '0 0 40px rgba(0,191,255,0.25)' }}>
               <FaBrain className="text-white text-3xl" />
             </div>
-            <h3 className="text-2xl font-black text-white mb-3">Ready to meet your music self?</h3>
-            <p className="text-white/45 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
-              Mistral AI will decode your listening DNA, find your spirit animal, and surface artists you&apos;ll obsess over.
+            <h3 className="text-2xl font-black text-white mb-3">What does your music say about you?</h3>
+            <p className="text-white/50 text-sm max-w-sm mx-auto mb-8 leading-relaxed">
+              We&apos;ll read your listening history and put together a portrait of your taste — your genres, your vibe, artists you&apos;ll probably love.
             </p>
             <button
               onClick={handleStartAnalysis}
@@ -269,9 +276,8 @@ export default function AIIntelligenceSection({ spotifyData, recentTracks, class
               className="inline-flex items-center gap-3 font-bold px-8 py-4 rounded-2xl text-black transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ background: 'linear-gradient(135deg, #00BFFF, #33d4ff)', boxShadow: '0 0 30px rgba(0,191,255,0.4)' }}
             >
-              <FaBrain />
-              Analyze My Music
               <FaFire />
+              Reveal My Story
             </button>
           </div>
         )}
@@ -285,11 +291,11 @@ export default function AIIntelligenceSection({ spotifyData, recentTracks, class
               <div className="absolute inset-2 rounded-full border-4 border-transparent border-t-[#9B8BF4] animate-spin"
                 style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
             </div>
-            <p className="text-white font-semibold mb-2">Analyzing your listening DNA…</p>
-            <p className="text-white/35 text-sm">Usually takes 10–20 seconds</p>
+            <p className="text-white font-semibold mb-2">Reading your taste…</p>
+            <p className="text-white/45 text-sm">Usually takes 10–20 seconds</p>
             <div className="flex justify-center gap-2 mt-5 flex-wrap">
               {['Finding your spirit animal', 'Mapping your genres', 'Writing your story'].map((label) => (
-                <span key={label} className="text-[10px] text-white/25 bg-white/5 rounded-full px-3 py-1">
+                <span key={label} className="text-xs text-white/35 bg-white/5 rounded-full px-3 py-1.5">
                   {label}
                 </span>
               ))}
@@ -321,14 +327,8 @@ export default function AIIntelligenceSection({ spotifyData, recentTracks, class
                 <>
                   <AIStory analysis={analysis} />
                   <AIPersonalityCard analysis={analysis ?? { enhanced: {}, confidence: 0 }} />
-                  {/* Spirit Animal as the climactic reveal */}
                   {analysis?.enhanced?.musicSpiritAnimal && (
-                    <div>
-                      <p className="text-center text-[10px] tracking-[0.2em] uppercase text-[#9B8BF4]/50 mb-3 mt-2">
-                        ✦ Your Musical Identity Revealed ✦
-                      </p>
-                      <MusicSpiritAnimal analysis={analysis} />
-                    </div>
+                    <MusicSpiritAnimal analysis={analysis} />
                   )}
                 </>
               )}

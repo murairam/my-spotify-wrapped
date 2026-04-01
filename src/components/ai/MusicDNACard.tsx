@@ -45,7 +45,7 @@ export default function MusicDNACard({ spotifyData, analysis, className = '' }: 
       {/* Three-word tagline hero — AI generated */}
       {threeWordTagline && threeWordTagline.length > 0 && (
         <div className="px-6 pt-6 pb-4 text-center border-b border-white/5">
-          <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 mb-3">Your Sound in Three Words</p>
+          <p className="text-xs font-medium text-white/40 mb-3">Your sound in three words</p>
           <div className="flex justify-center gap-2 flex-wrap">
             {threeWordTagline.map((word, i) => (
               <span
@@ -72,7 +72,7 @@ export default function MusicDNACard({ spotifyData, analysis, className = '' }: 
         {/* Mood badge */}
         {moodLabel && moodStyle && (
           <div className="flex items-center justify-between">
-            <p className="text-[10px] tracking-[0.15em] uppercase text-white/30">Listening Mood</p>
+            <p className="text-xs font-medium text-white/45">Listening mood</p>
             <span
               className="text-xs font-semibold px-3 py-1.5 rounded-full"
               style={{ background: moodStyle.bg, color: moodStyle.text, border: `1px solid ${moodStyle.border}` }}
@@ -85,10 +85,10 @@ export default function MusicDNACard({ spotifyData, analysis, className = '' }: 
         {/* Genre bars */}
         {genres.length > 0 && (
           <div className="space-y-2.5">
-            <p className="text-[10px] tracking-[0.15em] uppercase text-white/30 mb-3">Top Genres</p>
+            <p className="text-xs font-medium text-white/45 mb-3">Top genres</p>
             {genres.map((genre, i) => (
               <div key={genre} className="flex items-center gap-3">
-                <span className="text-xs text-white/50 w-28 truncate capitalize">{genre}</span>
+                <span className="text-xs text-white/65 w-28 truncate capitalize">{genre}</span>
                 <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <div
                     className="h-full rounded-full"
@@ -110,7 +110,7 @@ export default function MusicDNACard({ spotifyData, analysis, className = '' }: 
 
         {/* Mainstream bar — replaces the boring 67%/33% boxes */}
         <div>
-          <div className="flex justify-between text-[10px] uppercase tracking-wider text-white/30 mb-2">
+          <div className="flex justify-between text-xs text-white/45 mb-2">
             <span>Underground</span>
             <span>Mainstream</span>
           </div>
@@ -126,8 +126,8 @@ export default function MusicDNACard({ spotifyData, analysis, className = '' }: 
             />
           </div>
           <div className="flex justify-between mt-1.5">
-            <span className="text-[10px] text-white/40">{100 - mainstreamScore}% unique</span>
-            <span className="text-[10px] text-white/40">{mainstreamScore}% popular</span>
+            <span className="text-xs text-white/45">{100 - mainstreamScore}% unique</span>
+            <span className="text-xs text-white/45">{mainstreamScore}% popular</span>
           </div>
         </div>
       </div>

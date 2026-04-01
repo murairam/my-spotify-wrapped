@@ -186,51 +186,42 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
               </div>
 
               <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col">
                   {currentData.topTracks.slice(0, 10).map((track, index) => (
                     <div
                       key={track.id}
-                      className={`flex items-center gap-4 p-4 rounded-lg bg-white/[0.03] hover:bg-[#00BFFF]/5 border border-transparent hover:border-[#00BFFF]/15 transition-all group ${index < 3 ? 'md:p-6' : ''}`}
+                      className="flex items-center gap-4 py-4 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors group px-2 -mx-2 rounded"
                     >
-                      <div className={`${index < 3 ? 'w-12 h-12 text-lg' : 'w-10 h-10 text-sm'} bg-[#00BFFF] rounded-full flex items-center justify-center text-black font-bold flex-shrink-0`}>
+                      <span className={`w-6 shrink-0 text-right font-mono ${index < 3 ? 'text-[#00BFFF] font-bold text-base' : 'text-gray-600 text-sm'}`}>
                         {index + 1}
-                      </div>
+                      </span>
                       <Image
                         src={track.images[0]?.url}
                         alt={`Album art for ${track.name}`}
-                        width={index < 3 ? 64 : 48}
-                        height={index < 3 ? 64 : 48}
-                        className={`${index < 3 ? 'w-16 h-16' : 'w-12 h-12'} rounded object-cover`}
+                        width={index < 3 ? 56 : 44}
+                        height={index < 3 ? 56 : 44}
+                        className={`${index < 3 ? 'w-14 h-14' : 'w-11 h-11'} rounded object-cover shrink-0`}
                         unoptimized
                       />
-                      <div className="flex-1 min-w-0">
-                        <h4 className={`${index < 3 ? 'font-bold text-lg' : 'font-semibold text-white'} truncate text-white`}>
-                          {track.name}
-                        </h4>
-                        <p className={`${index < 3 ? 'text-gray-200 text-sm' : 'text-gray-400 text-sm'} truncate`}>{track.artist}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {track.external_urls?.spotify && (
-                          <a
-                            href={track.external_urls.spotify}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#00BFFF] hover:text-white transition-colors"
-                            title="Open in Spotify"
-                            aria-label={`Open ${track.name} by ${track.artist} in Spotify`}
-                          >
-                            <FaExternalLinkAlt size={14} />
-                          </a>
-                        )}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <FaPlay className="text-[#00BFFF] cursor-pointer" size={14} aria-label={`Play ${track.name}`}/>
-                        </div>
-                      </div>
+                      <p className={`flex-1 min-w-0 truncate ${index < 3 ? 'font-semibold text-white text-lg' : 'text-gray-200'}`}>
+                        {track.name}
+                      </p>
+                      <p className="text-gray-500 text-sm shrink-0 text-right">{track.artist}</p>
+                      {track.external_urls?.spotify && (
+                        <a
+                          href={track.external_urls.spotify}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-[#00BFFF] transition-all shrink-0"
+                          aria-label={`Open ${track.name} in Spotify`}
+                        >
+                          <FaExternalLinkAlt size={11} />
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>
 
-                {/* Spotify Attribution */}
                 <div className="mt-6 pt-4 border-t border-[#00BFFF]/10 flex items-center justify-center gap-2 text-gray-400 text-sm">
                   <Image src="/spotify-icon.png" alt="Spotify" width={16} height={16} className="w-4 h-4" unoptimized />
                   <span>Powered by Spotify</span>
@@ -251,35 +242,33 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
               </div>
 
               <div className="p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="flex flex-col">
                   {currentData.topArtists.slice(0, 10).map((artist, index) => (
-                    <div key={artist.id} className={`text-center p-4 rounded-lg bg-white/[0.03] hover:bg-[#00BFFF]/5 border border-transparent hover:border-[#00BFFF]/15 transition-all group ${index < 3 ? 'md:p-6' : ''}`}>
-                      <div className="relative">
-                        <Image
-                          src={artist.images[0]?.url}
-                          alt={`Photo of ${artist.name}`}
-                          width={index < 3 ? 112 : 80}
-                          height={index < 3 ? 112 : 80}
-                          className={`${index < 3 ? 'w-28 h-28' : 'w-20 h-20'} rounded-full mx-auto mb-3 object-cover ring-2 ring-[#00BFFF]/20`}
-                          unoptimized
-                        />
-                        <div className={`absolute -top-2 -right-2 ${index < 3 ? 'w-10 h-10 text-sm' : 'w-8 h-8 text-xs'} bg-[#00BFFF] rounded-full flex items-center justify-center text-black font-bold`}>
-                          {index + 1}
-                        </div>
-                      </div>
-                      <h4 className={`${index < 3 ? 'font-bold text-lg' : 'font-semibold text-sm'} text-white mb-1`}>{artist.name}</h4>
-                      <p className={`${index < 3 ? 'text-gray-200 text-sm' : 'text-gray-400 text-xs'} mb-2`}>{artist.genres.slice(0, 2).join(', ')}</p>
+                    <div key={artist.id} className="flex items-center gap-4 py-4 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] transition-colors group px-2 -mx-2 rounded">
+                      <span className={`w-6 shrink-0 text-right font-mono ${index < 3 ? 'text-[#00BFFF] font-bold text-base' : 'text-gray-600 text-sm'}`}>
+                        {index + 1}
+                      </span>
+                      <Image
+                        src={artist.images[0]?.url}
+                        alt={`Photo of ${artist.name}`}
+                        width={index < 3 ? 56 : 44}
+                        height={index < 3 ? 56 : 44}
+                        className={`${index < 3 ? 'w-14 h-14' : 'w-11 h-11'} rounded-full object-cover shrink-0 ring-1 ${index < 3 ? 'ring-[#00BFFF]/40' : 'ring-white/10'}`}
+                        unoptimized
+                      />
+                      <p className={`flex-1 min-w-0 truncate ${index < 3 ? 'font-semibold text-white text-lg' : 'text-gray-200'}`}>{artist.name}</p>
+                      {artist.genres.length > 0 && (
+                        <p className="text-gray-500 text-sm shrink-0 text-right">{artist.genres.slice(0, 2).join(', ')}</p>
+                      )}
                       {artist.external_urls?.spotify && (
                         <a
                           href={artist.external_urls.spotify}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[#00BFFF] hover:text-white transition-colors text-xs"
-                          title="Open in Spotify"
+                          className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-[#00BFFF] transition-all shrink-0"
                           aria-label={`Open ${artist.name} in Spotify`}
                         >
-                          <FaExternalLinkAlt size={10} />
-                          <span>Open</span>
+                          <FaExternalLinkAlt size={11} />
                         </a>
                       )}
                     </div>
@@ -301,7 +290,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
               {currentData.musicIntelligence ? (
                 (() => {
                   const mi = currentData.musicIntelligence!;
-                  const cx = 100, cy = 100, maxR = 62;
+                  const cx = 115, cy = 105, maxR = 62;
                   const axes = [
                     { label: 'Mainstream', value: mi.mainstreamTaste ?? 0, angle: -Math.PI / 2 },
                     { label: 'Underground', value: mi.undergroundTaste ?? 0, angle: 0 },
@@ -317,7 +306,7 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
                   const dataPts = axes.map(a => { const p = pt(a.angle, a.value); return `${p.x},${p.y}`; }).join(' ');
                   return (
                     <div className="flex flex-col items-center">
-                      <svg width="100%" viewBox="0 0 200 200" className="max-w-[190px]">
+                      <svg width="100%" viewBox="0 0 240 215" className="max-w-[220px]">
                         {[25, 50, 75, 100].map(pct => (
                           <polygon key={pct} points={ringPts(pct)} fill="none" stroke="rgba(0,191,255,0.1)" strokeWidth="0.8" />
                         ))}
@@ -330,10 +319,10 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
                           const p = pt(a.angle, a.value);
                           return <circle key={i} cx={p.x} cy={p.y} r="3" fill="#00BFFF" />;
                         })}
-                        <text x={cx} y={cy - maxR - 10} textAnchor="middle" fill="#9ca3af" fontSize="9.5">Mainstream</text>
-                        <text x={cx + maxR + 8} y={cy} textAnchor="start" dominantBaseline="middle" fill="#9ca3af" fontSize="9.5">Underground</text>
-                        <text x={cx} y={cy + maxR + 14} textAnchor="middle" fill="#9ca3af" fontSize="9.5">Vintage</text>
-                        <text x={cx - maxR - 8} y={cy} textAnchor="end" dominantBaseline="middle" fill="#9ca3af" fontSize="9.5">Diversity</text>
+                        <text x={cx} y={cy - maxR - 10} textAnchor="middle" fill="#9ca3af" fontSize="9">Mainstream</text>
+                        <text x={cx + maxR + 6} y={cy} textAnchor="start" dominantBaseline="middle" fill="#9ca3af" fontSize="9">Underground</text>
+                        <text x={cx} y={cy + maxR + 14} textAnchor="middle" fill="#9ca3af" fontSize="9">Vintage</text>
+                        <text x={cx - maxR - 6} y={cy} textAnchor="end" dominantBaseline="middle" fill="#9ca3af" fontSize="9">Diversity</text>
                       </svg>
                       <div className="grid grid-cols-2 gap-1.5 w-full mt-1 text-xs">
                         <div className="flex justify-between px-2 py-1 rounded bg-white/[0.03]">
@@ -429,7 +418,6 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
         {/* AI Intelligence Section - Full Width Below Main Dashboard */}
         <div className="mt-16 pt-8 border-t border-[#00BFFF]/10 space-y-8">
           <AIIntelligenceSection
-            key={timeRange}
             spotifyData={spotifyDataForAI}
             recentTracks={isDemo ? getRecentlyPlayedForTimeRange() : ((currentData as unknown as HookSpotifyData)?.recentTracks || null)}
             className="w-full"
@@ -441,9 +429,9 @@ export default function Dashboard({ isDemo = false, onLogout, spotifyData, timeR
           <div className="flex items-center justify-center gap-3 text-gray-400">
               <span className="flex items-center justify-center gap-1">
                 Data provided by
-                <Image src="/spotify-logo.svg" alt="Spotify" width={24} height={24} className="inline align-middle mx-1" unoptimized />
+                <Image src="/spotify-green-logo.png" alt="Spotify" width={32} height={32} className="inline align-middle mx-1" unoptimized />
                 Web API and
-                <Image src="/mistral-logo-color-white.png" alt="Mistral" width={24} height={24} className="inline align-middle mx-1" unoptimized />
+                <Image src="/m-boxed-rainbow.png" alt="Mistral" width={32} height={32} className="inline align-middle mx-1" unoptimized />
                 Web API
               </span>
           </div>

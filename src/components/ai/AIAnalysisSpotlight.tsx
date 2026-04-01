@@ -1,5 +1,4 @@
 // src/components/ai/AIAnalysisSpotlight.tsx
-// WORKING VERSION - Just replace your existing file with this
 'use client';
 
 import React, { useState, useEffect } from 'react';
