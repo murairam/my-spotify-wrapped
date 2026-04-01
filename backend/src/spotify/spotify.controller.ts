@@ -24,7 +24,7 @@ export class SpotifyController {
     try {
       return await this.spotifyService.getTopItems(accessToken, safeTimeRange, safeLimit);
     } catch (error) {
-      const message = (error && typeof error === 'object' && 'message' in error) ? (error as any).message : 'Failed to fetch Spotify data';
+      const message = (error && typeof error === 'object' && 'message' in error) ? (error as { message: string }).message : 'Failed to fetch Spotify data';
       throw new InternalServerErrorException(message);
     }
   }
